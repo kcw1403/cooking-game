@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="한글놀이">
+<title>한글 놀이터</title>
+<style>
+  :root {
+    --bg: #fff8ec; --ink: #3a2e2a; --muted: #9a8b80;
+    --c1: #ff7f6e; --c2: #3dbb93; --c3: #5b9dff; --c4: #ffb340;
+    --cons: #ffe2dc; --vow: #dcecff; --card: #ffffff;
+    --k: min(11vw, 10vh, 110px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    touch-action: manipulation; user-select: none; -webkit-user-select: none;
+    overflow: hidden;
+  }
+  button { font-family: inherit; color: var(--ink); cursor: pointer; }
+
+  header {
+    height: 72px; display: flex; align-items: center; gap: 12px;
+    padding: 0 18px; padding-top: env(safe-area-inset-top);
+  }
+  #homeBtn {
+    font-size: 30px; width: 56px; height: 56px; border: none; border-radius: 16px;
+    background: var(--card); box-shadow: 0 4px 0 rgba(0,0,0,.1); visibility: hidden;
+  }
+  #title { font-size: 30px; font-weight: 800; flex: 1; }
+  #starBox { font-size: 26px; font-weight: 800; background: var(--card); padding: 8px 16px; border-radius: 30px; box-shadow: 0 4px 0 rgba(0,0,0,.08); }
+
+  main { height: calc(100% - 72px - env(safe-area-inset-top)); }
+  .screen {
+    display: none; height: 100%; padding: 8px 20px 20px;
+    flex-direction: column; align-items: center; gap: 14px; overflow-y: auto;
+  }
+  .screen.active { display: flex; }
+
+  /* ---------- 홈 ---------- */
+  .menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; width: min(92vw, 820px); margin: auto 0; }
+  .menu button {
+    border: none; border-radius: 32px; padding: 28px 10px; min-height: min(32vh, 260px);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    font-size: clamp(22px, 3.6vw, 36px); font-weight: 800; color: #fff;
+    box-shadow: 0 8px 0 rgba(0,0,0,.15);
+  }
+  .menu button span { font-size: clamp(50px, 9vw, 96px); }
+  .menu button:active, .key:active, .opt:active, .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,.15); }
+  #voiceTip { display: none; font-size: 18px; color: #b0553f; background: #ffe9e3; padding: 10px 16px; border-radius: 14px; text-align: center; }
+
+  /* ---------- 공통 ---------- */
+  .tabs { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .tab {
+    border: none; border-radius: 30px; padding: 10px 22px; font-size: 22px; font-weight: 800;
+    background: #efe3d3; color: var(--muted);
+  }
+  .tab.on { background: var(--ink); color: #fff; }
+  .btn {
+    border: none; border-radius: 20px; padding: 12px 22px; font-size: 24px; font-weight: 800;
+    background: var(--card); box-shadow: 0 5px 0 rgba(0,0,0,.12); min-width: 72px;
+  }
+  .btn.big { font-size: 40px; padding: 10px 28px; }
+  .row { display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; }
+
+  /* ---------- 글자 조합 ---------- */
+  .display {
+    width: min(90vw, 620px); height: min(26vh, 220px); flex-shrink: 0;
+    background: var(--card); border-radius: 28px; box-shadow: 0 6px 0 rgba(0,0,0,.08);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  #bigChar { font-size: min(16vh, 140px); font-weight: 800; line-height: 1.05; min-height: 1em; }
+  #formula { font-size: min(3.6vh, 30px); font-weight: 700; color: var(--muted); min-height: 1.3em; }
+  .c { color: var(--c1); } .v { color: var(--c3); }
+  .keys { display: grid; gap: 10px; }
+  .keys.cons { grid-template-columns: repeat(7, var(--k)); }
+  .keys.vow { grid-template-columns: repeat(5, var(--k)); }
+  .key {
+    width: var(--k); height: var(--k); border: none; border-radius: 18px;
+    font-size: calc(var(--k) * .5); font-weight: 800; background: var(--cons);
+    box-shadow: 0 5px 0 rgba(0,0,0,.12);
+  }
+  .key.vow { background: var(--vow); }
+  .key.sel { outline: 5px solid var(--c1); outline-offset: -5px; }
+  .key.vow.sel { outline-color: var(--c3); }
+  .b { color: var(--c2); }
+  #compose { --k: min(calc((100vw - 120px) / 11), 9vh, 88px); gap: 10px; }
+  #compose .display { height: min(26vh, 220px); }
+  #compose .keys { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: calc(var(--k) * 10 + 72px); }
+  #compose .keys.vow { max-width: none; flex-wrap: nowrap; }
+  @media (orientation: portrait) {   /* 세로 화면: 줄을 늘리고 버튼을 크게 */
+    #compose { --k: min(calc((100vw - 88px) / 7), 8.5vh, 88px); }
+    #compose .keys { max-width: calc(var(--k) * 7 + 48px); }
+    #compose .keys.vow { flex-wrap: wrap; max-width: calc(var(--k) * 6 + 40px); }
+  }
+  .key.dbl { background: #ffc9bd; }
+  .key.hint { animation: glow .7s infinite alternate; }
+  @keyframes glow { from { box-shadow: 0 0 0 0 #ffd54a; } to { box-shadow: 0 0 0 8px #ffd54a; } }
+  .vtabs .tab { font-size: 18px; padding: 6px 16px; }
+  #missionBox { gap: 6px; padding: 8px 14px; }
+  #mTop { display: flex; align-items: center; gap: 18px; }
+  #mPic { font-size: min(12vh, 100px); line-height: 1.05; }
+  #mWord { font-weight: 800; letter-spacing: 2px; color: #cbbba8; white-space: nowrap; }
+  #mWord .done { color: var(--c2); }
+  #mWord .cur { color: var(--c1); text-decoration: underline; text-underline-offset: 6px; }
+  #mSlots { display: flex; gap: 8px; }
+  .slot {
+    border: 3px dashed #d9cbb8; border-radius: 16px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; line-height: 1;
+  }
+  .slot.cur { border: 4px solid var(--c1); }
+  .slot.done { border: 3px solid var(--c2); background: #c9f2df; }
+
+  /* ---------- 퀴즈 ---------- */
+  .stars { font-size: 30px; min-height: 40px; letter-spacing: 2px; }
+  .ask { font-size: 24px; font-weight: 700; color: var(--muted); }
+  .opts { display: grid; grid-template-columns: repeat(2, auto); gap: 18px; }
+  .opts.three { grid-template-columns: repeat(3, auto); }
+  .opt {
+    --s: min(28vw, 25vh, 210px);
+    width: var(--s); height: var(--s); border: none; border-radius: 28px;
+    font-size: calc(var(--s) * .48); font-weight: 800; background: var(--card);
+    box-shadow: 0 6px 0 rgba(0,0,0,.12); transition: background .2s, opacity .2s;
+  }
+  .opt.word { font-size: calc(var(--s) * .24); }
+  .opt.right { background: #c9f2df; }
+  .opt.wrong { opacity: .35; }
+  .shake { animation: shake .4s; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-12px)} 75%{transform:translateX(12px)} }
+  #pic { font-size: min(22vh, 180px); line-height: 1.1; }
+  .dpic { width: 1.45em; height: 1em; vertical-align: middle; }
+  .cats .tab { font-size: 18px; padding: 8px 14px; }
+  #noBatchim.on, #mNoB.on { background: var(--c2); }
+
+  /* ---------- 따라 쓰기 ---------- */
+  #traceWrap { position: relative; background: var(--card); border-radius: 28px; box-shadow: 0 6px 0 rgba(0,0,0,.08); flex-shrink: 0; }
+  #traceWrap canvas { position: absolute; left: 0; top: 0; border-radius: 28px; }
+  #drawLayer { touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+  .color { width: 46px; height: 46px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 3px 0 rgba(0,0,0,.15); }
+  .color.on { border-color: var(--ink); }
+
+  /* ---------- 단어 카드 ---------- */
+  .wordCard {
+    width: min(88vw, 520px); flex-shrink: 0; background: var(--card); border-radius: 32px;
+    box-shadow: 0 6px 0 rgba(0,0,0,.08); padding: 18px; text-align: center;
+  }
+  #cardPic { font-size: min(24vh, 190px); line-height: 1.15; }
+  #cardWord { font-size: min(10vh, 84px); font-weight: 800; letter-spacing: 6px; }
+  #cardWord .first { color: var(--c1); }
+  #cardSplit { font-size: min(3.6vh, 28px); font-weight: 700; color: var(--muted); min-height: 1.3em; }
+
+  /* ---------- 칭찬 효과 ---------- */
+  .fx { position: fixed; pointer-events: none; font-size: 44px; animation: pop 1.2s ease-out forwards; z-index: 50; }
+  @keyframes pop {
+    0% { transform: translate(0,0) scale(.4); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity: 0; }
+  }
+  #banner {
+    position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+    background: rgba(255,248,236,.85); font-size: min(9vw, 64px); font-weight: 800; z-index: 40; text-align: center;
+  }
+</style>
+</head>
+<body>
+<header>
+  <button id="homeBtn" aria-label="처음으로">🏠</button>
+  <div id="title">한글 놀이터</div>
+  <div id="starBox">⭐ <span id="starCount">0</span></div>
+</header>
+
+<main>
+  <!-- 홈 -->
+  <section class="screen active" id="home">
+    <div class="menu">
+      <button data-go="compose" style="background:var(--c1)"><span>🧩</span>글자 만들기</button>
+      <button data-go="quiz" style="background:var(--c3)"><span>👂</span>듣고 고르기</button>
+      <button data-go="trace" style="background:var(--c2)"><span>✏️</span>따라 쓰기</button>
+      <button data-go="words" style="background:var(--c4)"><span>🖼️</span>그림 단어</button>
+    </div>
+    <div id="voiceTip">이 기기에서 한국어 음성을 찾지 못했습니다. 소리가 나지 않으면 기기 설정에서 한국어 음성을 추가해 주세요.</div>
+  </section>
+
+  <!-- 글자 만들기 -->
+  <section class="screen" id="compose">
+    <div class="tabs" id="cmpModes">
+      <button class="tab on" data-m="mission">🎯 낱말 만들기</button>
+      <button class="tab" data-m="free">🧩 마음대로 만들기</button>
+    </div>
+    <div class="display" id="missionBox">
+      <div id="mTop"><div id="mPic"></div><div id="mWord"></div></div>
+      <div id="mSlots"></div>
+    </div>
+    <div class="display" id="composeDisplay" style="display:none">
+      <div id="bigChar">?</div>
+      <div id="formula">자음과 모음을 눌러 보세요</div>
+    </div>
+    <div class="keys cons" id="consKeys"></div>
+    <div class="tabs vtabs" id="vowTabs">
+      <button class="tab on" data-g="0">기본 모음</button>
+      <button class="tab" data-g="1">더 많은 모음</button>
+    </div>
+    <div class="keys vow" id="vowKeys"></div>
+    <div class="row" id="missionCtl">
+      <button class="btn" id="mCat">📚 전체 ▸</button>
+      <button class="tab" id="mNoB">받침 없는 낱말만</button>
+      <button class="btn" id="mSay">🔊</button>
+      <button class="btn" id="mSkip">⏭️</button>
+    </div>
+    <div class="row" id="freeCtl" style="display:none">
+      <button class="btn" id="composeBack">⬅️ 지우기</button>
+      <button class="btn" id="composeClear">🔄 다시</button>
+    </div>
+  </section>
+
+  <!-- 듣고 고르기 -->
+  <section class="screen" id="quiz">
+    <div class="tabs" id="quizTabs">
+      <button class="tab on" data-lv="cons">자음</button>
+      <button class="tab" data-lv="vow">모음</button>
+      <button class="tab" data-lv="syl">글자</button>
+    </div>
+    <div class="stars" id="quizStars"></div>
+    <button class="btn big" id="quizSay">🔊 듣기</button>
+    <div class="ask">소리를 듣고 맞는 글자를 눌러요</div>
+    <div class="opts" id="quizOpts"></div>
+  </section>
+
+  <!-- 따라 쓰기 -->
+  <section class="screen" id="trace">
+    <div class="tabs" id="traceTabs">
+      <button class="tab on" data-set="cons">자음</button>
+      <button class="tab" data-set="vow">모음</button>
+      <button class="tab" data-set="syl">글자</button>
+    </div>
+    <div id="traceWrap">
+      <canvas id="guideLayer"></canvas>
+      <canvas id="drawLayer"></canvas>
+    </div>
+    <div class="row">
+      <button class="btn" id="tracePrev">◀</button>
+      <button class="btn" id="traceSay">🔊</button>
+      <button class="btn" id="traceClear">🔄 처음부터</button>
+      <button class="btn" id="traceDone">⏭️ 건너뛰기</button>
+      <button class="btn" id="traceNext">▶</button>
+    </div>
+    <div class="row">
+      <button class="btn" id="traceShow">✋ 순서 보기</button>
+      <button class="btn" id="traceHint">🔢 번호 끄기</button>
+      <div class="row" id="colors"></div>
+    </div>
+  </section>
+
+  <!-- 그림 단어 -->
+  <section class="screen" id="words">
+    <div class="tabs" id="wordTabs">
+      <button class="tab on" data-mode="card">카드 보기</button>
+      <button class="tab" data-mode="match">맞히기</button>
+      <button class="tab" id="noBatchim">받침 없는 낱말만</button>
+    </div>
+    <div class="tabs cats" id="catTabs"></div>
+    <div id="cardMode" style="display:contents">
+      <div class="wordCard" id="wordCard">
+        <div id="cardPic"></div>
+        <div id="cardWord"></div>
+        <div id="cardSplit"></div>
+      </div>
+      <div class="row">
+        <button class="btn" id="cardPrev">◀</button>
+        <button class="btn big" id="cardSay">🔊</button>
+        <button class="btn" id="cardNext">▶</button>
+      </div>
+    </div>
+    <div id="matchMode" style="display:none; flex-direction:column; align-items:center; gap:14px">
+      <div class="stars" id="matchStars"></div>
+      <div id="pic"></div>
+      <div class="ask">그림에 맞는 낱말을 골라요</div>
+      <div class="opts three" id="matchOpts"></div>
+    </div>
+  </section>
+</main>
+
+<div id="banner"></div>
+
+<script>
+/* ================= 한글 데이터 ================= */
+const CHO  = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const CONS = [
+  ['ㄱ','기역'],['ㄴ','니은'],['ㄷ','디귿'],['ㄹ','리을'],['ㅁ','미음'],['ㅂ','비읍'],['ㅅ','시옷'],
+  ['ㅇ','이응'],['ㅈ','지읒'],['ㅊ','치읓'],['ㅋ','키읔'],['ㅌ','티읕'],['ㅍ','피읖'],['ㅎ','히읗']
+];
+const CONS_NAME = Object.fromEntries(CONS);
+const VOWS = ['ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ'];
+
+/* 그림 단어: [그림, 낱말]. 그림이 'dino:이름'이면 아래 DINO 그림(SVG)을 씁니다 */
+const CATS = [
+  { id: 'dino', name: '🦖 공룡', words: [
+    ['dino:trex','티라노사우루스'],['dino:tri','트리케라톱스'],['dino:stego','스테고사우루스'],
+    ['dino:brachio','브라키오사우루스'],['dino:ptera','프테라노돈'],['dino:anky','안킬로사우루스'],
+    ['dino:spino','스피노사우루스'],['dino:raptor','벨로키랍토르'],['🦴','뼈'],['🌋','화산']
+  ]},
+  { id: 'animal', name: '🐶 동물', words: [
+    ['🐶','개'],['🐱','고양이'],['🐰','토끼'],['🦁','사자'],['🐯','호랑이'],['🐘','코끼리'],
+    ['🦒','기린'],['🐵','원숭이'],['🐻','곰'],['🐷','돼지'],['🐮','소'],['🐴','말'],
+    ['🦊','여우'],['🐼','판다'],['🐭','쥐'],['🐑','양'],['🦓','얼룩말'],['🦛','하마'],
+    ['🐔','닭'],['🦆','오리']
+  ]},
+  { id: 'sea', name: '🐟 바다·곤충', words: [
+    ['🐳','고래'],['🐙','문어'],['🦀','게'],['🐢','거북이'],['🐟','물고기'],['🦈','상어'],
+    ['🐬','돌고래'],['🦑','오징어'],['🦐','새우'],['🦋','나비'],['🐜','개미'],['🐝','벌'],
+    ['🕷️','거미'],['🐞','무당벌레'],['🐌','달팽이']
+  ]},
+  { id: 'fruit', name: '🍎 과일', words: [
+    ['🍎','사과'],['🍌','바나나'],['🍇','포도'],['🍓','딸기'],['🍉','수박'],['🍑','복숭아'],
+    ['🍋','레몬'],['🍒','체리'],['🍍','파인애플'],['🥝','키위'],['🍊','귤'],['🥭','망고'],
+    ['🍈','멜론']
+  ]},
+  { id: 'food', name: '🥕 채소·음식', words: [
+    ['🥕','당근'],['🥔','감자'],['🌽','옥수수'],['🍅','토마토'],['🥒','오이'],['🧅','양파'],
+    ['🍄','버섯'],['🥛','우유'],['🍕','피자'],['🧀','치즈'],['🍞','빵'],['🥚','달걀'],
+    ['🍙','주먹밥'],['🍦','아이스크림'],['🍰','케이크'],['🍭','사탕']
+  ]},
+  { id: 'ride', name: '🚗 탈것', words: [
+    ['🚗','자동차'],['🚂','기차'],['🚌','버스'],['✈️','비행기'],['🚢','배'],['🚲','자전거'],
+    ['🚁','헬리콥터'],['🚑','구급차'],['🚒','소방차'],['🚓','경찰차'],['🚀','로켓'],['🚜','트랙터'],
+    ['🚕','택시']
+  ]},
+  { id: 'thing', name: '👕 옷·물건', words: [
+    ['🧢','모자'],['👖','바지'],['🧦','양말'],['☂️','우산'],['⏰','시계'],['🎒','가방'],
+    ['🪑','의자'],['⚽','공'],['👟','운동화'],['🧤','장갑'],['👓','안경'],['🧸','곰인형'],
+    ['📚','책'],['✏️','연필'],['🎁','선물']
+  ]},
+  { id: 'nature', name: '🌳 자연·날씨', words: [
+    ['☀️','해'],['🌙','달'],['⭐','별'],['🌳','나무'],['🌸','꽃'],['☁️','구름'],
+    ['🌧️','비'],['⛄','눈사람'],['🌈','무지개'],['⚡','번개'],['🌊','파도'],['⛰️','산'],
+    ['🍂','낙엽']
+  ]},
+  { id: 'body', name: '👀 몸', words: [
+    ['👀','눈'],['👃','코'],['👄','입'],['👂','귀'],['✋','손'],['🦶','발'],
+    ['🦷','이'],['🦵','다리'],['👅','혀']
+  ]}
+];
+const WORDS = CATS.flatMap(c => c.words);
+
+/* 공룡 그림 (옆모습, 오른쪽을 봄, 240×165 칸)
+   윤곽선 + 등은 진하게/배는 밝게 + 뒤쪽 다리는 어둡게 칠해 입체감을 냅니다. */
+const OL = 'stroke="#33291f" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"';
+const OLt = 'stroke="#33291f" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"';
+const dEye = (x, y, r = 3.6, iris = '#e8b830') =>
+  `<circle cx="${x}" cy="${y}" r="${r}" fill="${iris}" ${OLt}/><ellipse cx="${x + 0.4}" cy="${y}" rx="${r * 0.35}" ry="${r * 0.8}" fill="#1e1a16"/><circle cx="${x - r * 0.35}" cy="${y - r * 0.4}" r="${r * 0.25}" fill="#fff"/>`;
+const lines = (d, c, w) => `<path d="${d}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round"/>`;
+const tri = (x, y, w, h, fill) => `<path d="M${x},${y} l${w / 2},${h} l${w / 2},${-h}Z" fill="${fill}" ${OLt}/>`;   // 아래로 향한 이빨
+function plate(x, y, h, fill) {   // 스테고사우루스 골판
+  const w = h * 0.42;
+  return `<path d="M${x - w},${y + 6} C${x - w},${y - h * 0.45} ${x - w * 0.4},${y - h * 0.8} ${x},${y - h} C${x + w * 0.4},${y - h * 0.8} ${x + w},${y - h * 0.45} ${x + w},${y + 6}Z" fill="${fill}" ${OL}/>`;
+}
+const DINO = {
+  trex: `
+    <g transform="translate(20,0)"><path d="M92,88 C100,100 112,108 116,120 L108,142 L126,151 L128,158 L96,158 L94,150 L98,140 L100,122 C92,112 86,100 86,92Z" fill="#46703a" ${OL}/></g>
+    <path d="M4,100 C40,88 70,70 100,64 C125,58 140,56 152,50 C160,44 164,34 172,30 L206,27 C222,27 233,34 235,44 L235,58 C234,63 230,66 226,67 C212,74 196,76 186,74 C176,76 166,84 160,94 C156,104 146,112 132,114 C118,116 106,112 98,108 C70,110 40,106 4,100Z" fill="#5e8c4a" ${OL}/>
+    <path d="M186,73 C176,76 166,84 160,94 C156,104 146,112 132,114 C118,116 106,112 98,108 C116,104 136,98 150,88 C160,80 172,74 186,73Z" fill="#c3cf86"/>
+    ${lines('M62,81 l4,11 M78,73 l3,13 M95,66 l2,14 M112,61 l1,14 M128,58 l0,13 M143,55 l-1,12 M160,44 l-3,10', '#3f6532', 4)}
+    ${lines('M200,44 q5,10 -1,20', '#46703a', 2)}
+    ${tri(226, 58, 4, 5, '#fff')}${tri(218, 58.6, 4, 5, '#fff')}${tri(210, 59.2, 4, 5, '#fff')}${tri(202, 59.8, 4, 4, '#fff')}
+    ${lines('M235,58 L198,60 C194,60 190,58 188,56', '#33291f', 2.4)}
+    <ellipse cx="229" cy="36" rx="2.4" ry="1.6" fill="#33291f"/>
+    ${lines('M184,37 q8,-6 17,-1', '#33291f', 3)}
+    ${dEye(192, 41)}
+    <path d="M152,98 C158,100 164,104 166,110 L171,113 L165,114 L162,109 C158,107 154,105 150,104Z" fill="#5e8c4a" ${OL}/>
+    <path d="M96,118 L110,120 L104,148 L94,148Z" fill="#5e8c4a" ${OL}/>
+    <path d="M88,146 L106,146 L124,152 L126,158 L86,158Z" fill="#5e8c4a" ${OL}/>
+    <path d="M124,152 l6,3 l-5,3Z" fill="#efe6d0" ${OLt}/>
+    <path d="M78,90 C76,108 86,122 102,124 C112,124 117,116 115,104 C113,92 100,84 88,84Z" fill="#5e8c4a" ${OL}/>
+    ${lines('M86,96 q8,10 22,10', '#46703a', 2)}`,
+
+  tri: `
+    <path d="M96,108 C108,108 114,116 112,128 L112,152 L114,156 L94,156 L96,150 L94,128 C92,118 92,110 96,108Z" fill="#8f5a33" ${OL}/>
+    <path d="M158,108 C170,108 174,116 172,128 L172,152 L174,156 L154,156 L156,150 L154,128 C152,118 152,110 158,108Z" fill="#8f5a33" ${OL}/>
+    <path d="M4,108 C20,98 34,86 50,74 C70,54 110,46 140,52 C158,56 168,66 172,80 L176,100 C172,118 160,124 140,124 L80,126 C64,126 52,118 46,110 C34,108 18,110 4,108Z" fill="#b8784a" ${OL}/>
+    <path d="M58,116 C80,124 130,124 166,114 C156,124 120,128 84,127 C72,126 64,122 58,116Z" fill="#e3bf8f"/>
+    ${lines('M60,70 q6,8 4,16 M80,58 q6,8 4,18 M102,52 q5,9 3,18 M124,51 q4,9 2,18 M146,55 q2,9 0,17', '#9c6238', 3)}
+    <path d="M70,104 C86,102 98,112 98,126 L96,152 L100,158 L74,158 L76,150 L72,126 C68,116 64,108 70,104Z" fill="#b8784a" ${OL}/>
+    <path d="M144,108 C158,108 162,116 160,128 L160,152 L164,158 L140,158 L142,150 L140,128 C138,118 138,110 144,108Z" fill="#b8784a" ${OL}/>
+    ${lines('M80,158 v-4 M88,158 v-4 M148,158 v-4 M156,158 v-4', '#33291f', 1.5)}
+    ${[[143,36],[147,24],[156,15],[170,11],[185,13],[196,21],[202,33],[204,47],[201,60]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#a8683c" ${OLt}/>`).join('')}
+    <path d="M162,92 C150,76 140,56 142,38 C144,22 156,12 172,12 C188,12 200,24 202,40 C204,56 198,70 190,80Z" fill="#d99a5e" ${OL}/>
+    <path d="M162,82 C154,66 152,48 156,36 C160,26 166,22 174,22 C184,22 192,30 194,42 C196,56 190,68 184,76Z" fill="#e8b57a"/>
+    <circle cx="170" cy="40" r="4" fill="#b8784a"/><circle cx="182" cy="50" r="3" fill="#b8784a"/>
+    <path d="M178,62 C188,48 204,34 224,22 C212,40 200,56 190,66Z" fill="#d8c8a0" ${OL}/>
+    <path d="M168,60 C182,52 202,56 214,66 L232,84 C234,90 230,94 224,94 L220,102 C210,106 196,104 186,100 C176,96 168,88 166,78Z" fill="#b8784a" ${OL}/>
+    <path d="M224,94 L232,84 C237,92 235,100 227,104 L220,102Z" fill="#6b4428" ${OL}/>
+    ${lines('M222,98 C210,100 198,98 190,94', '#33291f', 2)}
+    <path d="M184,64 C196,50 214,34 237,19 C223,38 207,56 196,70Z" fill="#f3e6c4" ${OL}/>
+    <path d="M213,71 C216,62 221,55 227,50 C227,60 225,68 222,77Z" fill="#f3e6c4" ${OL}/>
+    ${dEye(197, 75, 3.2)}`,
+
+  stego: `
+    ${[[42,71,20],[58,63,28],[75,55,34],[94,49,38],[114,48,38],[133,54,32],[150,63,26],[165,73,20],[179,85,14]].map(([x, y, h]) => plate(x, y, h, '#a9532f')).join('')}
+    ${[[34,76,14],[50,67,22],[66,59,30],[84,51,36],[104,47,40],[124,50,36],[142,58,30],[158,68,22],[172,79,16],[186,90,10]].map(([x, y, h]) => plate(x, y, h, '#d4774a')).join('')}
+    <path d="M18,86 L5,62 L27,83Z M31,80 L24,55 L40,78Z M14,92 L2,74 L22,89Z M27,88 L16,66 L34,85Z" fill="#efe4c8" ${OL}/>
+    <rect x="92" y="104" width="17" height="52" rx="8" fill="#4f6a3e" ${OL}/>
+    <rect x="178" y="108" width="15" height="48" rx="7" fill="#4f6a3e" ${OL}/>
+    <path d="M6,90 C30,80 50,66 72,56 C88,48 112,46 134,54 C152,62 166,72 178,84 C188,92 198,98 212,99 C224,100 232,104 233,110 C232,116 224,118 214,116 C204,114 194,112 186,112 C176,116 164,120 146,122 L94,124 C74,124 58,118 48,108 C34,104 20,98 6,90Z" fill="#6f8f5a" ${OL}/>
+    <path d="M58,114 C80,124 130,126 176,116 C160,124 116,127 92,126 C76,125 66,121 58,114Z" fill="#c8c79a"/>
+    ${[[70,80],[92,72],[116,70],[138,76],[158,88],[84,96],[110,94],[134,98],[60,96]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3" fill="#56743f"/>`).join('')}
+    <path d="M72,96 C92,94 102,108 98,124 L96,152 L100,158 L74,158 L76,150 L74,124 C68,112 66,100 72,96Z" fill="#6f8f5a" ${OL}/>
+    <path d="M168,108 C178,108 182,116 180,126 L180,152 L184,158 L162,158 L164,150 L162,126 C160,116 162,110 168,108Z" fill="#6f8f5a" ${OL}/>
+    ${lines('M233,111 L220,112', '#33291f', 2)}
+    ${dEye(219, 105, 2.6)}`,
+
+  brachio: `
+    <rect x="90" y="100" width="16" height="56" rx="8" fill="#5e6f86" ${OL}/>
+    <rect x="174" y="88" width="16" height="68" rx="8" fill="#5e6f86" ${OL}/>
+    <path d="M4,118 C30,108 50,96 70,86 C100,72 130,62 150,58 C164,44 176,26 186,16 C186,8 194,3 202,5 L214,8 C224,10 230,14 230,20 C228,26 218,28 208,26 C198,30 188,48 182,66 C180,82 176,94 168,100 C140,108 110,112 90,110 C72,110 60,112 50,114 C36,118 20,120 4,118Z" fill="#7d8fa8" ${OL}/>
+    <path d="M208,26 C198,30 188,48 182,66 C180,82 176,94 168,100 C140,108 110,112 90,110 C116,106 150,98 172,88 C178,70 186,46 202,28Z" fill="#b9c4d2"/>
+    ${[[80,86],[96,80],[112,74],[128,70],[144,66],[104,90],[124,84],[160,52],[170,38],[178,26]].map(([x, y], i) => `<ellipse cx="${x}" cy="${y}" rx="${i > 6 ? 2.5 : 4}" ry="${i > 6 ? 2 : 2.6}" fill="#65758d"/>`).join('')}
+    <path d="M74,92 C90,92 96,104 94,118 L92,152 L96,158 L74,158 L76,150 L74,120 C70,108 68,96 74,92Z" fill="#7d8fa8" ${OL}/>
+    <path d="M160,84 C174,84 180,94 178,108 L176,152 L180,158 L158,158 L160,150 L158,108 C156,96 154,86 160,84Z" fill="#7d8fa8" ${OL}/>
+    ${lines('M80,158 v-4 M88,158 v-4 M164,158 v-4 M172,158 v-4', '#33291f', 1.5)}
+    ${lines('M229,21 L214,23', '#33291f', 2)}
+    <ellipse cx="205" cy="7" rx="2" ry="1.4" fill="#33291f"/>
+    ${dEye(210, 14, 2.6)}`,
+
+  ptera: `
+    <path d="M114,76 L72,58 L44,52 L4,66 C30,72 50,80 66,86 C84,92 98,96 112,96Z" fill="#a8664e" ${OL}/>
+    ${lines('M114,76 L72,58 L44,52 L4,66', '#6e3b2a', 3)}
+    <path d="M126,76 L170,58 L198,52 L236,66 C210,72 190,80 174,86 C156,92 142,96 128,96Z" fill="#c9876a" ${OL}/>
+    ${lines('M140,88 C160,80 184,72 210,66 M150,92 C170,86 190,80 206,74', '#b06f55', 1.5)}
+    ${lines('M126,76 L170,58 L198,52 L236,66', '#6e3b2a', 3.2)}
+    ${lines('M198,52 l4,-6 M198,52 l6,-3', '#33291f', 1.6)}
+    ${lines('M114,100 L106,120 L102,122 M126,100 L134,120 L138,122', '#8a5a40', 4)}
+    <path d="M108,72 C112,64 128,64 132,72 C136,84 130,100 120,106 C110,100 104,84 108,72Z" fill="#d9a47f" ${OL}/>
+    <path d="M114,80 C116,90 120,98 120,104 C124,96 128,88 126,80Z" fill="#ecd0b4"/>
+    <path d="M120,68 C120,58 124,52 132,48 C118,42 102,34 86,30 C104,30 124,36 138,42 C160,42 182,44 200,48 C182,52 160,56 140,58 C132,60 126,64 126,70Z" fill="#d9a47f" ${OL}/>
+    <path d="M132,48 C118,42 102,34 86,30 C104,30 124,36 138,42Z" fill="#b8432f" ${OL}/>
+    ${lines('M150,51.5 L198,48.2', '#33291f', 1.6)}
+    ${dEye(139, 47, 2.6)}`,
+
+  anky: `
+    <rect x="98" y="108" width="17" height="47" rx="7" fill="#5e5238" ${OL}/>
+    <rect x="180" y="108" width="16" height="47" rx="7" fill="#5e5238" ${OL}/>
+    <path d="M48,94 C34,94 24,96 16,98 L16,106 C26,106 36,108 52,110Z" fill="#8a7a55" ${OL}/>
+    <path d="M2,97 C2,88 10,85 18,87 C25,88 27,94 27,100 C27,108 21,112 12,111 C4,110 2,105 2,97Z" fill="#6d5f40" ${OL}/>
+    ${lines('M8,92 q4,-3 8,0 M8,104 q5,3 10,0', '#4c412b', 2)}
+    <path d="M50,106 L194,104 C190,118 172,122 152,122 L92,124 C72,124 58,118 50,106Z" fill="#8a7a55" ${OL}/>
+    <path d="M60,114 C80,122 130,122 180,114 C170,122 140,124 100,124 C80,124 68,120 60,114Z" fill="#c9b98e"/>
+    <path d="M40,106 C46,72 80,52 120,50 C160,50 188,68 198,100 L198,108 L44,110Z" fill="#7a6a48" ${OL}/>
+    ${[[90,60],[110,55],[130,54],[150,57],[170,64],[70,74],[92,70],[114,67],[136,67],[158,70],[180,78],[58,90],[80,86],[102,83],[124,82],[146,83],[168,86],[188,93]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="7.5" ry="4.6" fill="#bfae80" ${OLt}/>`).join('')}
+    ${[50,68,86,104,122,140,158,176].map(x => `<path d="M${x},106 L${x + 6},119 L${x + 12},106Z" fill="#efe4c8" ${OLt}/>`).join('')}
+    <path d="M68,110 L94,110 L92,150 L96,158 L68,158 L70,150Z" fill="#8a7a55" ${OL}/>
+    <path d="M152,110 L178,110 L176,150 L180,158 L152,158 L154,150Z" fill="#8a7a55" ${OL}/>
+    <path d="M188,86 C200,82 216,82 226,90 L235,100 C235,108 229,112 221,112 L200,114 C192,112 188,104 188,96Z" fill="#8a7a55" ${OL}/>
+    <path d="M226,108 L235,100 C238,106 236,112 230,114Z" fill="#5e5238" ${OL}/>
+    <path d="M204,85 L212,72 L215,86Z" fill="#efe4c8" ${OLt}/>
+    <path d="M214,109 L226,120 L209,113Z" fill="#efe4c8" ${OLt}/>
+    ${lines('M206,82 q8,-4 14,2', '#33291f', 2.4)}
+    ${dEye(214, 92, 2.8)}`,
+
+  spino: `
+    <path d="M70,78 C78,40 96,14 120,10 C142,10 158,34 166,68Z" fill="#c1563a" ${OL}/>
+    <path d="M76,74 C84,56 100,44 120,42 C140,42 152,54 162,68Z" fill="#e08a5a"/>
+    ${lines('M84,74 L90,38 M98,70 L104,22 M112,68 L116,12 M126,66 L128,12 M140,66 L140,24 M154,66 L152,40', '#8e3a24', 2.4)}
+    <path d="M100,92 C108,104 118,112 120,122 L112,142 L128,150 L130,158 L100,158 L98,150 L102,140 L104,124 C96,114 92,104 92,96Z" fill="#5a4234" ${OL}/>
+    <path d="M4,104 C40,92 70,78 100,70 C125,64 145,62 160,64 C172,60 182,52 190,50 L206,50 C220,52 232,56 239,60 L239,65 C226,67 214,67 204,69 C196,73 186,79 178,87 C170,100 156,110 136,114 C118,116 106,112 98,110 C70,112 40,110 4,104Z" fill="#7a5a48" ${OL}/>
+    <path d="M204,69 C196,73 186,79 178,87 C170,100 156,110 136,114 C118,116 106,112 98,110 C120,106 146,98 162,86 C176,76 190,70 204,69Z" fill="#d8b894"/>
+    ${lines('M40,98 l3,8 M60,90 l3,10 M80,82 l2,11', '#5a4234', 3)}
+    ${tri(232, 65.4, 3, 4, '#fff')}${tri(225, 66.2, 3, 4, '#fff')}${tri(218, 67, 3, 4, '#fff')}${tri(211, 67.8, 3, 3.5, '#fff')}
+    ${lines('M239,64 L204,68', '#33291f', 2)}
+    <ellipse cx="220" cy="54" rx="2" ry="1.4" fill="#33291f"/>
+    ${lines('M190,52 q6,-5 13,-1', '#33291f', 2.6)}
+    ${dEye(196, 56, 3)}
+    <path d="M164,94 C172,98 180,104 182,112 L189,117 L182,119 L178,114 C172,108 166,104 160,102Z" fill="#7a5a48" ${OL}/>
+    <path d="M100,118 L112,120 L106,146 L98,146Z" fill="#7a5a48" ${OL}/>
+    <path d="M92,144 L108,144 L124,151 L126,158 L90,158Z" fill="#7a5a48" ${OL}/>
+    <path d="M84,90 C82,106 90,120 104,122 C114,122 118,114 117,104 C115,92 104,86 94,86Z" fill="#7a5a48" ${OL}/>`,
+
+  raptor: `
+    <path d="M34,66 C22,58 8,58 0,63 C5,67 5,71 0,77 C8,84 22,84 34,80Z" fill="#8a6a46" ${OL}/>
+    ${lines('M6,66 L28,70 M4,73 L28,73 M6,80 L28,77', '#6b4e32', 1.2)}
+    <path d="M118,86 C126,96 128,104 124,110 L112,134 L118,152 L132,154 L132,158 L110,158 L104,136 L114,108 C110,100 108,94 110,88Z" fill="#7d6040" ${OL}/>
+    <path d="M4,70 C30,70 60,68 84,66 C100,60 120,58 136,62 C148,56 158,46 166,40 C172,34 180,32 190,32 L214,38 C222,40 226,44 224,48 C218,52 206,52 196,54 C188,56 182,62 176,70 C168,80 156,90 138,94 C120,96 104,92 92,84 C66,80 34,78 4,76Z" fill="#b08a5a" ${OL}/>
+    <path d="M196,54 C188,56 182,62 176,70 C168,80 156,90 138,94 C120,96 104,92 92,84 C116,86 142,82 160,70 C172,62 184,56 196,54Z" fill="#e3cfa6"/>
+    ${lines('M30,70 l2,6 M48,69 l2,8 M66,68 l2,9 M86,66 l2,10 M104,61 l2,12 M122,59 l1,12 M140,60 l-1,10 M156,50 l-3,8', '#6b4e32', 3)}
+    ${tri(218, 47.4, 2.6, 3, '#fff')}${tri(212, 48.4, 2.6, 3, '#fff')}${tri(206, 49.4, 2.6, 3, '#fff')}
+    ${lines('M224,47 L198,51', '#33291f', 1.8)}
+    ${dEye(196, 40, 3)}
+    <path d="M142,88 C140,100 146,112 160,117 C164,108 166,100 166,92Z" fill="#8a6a46" ${OL}/>
+    ${lines('M146,96 l10,14 M152,92 l8,16', '#6b4e32', 1.4)}
+    <path d="M150,82 C160,86 168,94 170,104 L177,109 L169,110 L164,104 C158,98 150,94 142,92Z" fill="#b08a5a" ${OL}/>
+    <path d="M106,100 L116,102 L100,132 L92,129Z" fill="#b08a5a" ${OL}/>
+    <path d="M92,127 L101,131 L108,152 L99,154Z" fill="#b08a5a" ${OL}/>
+    <path d="M98,150 L120,152 L122,158 L96,158Z" fill="#b08a5a" ${OL}/>
+    <path d="M103,151 C98,143 102,137 110,139" stroke="#33291f" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M94,78 C110,74 120,86 116,102 L104,106 C94,100 88,88 94,78Z" fill="#b08a5a" ${OL}/>`
+};
+function picHTML(p) {
+  if (p.startsWith('dino:')) return `<svg class="dpic" viewBox="-4 0 246 166" aria-hidden="true">${DINO[p.slice(5)]}</svg>`;
+  return p;
+}
+
+const compose = (c, v) => String.fromCharCode(0xAC00 + (CHO.indexOf(c) * 21 + JUNG.indexOf(v)) * 28);
+const jamoSay = j => CONS_NAME[j] || compose('ㅇ', j);
+function split(ch) {
+  const code = ch.charCodeAt(0) - 0xAC00;
+  if (code < 0 || code > 11171) return null;
+  return [CHO[Math.floor(code / 588)], JUNG[Math.floor((code % 588) / 28)], JONG[code % 28]];
+}
+const rand = n => Math.floor(Math.random() * n);
+const pick = arr => arr[rand(arr.length)];
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const $ = id => document.getElementById(id);
+
+/* ================= 소리 ================= */
+let koVoice = null;
+function pickVoice() {
+  const vs = speechSynthesis.getVoices();
+  koVoice = vs.find(v => /^ko/i.test(v.lang) && /yuna|유나|google/i.test(v.name))
+         || vs.find(v => /^ko/i.test(v.lang)) || null;
+}
+if ('speechSynthesis' in window) {
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+  setTimeout(() => { pickVoice(); if (!koVoice) $('voiceTip').style.display = 'block'; }, 2000);
+} else {
+  $('voiceTip').style.display = 'block';
+}
+function speak(text, rate = 0.8) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR'; if (koVoice) u.voice = koVoice;
+  u.rate = rate; u.pitch = 1.1;
+  speechSynthesis.speak(u);
+}
+
+let actx = null;
+function tone(freqs) {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    const t0 = actx.currentTime;
+    freqs.forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain(), t = t0 + i * 0.12;
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+      o.connect(g).connect(actx.destination); o.start(t); o.stop(t + 0.35);
+    });
+  } catch (e) { /* 소리 장치 없음 */ }
+}
+const goodTone = () => tone([660, 880, 1320]);
+const badTone = () => tone([300, 220]);
+
+/* ================= 별 / 칭찬 ================= */
+let totalStars = 0;
+try { totalStars = +localStorage.getItem('hangulStars') || 0; } catch (e) {}
+$('starCount').textContent = totalStars;
+function addStar() {
+  totalStars++; $('starCount').textContent = totalStars;
+  try { localStorage.setItem('hangulStars', totalStars); } catch (e) {}
+}
+function celebrate(el) {
+  const r = el ? el.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2, width: 0, height: 0 };
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  for (let i = 0; i < 12; i++) {
+    const s = document.createElement('div');
+    s.className = 'fx'; s.textContent = pick(['⭐','🌟','✨','💖','🎉']);
+    const a = Math.random() * Math.PI * 2, d = 80 + Math.random() * 120;
+    s.style.left = (cx - 22) + 'px'; s.style.top = (cy - 22) + 'px';
+    s.style.setProperty('--dx', Math.cos(a) * d + 'px');
+    s.style.setProperty('--dy', Math.sin(a) * d + 'px');
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1300);
+  }
+}
+function banner(text, ms = 1800) {
+  const b = $('banner'); b.textContent = text; b.style.display = 'flex';
+  setTimeout(() => b.style.display = 'none', ms);
+}
+const PRAISE = ['잘했어요!', '맞았어요!', '최고예요!', '대단해요!', '참 잘했어요!'];
+
+/* ================= 화면 전환 ================= */
+const TITLES = { home: '한글 놀이터', compose: '글자 만들기', quiz: '듣고 고르기', trace: '따라 쓰기', words: '그림 단어' };
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  $('title').textContent = TITLES[id];
+  $('homeBtn').style.visibility = id === 'home' ? 'hidden' : 'visible';
+  quizState.round++; matchState.round++;   // 화면을 떠나면 예약된 다음 문제 취소
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  ms.round++;
+  if (id === 'compose') setCmpMode(cmpMode);
+  if (id === 'quiz') newQuiz();
+  if (id === 'trace') { resizeTrace(); startLetter(); }
+  if (id === 'words') { wordMode === 'card' ? showCard() : newMatch(); }
+}
+$('homeBtn').onclick = () => show('home');
+document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => show(b.dataset.go));
+
+function setTabs(box, btn) { box.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t === btn)); }
+
+/* ================= 글자 만들기 ================= */
+const CONS2 = [['ㄲ','쌍기역'],['ㄸ','쌍디귿'],['ㅃ','쌍비읍'],['ㅆ','쌍시옷'],['ㅉ','쌍지읒']];
+Object.assign(CONS_NAME, Object.fromEntries(CONS2));
+const VOWS2 = ['ㅐ','ㅒ','ㅔ','ㅖ','ㅘ','ㅙ','ㅚ','ㅝ','ㅞ','ㅟ','ㅢ'];
+const VGROUPS = [VOWS, VOWS2];
+// 겹받침은 자음 두 개를 차례로 눌러 만듭니다
+const JPAIR = { 'ㄳ':['ㄱ','ㅅ'], 'ㄵ':['ㄴ','ㅈ'], 'ㄶ':['ㄴ','ㅎ'], 'ㄺ':['ㄹ','ㄱ'], 'ㄻ':['ㄹ','ㅁ'], 'ㄼ':['ㄹ','ㅂ'],
+                'ㄽ':['ㄹ','ㅅ'], 'ㄾ':['ㄹ','ㅌ'], 'ㄿ':['ㄹ','ㅍ'], 'ㅀ':['ㄹ','ㅎ'], 'ㅄ':['ㅂ','ㅅ'] };
+const isVow = j => JUNG.includes(j);
+const syl = (c, v, j = '') => String.fromCharCode(0xAC00 + (CHO.indexOf(c) * 21 + JUNG.indexOf(v)) * 28 + JONG.indexOf(j));
+const josa = w => split(w[w.length - 1])?.[2] ? '을' : '를';
+function partialSyl(p) {           // 누른 자모 [초, 중, 받침1, 받침2] → 지금까지 만든 글자
+  if (!p.length) return '';
+  if (p.length === 1) return p[0];
+  let j = p[2] || '';
+  if (p[3]) j = Object.keys(JPAIR).find(k => JPAIR[k][0] === p[2] && JPAIR[k][1] === p[3]);
+  return syl(p[0], p[1], j);
+}
+
+let cmpMode = 'mission', vGroup = 0;
+function makeKeys(box, list, cls) {
+  box.innerHTML = '';
+  list.forEach(j => {
+    const b = document.createElement('button');
+    b.className = 'key ' + cls + (CONS2.some(x => x[0] === j) ? ' dbl' : '');
+    b.textContent = j; b.dataset.j = j;
+    b.onclick = () => cmpMode === 'mission' ? missionTap(j, b) : freeTap(j);
+    box.appendChild(b);
+  });
+}
+makeKeys($('consKeys'), CONS.map(c => c[0]).concat(CONS2.map(c => c[0])), 'cons');
+function setVGroup(g) {
+  vGroup = g;
+  makeKeys($('vowKeys'), VGROUPS[g], 'vow');
+  setTabs($('vowTabs'), $('vowTabs').children[g]);
+  markKeys();
+}
+$('vowTabs').onclick = e => { const t = e.target.closest('.tab'); if (t) setVGroup(+t.dataset.g); };
+function markKeys() {
+  const on = cmpMode === 'free' ? [free.c, free.v, free.j] : [];
+  document.querySelectorAll('#compose .key').forEach(k => k.classList.toggle('sel', on.includes(k.dataset.j)));
+}
+function clearHint() { document.querySelectorAll('#compose .key.hint').forEach(k => k.classList.remove('hint')); }
+
+function setCmpMode(m) {
+  cmpMode = m;
+  setTabs($('cmpModes'), $('cmpModes').querySelector(`[data-m="${m}"]`));
+  const mis = m === 'mission';
+  $('missionBox').style.display = mis ? 'flex' : 'none';
+  $('missionCtl').style.display = mis ? 'flex' : 'none';
+  $('composeDisplay').style.display = mis ? 'none' : 'flex';
+  $('freeCtl').style.display = mis ? 'none' : 'flex';
+  clearHint();
+  if (mis) newMission(); else updateFree(true);
+}
+$('cmpModes').onclick = e => { const t = e.target.closest('.tab'); if (t) setCmpMode(t.dataset.m); };
+
+/* ---- 마음대로 만들기: 자음 → 모음 → (자음을 또 누르면) 받침 ---- */
+const free = { c: null, v: null, j: null };
+let freeMsg = '';
+function freeTap(j) {
+  freeMsg = '';
+  if (isVow(j)) free.v = j;
+  else if (!free.c || !free.v) free.c = j;
+  else if (JONG.includes(j)) free.j = j;
+  else freeMsg = `${j}${josa(CONS_NAME[j]) === '을' ? '은' : '는'} 받침이 될 수 없어요`;
+  updateFree();
+}
+function updateFree(silent) {
+  markKeys();
+  const { c, v, j } = free, big = $('bigChar'), f = $('formula');
+  let say = '';
+  if (c && v) {
+    const s = syl(c, v, j || '');
+    big.textContent = s;
+    f.innerHTML = freeMsg || `<span class="c">${c}</span> + <span class="v">${v}</span>` +
+      (j ? ` + <span class="b">${j}</span>` : '') + ` = ${s}` + (j ? '' : ' · 자음을 또 누르면 받침');
+    say = freeMsg || s;
+  } else if (c) {
+    big.innerHTML = `<span class="c">${c}</span>`; f.textContent = CONS_NAME[c] + ' · 이제 모음을 눌러요';
+    say = CONS_NAME[c];
+  } else if (v) {
+    big.innerHTML = `<span class="v">${v}</span>`; f.textContent = '이제 자음을 눌러요';
+    say = jamoSay(v);
+  } else {
+    big.textContent = '?'; f.textContent = '자음과 모음을 눌러 보세요';
+  }
+  if (!silent && say) speak(say);
+}
+$('composeBack').onclick = () => {
+  freeMsg = '';
+  if (free.j) free.j = null; else if (free.v) free.v = null; else free.c = null;
+  updateFree();
+};
+$('composeClear').onclick = () => { free.c = free.v = free.j = null; freeMsg = ''; updateFree(true); };
+$('composeDisplay').onclick = () => { if (free.c && free.v) speak(syl(free.c, free.v, free.j || '')); };
+
+/* ---- 낱말 만들기: 그림 낱말을 자모로 한 글자씩 완성 ---- */
+const ms = { cat: 'all', noB: false, last: '', pic: '', word: '', syls: [], built: [], si: 0, wrong: 0, lock: false, round: 0 };
+const catOrder = ['all', ...CATS.map(c => c.id)];
+const needOf = ch => { const [c, v, j] = split(ch); return [c, v, ...(JPAIR[j] || (j ? [j] : []))]; };
+const needNow = () => needOf(ms.syls[ms.si])[ms.built[ms.si].length];
+function missionPool() {
+  const base = ms.cat === 'all' ? WORDS : CATS.find(c => c.id === ms.cat).words;
+  const p = ms.noB ? base.filter(w => noBatchim(w[1])) : base;
+  return p.length ? p : base;
+}
+function newMission() {
+  ms.round++;
+  const pool = missionPool();
+  let w; do { w = pick(pool); } while (pool.length > 1 && w[1] === ms.last);
+  Object.assign(ms, { last: w[1], pic: w[0], word: w[1], syls: [...w[1]], si: 0, wrong: 0, lock: false });
+  ms.built = ms.syls.map(() => []);
+  clearHint(); renderMission(); syncVGroup();
+  speak(ms.word);
+}
+function syncVGroup() {          // 찾아야 할 모음이 있는 모음 탭을 미리 열어 둡니다
+  const n = ms.si < ms.syls.length && needNow();
+  if (n && isVow(n)) { const g = VOWS.includes(n) ? 0 : 1; if (g !== vGroup) setVGroup(g); }
+}
+function renderMission() {
+  const n = ms.syls.length, wbox = Math.min(innerWidth * .9, 620) - 30;
+  const picW = Math.min(innerHeight * .12, 100) * 1.5;
+  $('mPic').innerHTML = picHTML(ms.pic);
+  const wEl = $('mWord');
+  wEl.style.fontSize = Math.min(56, innerHeight * .07, (wbox - picW - 20) / n) + 'px';
+  wEl.innerHTML = ms.syls.map((s, i) => `<span class="${i < ms.si ? 'done' : i === ms.si ? 'cur' : ''}">${s}</span>`).join('');
+  const sl = Math.min(90, innerHeight * .1, (wbox - (n - 1) * 8) / n);
+  $('mSlots').innerHTML = ms.syls.map((s, i) =>
+    `<div class="slot ${i < ms.si ? 'done' : i === ms.si ? 'cur' : ''}" style="width:${sl}px;height:${sl}px;font-size:${sl * .7}px">${partialSyl(ms.built[i])}</div>`).join('');
+}
+function missionTap(j, btn) {
+  if (ms.lock) return;
+  const need = needNow();
+  if (j !== need) {
+    ms.wrong++; badTone();
+    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+    if (ms.wrong >= 2) {
+      syncVGroup();
+      document.querySelector(`#compose .key[data-j="${need}"]`)?.classList.add('hint');
+      const name = jamoSay(need);
+      speak(`${name}${josa(name)} 찾아 볼까요?`);
+    }
+    return;
+  }
+  ms.wrong = 0; clearHint();
+  ms.built[ms.si].push(j);
+  if (ms.built[ms.si].length < needOf(ms.syls[ms.si]).length) {
+    tone([700]); speak(jamoSay(j), 0.9);
+    renderMission(); syncVGroup();
+    return;
+  }
+  ms.si++;
+  renderMission();
+  if (ms.si < ms.syls.length) { tone([660, 880]); speak(ms.syls[ms.si - 1]); syncVGroup(); return; }
+  ms.lock = true; goodTone(); addStar(); celebrate($('mSlots'));
+  setTimeout(() => speak(ms.word + '! ' + pick(PRAISE)), 300);
+  const r = ms.round;
+  setTimeout(() => { if (r === ms.round) newMission(); }, 2800);
+}
+$('mCat').onclick = () => {
+  ms.cat = catOrder[(catOrder.indexOf(ms.cat) + 1) % catOrder.length];
+  $('mCat').textContent = (ms.cat === 'all' ? '📚 전체' : CATS.find(c => c.id === ms.cat).name) + ' ▸';
+  newMission();
+};
+$('mNoB').onclick = () => { ms.noB = !ms.noB; $('mNoB').classList.toggle('on', ms.noB); newMission(); };
+$('mSay').onclick = () => speak(ms.word);
+$('mSkip').onclick = newMission;
+setVGroup(0);
+
+/* ================= 공통: 고르기 문제 ================= */
+// q = { answer, options[], say(optional), wordStyle }
+function runChoice(box, starBox, q, state, onNext) {
+  box.innerHTML = '';
+  state.locked = false;
+  const round = state.round = (state.round || 0) + 1;   // 탭/화면이 바뀌면 이전 타이머 무시
+  const next = () => { if (state.round === round) onNext(); };
+  q.options.forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'opt' + (q.wordStyle ? ' word' : ''); b.textContent = o;
+    if (q.wordStyle) b.style.fontSize = `calc(var(--s) * ${Math.min(0.24, 0.9 / o.length).toFixed(3)})`;
+    b.onclick = () => {
+      if (state.locked || b.classList.contains('wrong')) return;
+      if (o === q.answer) {
+        state.locked = true; b.classList.add('right');
+        goodTone(); celebrate(b); addStar();
+        state.streak++;
+        starBox.textContent = '⭐'.repeat(state.streak % 10 || (state.streak ? 10 : 0));
+        setTimeout(() => speak(q.praiseSay ? q.praiseSay + ', ' + pick(PRAISE) : pick(PRAISE)), 350);
+        if (state.streak % 10 === 0) setTimeout(() => banner('🎉 별 10개 모았어요! 🎉'), 900);
+        setTimeout(next, state.streak % 10 === 0 ? 2800 : 1700);
+      } else {
+        b.classList.add('wrong', 'shake'); badTone();
+        setTimeout(() => b.classList.remove('shake'), 450);
+        if (q.say) setTimeout(() => speak(q.say), 500);
+      }
+    };
+    box.appendChild(b);
+  });
+}
+
+/* ================= 듣고 고르기 ================= */
+let quizLv = 'cons', lastQ = null;
+const quizState = { streak: 0, locked: false, round: 0 };
+let quizQ = null;
+function makeQuiz(lv) {
+  let answer, options, say;
+  if (lv === 'cons') {
+    const pool = CONS.map(c => c[0]);
+    do { answer = pick(pool); } while (answer === lastQ);
+    options = shuffle([answer, ...shuffle(pool.filter(x => x !== answer)).slice(0, 3)]);
+    say = CONS_NAME[answer];
+  } else if (lv === 'vow') {
+    do { answer = pick(VOWS); } while (answer === lastQ);
+    options = shuffle([answer, ...shuffle(VOWS.filter(x => x !== answer)).slice(0, 3)]);
+    say = jamoSay(answer);
+  } else {
+    let c, v;
+    do { c = pick(CONS)[0]; v = pick(VOWS); answer = compose(c, v); } while (answer === lastQ);
+    // 보기: 같은 자음 1개, 같은 모음 1개, 아무거나 1개 → 비교하며 배우도록
+    const set = new Set([answer]);
+    const add = s => { if (!set.has(s)) set.add(s); };
+    while (set.size < 2) add(compose(c, pick(VOWS)));
+    while (set.size < 3) add(compose(pick(CONS)[0], v));
+    while (set.size < 4) add(compose(pick(CONS)[0], pick(VOWS)));
+    options = shuffle([...set]);
+    say = answer;
+  }
+  lastQ = answer;
+  return { answer, options, say };
+}
+function newQuiz() {
+  quizQ = makeQuiz(quizLv);
+  runChoice($('quizOpts'), $('quizStars'), quizQ, quizState, newQuiz);
+  setTimeout(() => speak(quizQ.say), 300);
+}
+$('quizSay').onclick = () => quizQ && speak(quizQ.say);
+$('quizTabs').onclick = e => {
+  const t = e.target.closest('.tab'); if (!t) return;
+  setTabs($('quizTabs'), t); quizLv = t.dataset.lv; lastQ = null;
+  quizState.streak = 0; $('quizStars').textContent = '';
+  newQuiz();
+};
+
+/* ================= 따라 쓰기 ================= */
+const TRACE_SETS = {
+  cons: CONS.map(c => c[0]),
+  vow: VOWS,
+  syl: ['가','나','다','라','마','바','사','아','자','차','카','타','파','하','고','누','미','소','우','이']
+};
+let traceSet = 'cons', traceIdx = 0, traceSize = 300;
+let penColor = '#ff7f6e';
+const guide = $('guideLayer'), draw = $('drawLayer');
+const gctx = guide.getContext('2d'), dctx = draw.getContext('2d');
+
+function resizeTrace() {
+  const scr = $('trace');
+  const availW = scr.clientWidth - 40;
+  const availH = scr.clientHeight - 245;
+  traceSize = Math.max(200, Math.min(availW, availH, 620));
+  const dpr = window.devicePixelRatio || 1;
+  $('traceWrap').style.width = $('traceWrap').style.height = traceSize + 'px';
+  [guide, draw].forEach(cv => {
+    cv.width = traceSize * dpr; cv.height = traceSize * dpr;
+    cv.style.width = cv.style.height = traceSize + 'px';
+    cv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+  });
+  renderGuide();   // 진행 상태는 유지
+}
+/* ---- 획순 데이터 ----
+   자모마다 획 목록을 쓰는 순서대로 적습니다. 획 = 점 목록 [x, y] (0~1 칸 기준), 첫 점이 시작점입니다. */
+function ring(cx, cy, r) {   // 위에서 시작해 시계 반대 방향으로 도는 동그라미
+  const pts = [];
+  for (let i = 0; i <= 36; i++) { const t = i / 40 * Math.PI * 2; pts.push([cx - r * Math.sin(t), cy - r * Math.cos(t)]); }   // 끝 화살표가 보이도록 조금 덜 돎
+  return pts;
+}
+const STROKES = {
+  'ㄱ': [[[.15,.2],[.82,.2],[.82,.88]]],
+  'ㄴ': [[[.2,.15],[.2,.8],[.85,.8]]],
+  'ㄷ': [[[.18,.2],[.82,.2]], [[.18,.2],[.18,.8],[.85,.8]]],
+  'ㄹ': [[[.18,.15],[.82,.15],[.82,.48]], [[.18,.48],[.82,.48]], [[.18,.48],[.18,.85],[.85,.85]]],
+  'ㅁ': [[[.2,.2],[.2,.82]], [[.2,.2],[.8,.2],[.8,.82]], [[.2,.82],[.8,.82]]],
+  'ㅂ': [[[.2,.15],[.2,.85]], [[.8,.15],[.8,.85]], [[.2,.5],[.8,.5]], [[.2,.85],[.8,.85]]],
+  'ㅅ': [[[.5,.12],[.4,.5],[.15,.85]], [[.44,.42],[.85,.85]]],
+  'ㅇ': [ring(.5, .5, .34)],
+  'ㅈ': [[[.15,.18],[.8,.18],[.15,.85]], [[.48,.52],[.85,.85]]],
+  'ㅊ': [[[.44,.04],[.56,.17]], [[.15,.27],[.8,.27],[.15,.88]], [[.48,.58],[.85,.88]]],
+  'ㅋ': [[[.15,.18],[.82,.18],[.82,.88]], [[.2,.52],[.82,.52]]],
+  'ㅌ': [[[.18,.15],[.82,.15]], [[.18,.48],[.82,.48]], [[.18,.15],[.18,.85],[.85,.85]]],
+  'ㅍ': [[[.12,.18],[.88,.18]], [[.33,.18],[.33,.82]], [[.67,.18],[.67,.82]], [[.12,.82],[.88,.82]]],
+  'ㅎ': [[[.44,.03],[.56,.15]], [[.15,.25],[.85,.25]], ring(.5, .63, .23)],
+  'ㅏ': [[[.4,.08],[.4,.92]], [[.4,.48],[.75,.48]]],
+  'ㅑ': [[[.4,.08],[.4,.92]], [[.4,.36],[.75,.36]], [[.4,.62],[.75,.62]]],
+  'ㅓ': [[[.25,.48],[.6,.48]], [[.6,.08],[.6,.92]]],
+  'ㅕ': [[[.25,.36],[.6,.36]], [[.25,.62],[.6,.62]], [[.6,.08],[.6,.92]]],
+  'ㅗ': [[[.5,.38],[.5,.62]], [[.08,.62],[.92,.62]]],
+  'ㅛ': [[[.35,.38],[.35,.62]], [[.65,.38],[.65,.62]], [[.08,.62],[.92,.62]]],
+  'ㅜ': [[[.08,.4],[.92,.4]], [[.5,.4],[.5,.66]]],
+  'ㅠ': [[[.08,.4],[.92,.4]], [[.35,.4],[.35,.66]], [[.65,.4],[.65,.66]]],
+  'ㅡ': [[[.08,.5],[.92,.5]]],
+  'ㅣ': [[[.5,.08],[.5,.92]]]
+};
+const VERTICAL_VOWELS = 'ㅏㅑㅓㅕㅣ';
+// 칸(x, y, w, h)에 자모 획을 옮겨 담기
+const place = (strokes, x, y, w, h) => strokes.map(st => st.map(([px, py]) => [x + px * w, y + py * h]));
+function strokesOf(ch) {
+  const sp = split(ch);
+  if (!sp) return place(STROKES[ch], .1, .1, .8, .8);          // 자모 하나
+  const [c, v] = sp;
+  if (VERTICAL_VOWELS.includes(v))                               // 자음 왼쪽, 모음 오른쪽
+    return [...place(STROKES[c], .05, .15, .57, .7), ...place(STROKES[v], .45, .05, .5, .9)];
+  return [...place(STROKES[c], .2, .05, .6, .5), ...place(STROKES[v], .05, .25, .9, .7)];   // 자음 위, 모음 아래
+}
+
+const STROKE_COLORS = ['#ff7f6e', '#5b9dff', '#3dbb93', '#ffb340', '#9b6bff', '#e05a9a'];
+let showHints = true, animToken = 0;
+
+function polyline(ctx, pts, s) {
+  ctx.beginPath(); ctx.moveTo(pts[0][0] * s, pts[0][1] * s);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0] * s, pts[i][1] * s);
+  ctx.stroke();
+}
+function unit(a, b) { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; }
+
+function drawBase(strokes) {
+  const s = traceSize;
+  gctx.clearRect(0, 0, s, s);
+  gctx.save();
+  gctx.strokeStyle = '#f1e8db'; gctx.lineWidth = 2; gctx.setLineDash([10, 10]);
+  gctx.beginPath(); gctx.moveTo(s / 2, 16); gctx.lineTo(s / 2, s - 16);
+  gctx.moveTo(16, s / 2); gctx.lineTo(s - 16, s / 2); gctx.stroke();
+  gctx.restore();
+  gctx.strokeStyle = '#e9e1d6'; gctx.lineWidth = s * 0.09; gctx.lineCap = gctx.lineJoin = 'round';
+  strokes.forEach(st => polyline(gctx, st, s));
+}
+function drawHints(strokes, only) {   // 지금 쓸 획 하나만 안내
+  const s = traceSize, r = s * 0.038;
+  strokes.forEach((st, i) => {
+    if (i !== only) return;
+    const col = STROKE_COLORS[i % STROKE_COLORS.length];
+    // 가는 안내선 + 끝 화살촉
+    gctx.strokeStyle = col; gctx.lineWidth = s * 0.012; gctx.setLineDash([s * 0.025, s * 0.02]);
+    polyline(gctx, st, s); gctx.setLineDash([]);
+    const end = st[st.length - 1], prev = st[Math.max(0, st.length - (st.length > 5 ? 4 : 2))];
+    const [ux, uy] = unit(prev, end), a = s * 0.045;
+    const ex = end[0] * s, ey = end[1] * s;
+    gctx.fillStyle = col; gctx.beginPath();
+    gctx.moveTo(ex + ux * a * 0.4, ey + uy * a * 0.4);
+    gctx.lineTo(ex - ux * a - uy * a * 0.6, ey - uy * a + ux * a * 0.6);
+    gctx.lineTo(ex - ux * a + uy * a * 0.6, ey - uy * a - ux * a * 0.6);
+    gctx.closePath(); gctx.fill();
+    // 시작점 번호 (획 방향의 반대쪽에 붙임)
+    const [dx, dy] = unit(st[0], st[Math.min(st.length - 1, st.length > 5 ? 3 : 1)]);
+    let lx = st[0][0] * s - dx * r * 1.5, ly = st[0][1] * s - dy * r * 1.5;
+    lx = Math.min(s - r - 2, Math.max(r + 2, lx)); ly = Math.min(s - r - 2, Math.max(r + 2, ly));
+    gctx.beginPath(); gctx.arc(lx, ly, r, 0, Math.PI * 2); gctx.fill();
+    gctx.fillStyle = '#fff'; gctx.font = `800 ${Math.round(r * 1.3)}px sans-serif`;
+    gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(i + 1, lx, ly + 1);
+  });
+}
+
+/* ---- 체크포인트 판정 ----
+   획마다 시작~끝을 같은 간격으로 나눈 체크포인트를 둡니다.
+   순서대로 모두 지나면 그 획 통과, 획에서 크게 벗어나거나 다 못 지나고 손을 떼면 그 획만 다시 씁니다. */
+const HIT_R = 0.07;      // 체크포인트 통과 반경 (칸 크기 대비)
+const DEV_TOL = 0.12;    // 획 중심선에서 벗어나도 되는 폭 (칸 크기 대비)
+const TAP_LEN = 0.03;    // 이보다 짧게 그은 건 실수로 보고 조용히 지움
+const strokeLen = st => st.slice(1).reduce((L, p, i) => L + Math.hypot(p[0] - st[i][0], p[1] - st[i][1]), 0);
+function pointAt(st, d) {   // 획 시작에서 거리 d만큼 간 위치
+  for (let i = 1; i < st.length; i++) {
+    const seg = Math.hypot(st[i][0] - st[i - 1][0], st[i][1] - st[i - 1][1]);
+    if (d <= seg || i === st.length - 1) {
+      const k = seg ? Math.min(1, d / seg) : 0;
+      return [st[i - 1][0] + (st[i][0] - st[i - 1][0]) * k, st[i - 1][1] + (st[i][1] - st[i - 1][1]) * k];
+    }
+    d -= seg;
+  }
+  return st[st.length - 1];
+}
+function partial(st, d) {   // 획의 앞부분 d 길이만큼의 점 목록
+  const pts = [st[0]];
+  for (let i = 1; i < st.length && d > 0; i++) {
+    const seg = Math.hypot(st[i][0] - st[i - 1][0], st[i][1] - st[i - 1][1]);
+    if (seg <= d) { pts.push(st[i]); d -= seg; }
+    else { const k = d / seg; pts.push([st[i - 1][0] + (st[i][0] - st[i - 1][0]) * k, st[i - 1][1] + (st[i][1] - st[i - 1][1]) * k]); d = 0; }
+  }
+  return pts;
+}
+function makeCheckpoints(st) {
+  const L = strokeLen(st), n = L < 0.2 ? 2 : 3;   // 시작·끝 (긴 획은 가운데 하나 더)
+  return Array.from({ length: n }, (_, i) => pointAt(st, L * i / (n - 1)));
+}
+function segPointDist(a, b, p) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy;
+  const t = L2 ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L2)) : 0;
+  return Math.hypot(a[0] + dx * t - p[0], a[1] + dy * t - p[1]);
+}
+function distToStroke(st, p) {
+  let m = Infinity;
+  for (let i = 1; i < st.length; i++) m = Math.min(m, segPointDist(st[i - 1], st[i], p));
+  return m;
+}
+
+let tr = null;   // 지금 쓰는 글자의 진행 상태
+function startLetter(animate = true) {
+  const strokes = strokesOf(TRACE_SETS[traceSet][traceIdx]);
+  tr = { strokes, cps: strokes.map(makeCheckpoints), lens: strokes.map(strokeLen),
+         colors: [], cur: 0, hit: 0, done: false, last: null, ink: 0 };
+  drawing = false;
+  dctx.clearRect(0, 0, traceSize, traceSize);
+  if (animate) animateStrokes(strokes.map((_, i) => i)); else { animToken++; renderGuide(); }
+}
+function renderGuide(opt = {}) {
+  if (!tr) return;
+  const s = traceSize;
+  drawBase(tr.strokes);
+  // 통과한 획은 진하게
+  gctx.lineWidth = s * 0.07; gctx.lineCap = gctx.lineJoin = 'round';
+  for (let i = 0; i < tr.cur; i++) { gctx.strokeStyle = tr.colors[i]; polyline(gctx, tr.strokes[i], s); }
+  if (opt.bare) return;
+  if (showHints) drawHints(tr.strokes, tr.cur);
+  // 지금 쓸 획의 체크포인트 (지나간 점은 초록)
+  if (!tr.done && tr.cur < tr.strokes.length) {
+    tr.cps[tr.cur].forEach((p, j) => {
+      gctx.beginPath(); gctx.arc(p[0] * s, p[1] * s, s * 0.022, 0, Math.PI * 2);
+      gctx.fillStyle = j < tr.hit ? '#3dbb93' : '#fff'; gctx.fill();
+      gctx.lineWidth = 3; gctx.strokeStyle = j < tr.hit ? '#2b9a77' : '#c9b8a4'; gctx.stroke();
+    });
+  }
+}
+// 순서 보기: 지정한 획들을 차례로 그리는 애니메이션
+function animateStrokes(indices) {
+  if (!tr) return;
+  if (!indices) indices = tr.strokes.map((_, i) => i);
+  const token = ++animToken, s = traceSize;
+  renderGuide({ bare: true });
+  let k = 0, t0 = null;
+  function frame(now) {
+    if (token !== animToken) return;
+    if (t0 === null) t0 = now;
+    const si = indices[k], st = tr.strokes[si], L = tr.lens[si];
+    const f = Math.min(1, (now - t0) / (350 + L * 900));
+    gctx.strokeStyle = STROKE_COLORS[si % STROKE_COLORS.length];
+    gctx.lineWidth = s * 0.07; gctx.lineCap = gctx.lineJoin = 'round';
+    const pts = partial(st, L * f);
+    if (pts.length > 1) polyline(gctx, pts, s);
+    if (f >= 1) { k++; t0 = null; }
+    if (k < indices.length) requestAnimationFrame(frame);
+    else setTimeout(() => { if (token === animToken) renderGuide(); }, 700);
+  }
+  requestAnimationFrame(frame);
+}
+
+let drawing = false;
+const normP = e => [e.offsetX / traceSize, e.offsetY / traceSize];
+// a→b로 펜이 움직였을 때 판정. 시도가 끝나면 false
+function advance(a, b) {
+  tr.ink += Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const i = tr.cur, st = tr.strokes[i], cps = tr.cps[i];
+  if (distToStroke(st, b) > DEV_TOL) { failStroke(); return false; }
+  const before = tr.hit;
+  while (tr.hit < cps.length && segPointDist(a, b, cps[tr.hit]) < HIT_R) {
+    if (tr.hit === cps.length - 1 && tr.ink < tr.lens[i] * 0.5) break;   // 톡 찍기만으로 끝점 통과 방지
+    tr.hit++;
+  }
+  if (tr.hit === cps.length) { passStroke(); return false; }
+  if (tr.hit !== before) renderGuide();
+  return true;
+}
+function passStroke() {
+  drawing = false;
+  tr.colors[tr.cur] = penColor;
+  tr.cur++; tr.hit = 0;
+  dctx.clearRect(0, 0, traceSize, traceSize);
+  if (tr.cur < tr.strokes.length) { tone([784, 1047]); renderGuide(); return; }
+  // 글자 완성
+  tr.done = true; renderGuide();
+  goodTone(); celebrate($('traceWrap')); addStar();
+  setTimeout(() => speak(pick(PRAISE)), 350);
+  const myTr = tr;
+  setTimeout(() => { if (tr === myTr && $('trace').classList.contains('active')) traceGo(1); }, 1800);
+}
+function failStroke(quiet = false) {
+  drawing = false;
+  tr.hit = 0;
+  if (quiet) { dctx.clearRect(0, 0, traceSize, traceSize); renderGuide(); return; }
+  badTone();
+  setTimeout(() => speak('다시 해 볼까요?'), 250);
+  const myTr = tr;
+  setTimeout(() => {
+    if (tr !== myTr) return;
+    dctx.clearRect(0, 0, traceSize, traceSize);
+    animateStrokes([tr.cur]);   // 이 획만 다시 보여 줌
+  }, 400);
+}
+draw.addEventListener('pointerdown', e => {
+  if (!tr || tr.done || drawing) return;
+  animToken++; renderGuide();   // 순서 보기 재생 중이면 멈춤
+  drawing = true; try { draw.setPointerCapture(e.pointerId); } catch (err) {}
+  dctx.clearRect(0, 0, traceSize, traceSize);
+  dctx.strokeStyle = penColor; dctx.lineWidth = traceSize * 0.055;
+  dctx.lineCap = dctx.lineJoin = 'round';
+  dctx.beginPath(); dctx.moveTo(e.offsetX, e.offsetY); dctx.lineTo(e.offsetX + 0.1, e.offsetY); dctx.stroke();
+  tr.hit = 0; tr.ink = 0; tr.last = normP(e);
+  inkFrom = [e.offsetX, e.offsetY]; inkPts = [];
+  advance(tr.last, tr.last);
+});
+// 잉크는 새로 움직인 구간만, 화면 갱신마다 한 번씩 그립니다 (전체 경로를 매번 다시 그리면 획이 길수록 느려짐)
+let inkFrom = null, inkPts = [], inkReq = 0;
+function flushInk() {
+  inkReq = 0;
+  if (!drawing || !inkPts.length) { inkPts = []; return; }
+  dctx.beginPath(); dctx.moveTo(inkFrom[0], inkFrom[1]);
+  for (const p of inkPts) dctx.lineTo(p[0], p[1]);
+  dctx.stroke();
+  inkFrom = inkPts[inkPts.length - 1]; inkPts = [];
+}
+draw.addEventListener('pointermove', e => {
+  if (!drawing) return;
+  const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+  for (const p of evs) {
+    inkPts.push([p.offsetX, p.offsetY]);
+    const q = normP(p);
+    if (!advance(tr.last, q)) { inkPts = []; return; }
+    tr.last = q;
+  }
+  if (!inkReq) inkReq = requestAnimationFrame(flushInk);
+});
+['pointerup', 'pointercancel'].forEach(t => draw.addEventListener(t, () => {
+  if (!drawing) return;
+  failStroke(tr.ink < TAP_LEN);   // 끝까지 못 가고 손을 뗌
+}));
+
+function traceGo(d) {
+  const n = TRACE_SETS[traceSet].length;
+  traceIdx = (traceIdx + d + n) % n; startLetter();
+  speak(jamoOrSyl(TRACE_SETS[traceSet][traceIdx]));
+}
+const jamoOrSyl = ch => split(ch) ? ch : jamoSay(ch);
+$('tracePrev').onclick = () => traceGo(-1);
+$('traceNext').onclick = () => traceGo(1);
+$('traceClear').onclick = () => startLetter(false);
+$('traceShow').onclick = () => animateStrokes();
+$('traceHint').onclick = () => {
+  animToken++;
+  showHints = !showHints;
+  $('traceHint').textContent = showHints ? '🔢 번호 끄기' : '🔢 번호 켜기';
+  renderGuide();
+};
+$('traceSay').onclick = () => speak(jamoOrSyl(TRACE_SETS[traceSet][traceIdx]));
+$('traceDone').onclick = () => traceGo(1);   // 건너뛰기 (별 없음)
+$('traceTabs').onclick = e => {
+  const t = e.target.closest('.tab'); if (!t) return;
+  setTabs($('traceTabs'), t); traceSet = t.dataset.set; traceIdx = 0; startLetter();
+};
+['#ff7f6e', '#5b9dff', '#3dbb93', '#ffb340', '#9b6bff', '#3a2e2a'].forEach((c, i) => {
+  const b = document.createElement('button');
+  b.className = 'color' + (i === 0 ? ' on' : ''); b.style.background = c;
+  b.onclick = () => { penColor = c; document.querySelectorAll('.color').forEach(x => x.classList.toggle('on', x === b)); };
+  $('colors').appendChild(b);
+});
+window.addEventListener('resize', () => {
+  if ($('trace').classList.contains('active')) resizeTrace();
+  if ($('compose').classList.contains('active') && cmpMode === 'mission') renderMission();
+});
+
+/* ================= 그림 단어 ================= */
+let wordMode = 'card', wordCat = 'all', onlyNoBatchim = false;
+let wordList = WORDS, wordOrder = shuffle(WORDS), wordIdx = 0;
+const noBatchim = w => [...w].every(ch => { const s = split(ch); return !s || !s[2]; });
+function refreshWordList() {
+  const base = wordCat === 'all' ? WORDS : CATS.find(c => c.id === wordCat).words;
+  wordList = onlyNoBatchim ? base.filter(w => noBatchim(w[1])) : base;
+  if (!wordList.length) wordList = base;   // 걸러서 하나도 없으면 전체 사용
+  wordOrder = shuffle(wordList); wordIdx = 0; lastWord = null;
+  matchState.streak = 0; $('matchStars').textContent = '';
+  wordMode === 'card' ? showCard() : newMatch();
+}
+// 카테고리 버튼 만들기
+[{ id: 'all', name: '전체' }, ...CATS].forEach((c, i) => {
+  const b = document.createElement('button');
+  b.className = 'tab' + (i === 0 ? ' on' : ''); b.textContent = c.name; b.dataset.cat = c.id;
+  $('catTabs').appendChild(b);
+});
+$('catTabs').onclick = e => {
+  const t = e.target.closest('.tab'); if (!t) return;
+  setTabs($('catTabs'), t); wordCat = t.dataset.cat; refreshWordList();
+};
+$('noBatchim').onclick = () => {
+  onlyNoBatchim = !onlyNoBatchim;
+  $('noBatchim').classList.toggle('on', onlyNoBatchim);
+  refreshWordList();
+};
+function showCard() {
+  const [pic, word] = wordOrder[wordIdx];
+  $('cardPic').innerHTML = picHTML(pic);
+  $('cardWord').style.fontSize = `min(10vh, ${Math.min(84, Math.floor(460 / word.length))}px)`;
+  $('cardWord').style.letterSpacing = word.length > 5 ? '1px' : '6px';
+  $('cardWord').innerHTML = `<span class="first">${word[0]}</span>${word.slice(1)}`;
+  const sp = split(word[0]);
+  $('cardSplit').innerHTML = sp
+    ? `${word[0]} = <span class="c">${sp[0]}</span> + <span class="v">${sp[1]}</span>` + (sp[2] ? ` + <span class="c">${sp[2]}</span>` : '')
+    : '';
+}
+function cardGo(d) {
+  wordIdx = (wordIdx + d + wordOrder.length) % wordOrder.length;
+  showCard(); speak(wordOrder[wordIdx][1]);
+}
+$('cardPrev').onclick = () => cardGo(-1);
+$('cardNext').onclick = () => cardGo(1);
+$('cardSay').onclick = () => speak(wordOrder[wordIdx][1]);
+$('wordCard').onclick = () => speak(wordOrder[wordIdx][1]);
+
+const matchState = { streak: 0, locked: false, round: 0 };
+let lastWord = null;
+function newMatch() {
+  let item; do { item = pick(wordList); } while (item[1] === lastWord && wordList.length > 1);
+  lastWord = item[1];
+  // 보기는 같은 카테고리에서, 모자라면 전체에서 채움
+  let others = shuffle(wordList.filter(w => w[1] !== item[1])).slice(0, 2);
+  if (others.length < 2) others = others.concat(shuffle(WORDS.filter(w => w[1] !== item[1] && !others.includes(w))).slice(0, 2 - others.length));
+  others = others.map(w => w[1]);
+  $('pic').innerHTML = picHTML(item[0]);
+  runChoice($('matchOpts'), $('matchStars'),
+    { answer: item[1], options: shuffle([item[1], ...others]), wordStyle: true, praiseSay: item[1] },
+    matchState, newMatch);
+}
+$('wordTabs').onclick = e => {
+  const t = e.target.closest('.tab'); if (!t || !t.dataset.mode) return;
+  $('wordTabs').querySelectorAll('[data-mode]').forEach(x => x.classList.toggle('on', x === t));
+  wordMode = t.dataset.mode;
+  $('cardMode').style.display = wordMode === 'card' ? 'contents' : 'none';
+  $('matchMode').style.display = wordMode === 'match' ? 'flex' : 'none';
+  wordMode === 'card' ? showCard() : newMatch();
+};
+</script>
+</body>
+</html>
