@@ -31,10 +31,7 @@
   #homeBtn {
     font-size: 30px; width: 56px; height: 56px; border: none; border-radius: 16px;
     background: var(--card); box-shadow: 0 4px 0 rgba(0,0,0,.1);
-  }
-  /* 홈에서 길게 누르는 동안 색이 차오름 → 놀이 선택 화면으로 */
-  #homeBtn.holding { background: #ffd28a; transition: background 1s linear; }
-  #title { font-size: 30px; font-weight: 800; flex: 1; }
+  }  #title { font-size: 30px; font-weight: 800; flex: 1; }
   #starBox { font-size: 26px; font-weight: 800; background: var(--card); padding: 8px 16px; border-radius: 30px; box-shadow: 0 4px 0 rgba(0,0,0,.08); }
 
   main { height: calc(100% - 72px - env(safe-area-inset-top)); }
@@ -601,17 +598,11 @@ function show(id) {
   if (id === 'trace') { resizeTrace(); startLetter(); }
   if (id === 'words') { wordMode === 'card' ? showCard() : newMatch(); }
 }
-$('homeBtn').onclick = () => show('home');
-/* 한글 놀이터 첫 화면에서 🏠을 1초 길게 누르면 놀이 선택 화면으로 */
-let hubT = null;
-$('homeBtn').addEventListener('pointerdown', () => {
-  if (!$('home').classList.contains('active')) return;
-  $('homeBtn').classList.add('holding');
-  hubT = setTimeout(() => { location.href = 'index.html'; }, 1000);
-});
-['pointerup', 'pointercancel', 'pointerleave'].forEach(t => $('homeBtn').addEventListener(t, () => {
-  clearTimeout(hubT); $('homeBtn').classList.remove('holding');
-}));
+/* 🏠: 놀이 화면에서는 한글 놀이터 첫 화면으로, 첫 화면에서는 놀이 선택 화면으로 */
+$('homeBtn').onclick = () => {
+  if ($('home').classList.contains('active')) location.href = 'index.html';
+  else show('home');
+};
 document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => show(b.dataset.go));
 
 function setTabs(box, btn) { box.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t === btn)); }
