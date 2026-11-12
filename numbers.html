@@ -85,6 +85,10 @@
   .plate span { font-size: min(5.6vw, 7vh, 56px); line-height: 1.1; }
   .plate.right { background: radial-gradient(circle, #c9f2df 0 60%, #a6e3c9 62% 68%, #c9f2df 70%); }
 
+  /* ---------- 반응이 없을 때 누를 곳 반짝이기 ---------- */
+  .glow { animation: glow .7s infinite alternate !important; }
+  @keyframes glow { from { box-shadow: 0 0 0 0 #ffd54a; } to { box-shadow: 0 0 0 10px #ffd54a; } }
+
   /* ---------- 칭찬 효과 ---------- */
   .fx { position: fixed; pointer-events: none; font-size: 44px; animation: fly 1.1s ease-out forwards; z-index: 50; }
   @keyframes fly { 0% { transform: translate(0,0) scale(.4); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity: 0; } }
@@ -160,8 +164,8 @@ const eul = w => w + (hasBatchim(w) ? '을' : '를');
 const THINGS = ['🍎', '🍓', '🍌', '🐶', '🐥', '🐟', '🚗', '⭐', '🎈', '🍪', '🦋', '🌸'];
 
 /* ---------- 범위: 1~5 / 1~10 (기기에 기억) ---------- */
-let MAX = 10;
-try { if (localStorage.getItem('num-range') === '5') MAX = 5; } catch (e) {}
+let MAX = 5;   // 처음에는 1~5로 시작 (1~10으로 바꾸면 기억)
+try { if (localStorage.getItem('num-range') === '10') MAX = 10; } catch (e) {}
 function renderRange() { $('rangeBtn').textContent = MAX === 5 ? '👶 1부터 5까지' : '🧒 1부터 10까지'; }
 $('rangeBtn').onclick = () => {
   MAX = MAX === 5 ? 10 : 5;
@@ -292,21 +296,24 @@ function newHowMany() {
 let cmpQ = null;
 const cmpSay = () => speak(cmpQ.more ? '어느 쪽이 더 많을까요?' : '어느 쪽이 더 적을까요?');
 function newCompare() {
-  const gap = MAX === 5 ? 2 : 1;    // 1~5에서는 차이를 크게 해서 쉽게
-  let a, b; do { a = 1 + rand(MAX); b = 1 + rand(MAX); } while (Math.abs(a - b) < gap);
+  // 두 접시의 개수 차이는 2개 이상 (1개 차이는 3세가 눈으로 비교하기 어려움)
+  let a, b; do { a = 1 + rand(MAX); b = 1 + rand(MAX); } while (Math.abs(a - b) < 2);
+  // 두 접시의 한 줄 개수를 같게 맞춰서, 줄 길이로 비교할 수 있게
+  const big = Math.max(a, b), cols = big <= 4 ? 2 : big <= 9 ? 3 : 4;
   const more = Math.random() < 0.7, thing = pick(THINGS);
   cmpQ = { a, b, more };
   $('cmpAsk').textContent = more ? '어느 쪽이 더 많을까요?' : '어느 쪽이 더 적을까요?';
   const box = $('plates'); box.innerHTML = ''; let locked = false;
   [a, b].forEach(n => {
     const p = document.createElement('button'); p.className = 'plate';
-    p.innerHTML = `<div class="pin" style="--cols:${Math.min(n, n <= 4 ? 2 : n <= 9 ? 3 : 4)}">` + Array.from({ length: n }, () => `<span>${thing}</span>`).join('') + '</div>';
+    p.innerHTML = `<div class="pin" style="--cols:${cols}">` + Array.from({ length: n }, () => `<span>${thing}</span>`).join('') + '</div>';
     const right = more ? n === Math.max(a, b) : n === Math.min(a, b);
     p.onclick = () => {
       if (locked || p.classList.contains('wrong')) return;
       if (right) {
         locked = true; p.classList.add('right'); goodTone(); celebrate(p); addStar();
-        later(() => speak(`${COUNTER[Math.max(a, b)]} 개가 ${COUNTER[Math.min(a, b)]} 개보다 많아요! ${pick(PRAISE)}`), 300);
+        const big = COUNTER[Math.max(a, b)], small = COUNTER[Math.min(a, b)];
+        later(() => speak((more ? `${big} 개가 ${small} 개보다 많아요! ` : `${small} 개가 ${big} 개보다 적어요! `) + pick(PRAISE)), 300);
         later(newCompare, 2800);
       } else { p.classList.add('wrong'); shake(p); badTone(); setTimeout(cmpSay, 400); }
     };
@@ -314,6 +321,24 @@ function newCompare() {
   });
   later(cmpSay, 300);
 }
+
+/* ================= 반응이 없을 때 다시 안내 ================= */
+// 놀이 화면에서 8초 동안 아무것도 누르지 않으면 문제를 다시 읽고 누를 곳을 반짝이게 합니다. 그 뒤로는 12초마다 반복합니다.
+const IDLE = {
+  count: () => { speak('하나씩 눌러서 세어 봐요!'); return document.querySelector('#countItems .item:not(.on)'); },
+  listen: () => { listenSay(); return $('listenSay'); },
+  howmany: () => { speak('몇 개일까요? 그림을 하나씩 눌러서 세어 봐요!'); return document.querySelector('#hmItems .item:not(.on)'); },
+  compare: () => { cmpSay(); return null; },
+};
+let idleT = null, curScreen = 'home';
+function clearGlow() { document.querySelectorAll('.glow').forEach(e => e.classList.remove('glow')); }
+function resetIdle() {
+  clearTimeout(idleT); clearGlow();
+  if (!IDLE[curScreen]) return;
+  const fire = () => { const t = IDLE[curScreen](); if (t) t.classList.add('glow'); idleT = setTimeout(fire, 12000); };
+  idleT = setTimeout(fire, 8000);
+}
+document.addEventListener('pointerdown', resetIdle, true);
 
 /* ================= 화면 전환 ================= */
 const TITLES = { home: '숫자 놀이터', count: '하나씩 세기', listen: '듣고 고르기', howmany: '몇 개일까?', compare: '많다 적다' };
@@ -323,7 +348,9 @@ function show(id) {
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
   $('title').textContent = TITLES[id];
+  curScreen = id;
   if (START[id]) START[id]();
+  resetIdle();
 }
 // 🏠: 놀이 안에서는 숫자 놀이터 첫 화면으로, 첫 화면에서는 놀이 선택 화면으로
 $('homeBtn').onclick = () => {
