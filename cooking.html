@@ -496,9 +496,11 @@ function squeezeBottle(bt,targetPt,color,then){
     {transform:`translate(${dx}px,${dy}px) rotate(-150deg)`,offset:.75},{transform:'none'}],{duration:1300,easing:'ease-in-out'});
   addCleanup(()=>a.cancel());
   later(()=>{
-    SFX.squirt();const nz={x:targetPt.x+U()*2,y:targetPt.y-U()*20+b.h*.45};
-    const s=el('div','pour',stage);s.style.background=color;s.style.left=(nz.x-U()*.8)+'px';s.style.top=nz.y+'px';s.style.height=Math.max(U()*2,targetPt.y-nz.y)+'px';
-    later(()=>s.remove(),420);
+    if(color){   // 소스: 줄기가 떨어짐
+      SFX.squirt();const nz={x:targetPt.x+U()*2,y:targetPt.y-U()*20+b.h*.45};
+      const s=el('div','pour',stage);s.style.background=color;s.style.left=(nz.x-U()*.8)+'px';s.style.top=nz.y+'px';s.style.height=Math.max(U()*2,targetPt.y-nz.y)+'px';
+      later(()=>s.remove(),420);
+    }else{SFX.shakeS();SFX.shakeS();}   // 깨: 흔드는 소리
     then();
   },480);
   later(()=>{bt.busy=false;},1320);
@@ -903,12 +905,15 @@ function rcOil(done){
       if(k>=2){S.oil=1;later(done,950);}});});
   hintFn=()=>({type:'tap',at:bt});
 }
+// 깨 통을 톡 누르면 통이 그릇 위로 기울며 깨가 뿌려짐. 2번 누르면 끝
 function rcSesame(done){
   const b=riceBowl(44,62,64,38);const sh=box(stage,'shaker',84,30,14,20,'<div class="lid"></div><div class="jar">깨</div>');sh.classList.add('wiggle');
-  let cnt=0,acc=0;
-  rubTask(()=>{S.seed=1;done();},{region:sh,pad:8,need:6,base:14,sound:SFX.shakeS,onProg:(pr,p,d)=>{
-    sh.classList.remove('wiggle');sh.style.transform=`rotate(${Math.sin(pr*40)*16}deg)`;acc+=d;
-    if(acc>U()*3&&cnt<40){acc=0;cnt++;addSeed(b.ins);}}});
+  let n=0;
+  onTap(sh,()=>{if(n>=2||sh.busy)return;n++;const k=n,c=center(b.ins);
+    squeezeBottle(sh,{x:c.x,y:c.y},null,()=>{
+      for(let i=0;i<16;i++)later(()=>addSeed(b.ins),i*25);floatText(c.x,c.y-U()*6,'솔솔!');
+      if(k>=2){S.seed=1;later(done,950);}});});
+  hintFn=()=>n<2?{type:'tap',at:sh}:null;
 }
 function rcMix(done){
   const b=riceBowl(50,60,64,38);
@@ -1023,7 +1028,7 @@ const SLICE={
 function sliceSvg(k,sizeU,rot){return `<svg viewBox="0 0 40 40" style="width:${uu(sizeU)};height:${uu(sizeU)};transform:rotate(${rot}deg)">${SLICE[k]||''}</svg>`;}
 function pizzaInner(size){
   let h='';if(S.sauce)h+='<div class="sauce"></div>';
-  (S.tops||[]).forEach(t=>{h+=`<span class="ztop" style="left:${t.x}%;top:${t.y}%">${sliceSvg(t.e,size*.17,t.r||0)}</span>`;});
+  (S.tops||[]).forEach(t=>{h+=`<span class="ztop" style="left:${t.x}%;top:${t.y}%">${sliceSvg(t.e,size*.15,t.r||0)}</span>`;});
   if(S.cheese)h+='<div class="cheese"></div>';
   return h;
 }
@@ -1037,23 +1042,28 @@ function pzSauce(done){
   paintTask(()=>{S.sauce=1;done();},{target:d,color:'#d8432f',R:.09,cover:.72,round:true,tool:'🥄'});
 }
 const TOPS=['🍄','🫑','🌽','🫒','🥓','🍅'];
-// 재료를 마음껏 올리기: 피자에 놓으면 썬 조각 3~4개로 흩어짐. 하나 이상 올리면 "다 올렸어요" 버튼이 나타남
-const TOP_MAX=12;   // 너무 많이 겹치지 않도록 최대 12번(조각 약 40개)까지
+// 재료를 마음껏 올리기: 피자 위에 정해 둔 자리(가운데 1, 안쪽 원 6, 바깥 원 12)가 있고,
+// 재료를 놓으면 놓은 곳에서 가까운 빈자리부터 썬 조각 3개가 반듯하게 들어감. 하나 이상 올리면 "다 올렸어요" 버튼이 나타남
+const TOP_SLOTS=[[50,50],
+  ...Array.from({length:6},(_,i)=>{const a=i*Math.PI/3-Math.PI/2;return[50+Math.cos(a)*18,50+Math.sin(a)*18];}),
+  ...Array.from({length:12},(_,i)=>{const a=i*Math.PI/6-Math.PI/2+Math.PI/12;return[50+Math.cos(a)*33,50+Math.sin(a)*33];})];
 function pzTop(done){
   S.tops=[];const P=46;const pz=renderPizza(50,44,P);
   const tr=box(stage,'tray',50,88,90,16);tr.style.width='94%';tr.style.left='3%';let n=0,fin=false;
+  const used=new Set();
   const btn=el('button','bigbtn green donebtn',stage,'✅ 다 올렸어요');btn.style.display='none';
   onTap(btn,()=>{if(fin||!n)return;fin=true;SFX.good();btn.classList.add('on');later(done,300);});
   const items=TOPS.map((t,i)=>{const e=emo(stage,t,10+i*16,88,12,'drag');
     draggable(e,pz,(elm,at)=>{
       resetDrag(elm);if(fin)return;
-      if(n>=TOP_MAX){SFX.lock();retrigger(btn,'shake');return;}
-      const r=relIn(at,pz),cnt=t==='🌽'?4:3;
-      for(let k=0;k<cnt;k++){
-        let dx=r.x-.5+rand(-.12,.12),dy=r.y-.5+rand(-.12,.12);const len=Math.hypot(dx,dy);if(len>.36){dx*=.36/len;dy*=.36/len;}
-        const tp={e:t,x:(.5+dx)*100,y:(.5+dy)*100,r:Math.round(rand(0,360))};S.tops.push(tp);
-        const sp=el('span','ztop',pz,sliceSvg(t,P*.17,tp.r));sp.style.left=tp.x+'%';sp.style.top=tp.y+'%';sp.style.animation='popin .3s';
-      }
+      const r=relIn(at,pz);
+      const free=TOP_SLOTS.map((s,k)=>k).filter(k=>!used.has(k))
+        .sort((a,b)=>Math.hypot(TOP_SLOTS[a][0]-r.x*100,TOP_SLOTS[a][1]-r.y*100)-Math.hypot(TOP_SLOTS[b][0]-r.x*100,TOP_SLOTS[b][1]-r.y*100));
+      if(!free.length){SFX.lock();retrigger(btn,'shake');say('피자가 꽉 찼어요! 초록 버튼을 눌러요!');return;}
+      free.slice(0,3).forEach(k=>{
+        used.add(k);const tp={e:t,x:TOP_SLOTS[k][0],y:TOP_SLOTS[k][1],r:0};S.tops.push(tp);
+        const sp=el('span','ztop',pz,sliceSvg(t,P*.15,0));sp.style.left=tp.x+'%';sp.style.top=tp.y+'%';sp.style.animation='popin .3s';
+      });
       SFX.pop();burst(at.x,at.y,['✨'],3);n++;
       if(n===1){btn.style.display='';btn.classList.add('wiggle');later(()=>say('다 올렸으면 초록 버튼을 눌러요!'),700);}
     });
@@ -1234,7 +1244,7 @@ const RECIPES={
   rice:{name:'주먹밥',icon:'🍙',end:'동글동글 주먹밥을 다 만들었어요!',steps:[
     {icon:'🍚',say:'밥을 꾹 잡고 그릇으로 옮겨 담아요!',setup:rcScoop},
     {icon:'🫗',say:'참기름 병을 톡톡 눌러서 넣어요!',setup:rcOil},
-    {icon:'🧂',say:'깨 통 위를 쓱쓱 흔들어서 깨를 뿌려요!',setup:rcSesame},
+    {icon:'🧂',say:'깨 통을 톡톡 눌러서 깨를 뿌려요!',setup:rcSesame},
     {icon:'🥄',say:'그릇 안을 쓱쓱 문질러서 골고루 섞어요!',setup:rcMix},
     {icon:'👐',say:'밥을 꾹꾹 눌러서 동글동글 뭉쳐요!',setup:rcSqueeze},
     {icon:'🟩',say:'김을 주먹밥 아래에 붙여요!',setup:rcNori},
