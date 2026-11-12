@@ -37,7 +37,15 @@ html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;touch-ac
 
 .obj{position:absolute;}
 .emo{display:flex;align-items:center;justify-content:center;line-height:1;}
-.tool{position:absolute;font-size:calc(var(--u)*11);pointer-events:none;z-index:40;transform:translate(-30%,-85%);line-height:1;}
+.tool{position:absolute;font-size:calc(var(--u)*11);pointer-events:none;z-index:40;transform:var(--tt,translate(-30%,-85%));line-height:1;}
+.tool.mid{--tt:translate(-50%,-50%);}
+.tool svg{display:block;}
+/* 쓰기 전에는 재료 옆에 놓여 살짝 흔들림 */
+.tool.rest{animation:toolwig 1.4s ease-in-out infinite;filter:drop-shadow(0 calc(var(--u)*.6) calc(var(--u)*.6) rgba(0,0,0,.25));}
+@keyframes toolwig{0%,100%{transform:var(--tt,translate(-30%,-85%)) rotate(-9deg)}50%{transform:var(--tt,translate(-30%,-85%)) rotate(7deg)}}
+/* 병에서 짜져 나오는 줄기 */
+.pour{position:absolute;width:calc(var(--u)*1.6);border-radius:calc(var(--u)*1);z-index:4;pointer-events:none;transform-origin:top center;animation:pourin .25s ease-out;}
+@keyframes pourin{from{transform:scaleY(0)}}
 .particle{position:absolute;font-size:calc(var(--u)*4);pointer-events:none;z-index:50;line-height:1;
   transform:translate(-50%,-50%);animation:fly .9s ease-out forwards;}
 @keyframes fly{to{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.3);opacity:0}}
@@ -196,6 +204,12 @@ html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;touch-ac
 .banana .bpeel.l.off{transform:rotate(-125deg)}.banana .bpeel.r.off{transform:rotate(125deg)}
 .banana .bpeel.c.off{transform:rotate(165deg) translateX(calc(var(--u)*4))}
 .banana .bstem{position:absolute;left:44%;width:12%;top:0;height:11%;background:#7a5a1e;border-radius:calc(var(--u)*1);z-index:2;}
+/* 껍질 벗기기용 바나나(SVG): 껍질 세 갈래가 아래쪽을 축으로 바깥으로 벗겨짐 */
+.banana svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.banana .bp{transform-box:fill-box;transform-origin:50% 100%;transition:transform .55s ease-in;}
+.banana .bp.l.off{transform:rotate(-112deg) scale(1,.6);}
+.banana .bp.r.off{transform:rotate(112deg) scale(1,.6);}
+.banana .bp.c.off{transform:rotate(-150deg) scale(1,.55);}
 .banh{position:absolute;left:0;right:0;top:12%;bottom:12%;background:linear-gradient(#fffbe6,#f5e2a0);border-radius:50%/50%;
   box-shadow:inset 0 calc(var(--u)*-1) calc(var(--u)*1.5) rgba(180,150,60,.35);}
 .bslice{border-radius:50%;background:radial-gradient(circle,#d9c27a 0 7%,#fff8dc 9% 62%,#f3e2a4 64%);border:calc(var(--u)*.5) solid #eedc9a;}
@@ -283,6 +297,11 @@ html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;touch-ac
 .cupfill{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(#ffb3c7,#ff8fab);transition:height 1.2s;}
 .straw{background:repeating-linear-gradient(0deg,#fff 0 calc(var(--u)*1.4),#ff4f81 calc(var(--u)*1.4) calc(var(--u)*2.8));border-radius:calc(var(--u)*1);
   transition:left .5s,top .5s,transform .5s;z-index:3;}
+/* 피자 토핑 "다 올렸어요" 버튼 */
+.donebtn{position:absolute;right:3%;top:36%;z-index:6;font-size:calc(var(--u)*4.2);padding:calc(var(--u)*2.4) calc(var(--u)*3.4);}
+.donebtn.on{filter:grayscale(.6);}
+/* 김밥 접시의 단무지 */
+.danmuji{background:radial-gradient(circle at 50% 50%,#fff6a8 0 45%,#ffe14d 47% 100%);border-radius:50%;box-shadow:0 calc(var(--u)*.6) calc(var(--u)*1) rgba(0,0,0,.15);}
 /* 요리 중 🏠 확인 창 */
 #confirm{position:fixed;inset:0;background:rgba(60,30,10,.45);display:none;align-items:center;justify-content:center;z-index:200;}
 #confirm.on{display:flex;}
@@ -421,11 +440,68 @@ function strokes(h){
   stageOn('pointerup',up);stageOn('pointercancel',up);
 }
 // 손가락을 따라다니는 도구
-function useTool(ch){
-  const t=el('div','tool',stage,ch);t.style.display='none';let n=0;
+// rest: 쓰기 전에 도구를 놓아 둘 기준 요소(그 오른쪽 아래에 놓임), cls: 'mid'면 손가락이 도구 가운데
+// t.off=true 로 두면 잠시 숨김 (예: 병을 누르는 동안)
+function useTool(ch,rest,cls){
+  const t=el('div','tool'+(cls?' '+cls:''),stage,ch);let n=0;t.off=false;
   const place=p=>{t.style.left=p.x+'px';t.style.top=p.y+'px';};
-  strokes({down:p=>{n++;place(p);t.style.display='block';},move:p=>place(p),up:()=>{n=Math.max(0,n-1);if(!n)t.style.display='none';}});
+  const home=()=>{
+    if(!t.isConnected)return;if(t.off){t.style.display='none';return;}
+    t.style.display='block';t.classList.add('rest');
+    const W=stage.clientWidth,H=stage.clientHeight,c=rest&&rest.isConnected?center(rest):{x:W*.8,y:H*.72,w:0,h:0};
+    if(cls==='mid')place({x:c.x,y:Math.min(H-U()*5,c.y+c.h*.5)});   // 밀대처럼 넓은 도구는 재료 아래 가운데
+    else place({x:Math.min(W-U()*9,c.x+c.w*.42+U()*4),y:Math.min(H-U()*2,c.y+c.h*.42+U()*7)});
+  };
+  t.home=home;requestAnimationFrame(home);
+  const onR=()=>{if(!n)home();};addEventListener('resize',onR);addCleanup(()=>removeEventListener('resize',onR));
+  strokes({down:p=>{if(t.off)return;n++;t.classList.remove('rest');place(p);t.style.display='block';},
+    move:p=>{if(n)place(p);},
+    up:()=>{if(!n)return;n=Math.max(0,n-1);if(!n)home();}});
   return t;
+}
+// 밥알 무늬: 크기·기울기·위치가 제각각인 길쭉한 밥알을 흩뿌린 그림을 한 번 만들어 --grain 으로 씀
+// (바둑판처럼 보이지 않게 무작위로 놓고, 타일 가장자리에 걸친 밥알은 반대편에도 그려 이음새가 없게 함)
+(function makeRiceGrain(){
+  const T=140;let g='';
+  const grain=(x,y,rx,ry,a)=>`<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" transform="rotate(${a|0} ${x.toFixed(1)} ${y.toFixed(1)})"/>`;
+  for(let i=0;i<190;i++){
+    const x=rand(0,T),y=rand(0,T),rx=rand(4.4,6),ry=rand(2.1,2.8),a=rand(0,180);
+    for(const ox of [0,-T,T])for(const oy of [0,-T,T]){const X=x+ox,Y=y+oy;if(X>-8&&X<T+8&&Y>-8&&Y<T+8)g+=grain(X,Y,rx,ry,a);}
+  }
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${T}" height="${T}"><rect width="${T}" height="${T}" fill="#f1e8d4"/>`+
+    `<g fill="#fffefa" stroke="#cdbb93" stroke-width="1.1">${g}</g></svg>`;
+  document.documentElement.style.setProperty('--grain',`url("data:image/svg+xml,${encodeURIComponent(svg)}") 0 0/calc(var(--u)*24) calc(var(--u)*24),#f8f2e4`);
+})();
+// 바르기에서 밥알 한 톨 그리기 (김밥 밥 펴기)
+function drawGrain(ctx,x,y,w){ctx.save();ctx.translate(x,y);ctx.rotate(rand(0,Math.PI));ctx.beginPath();ctx.ellipse(0,0,w*.026,w*.012,0,0,Math.PI*2);
+  ctx.fillStyle='#fffefa';ctx.fill();ctx.lineWidth=Math.max(1,w*.0025);ctx.strokeStyle='#cdbb93';ctx.stroke();ctx.restore();}
+// 그려서 쓰는 도구 (이모지에 없는 것)
+const KNIFE_SVG=`<svg viewBox="0 0 100 100" style="width:${uu(17)};height:${uu(17)}"><g transform="rotate(-45 50 50)">
+  <rect x="6" y="42" width="52" height="16" rx="8" fill="#dfe4e8" stroke="#8d969e" stroke-width="2.5"/>
+  <rect x="10" y="46" width="40" height="3" rx="1.5" fill="#fff" opacity=".8"/>
+  <ellipse cx="20" cy="51" rx="12" ry="6.5" fill="#ffd84d"/>
+  <rect x="56" y="40" width="40" height="20" rx="10" fill="#b9773e" stroke="#7d4a1e" stroke-width="2.5"/>
+  <circle cx="68" cy="50" r="2.6" fill="#7d4a1e"/><circle cx="84" cy="50" r="2.6" fill="#7d4a1e"/></g></svg>`;
+const PIN_SVG=`<svg viewBox="0 0 120 34" style="width:${uu(30)};height:${uu(8.5)}">
+  <defs><linearGradient id="pinw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3cf98"/><stop offset=".5" stop-color="#dca765"/><stop offset="1" stop-color="#b47a3c"/></linearGradient></defs>
+  <rect x="2" y="11" width="22" height="12" rx="6" fill="#a8692f" stroke="#6e4116" stroke-width="2"/>
+  <rect x="96" y="11" width="22" height="12" rx="6" fill="#a8692f" stroke="#6e4116" stroke-width="2"/>
+  <rect x="20" y="2" width="80" height="30" rx="13" fill="url(#pinw)" stroke="#8a5523" stroke-width="2.5"/>
+  <rect x="30" y="7" width="60" height="4" rx="2" fill="#fff" opacity=".45"/></svg>`;
+// 병을 그릇 쪽으로 기울여 짜기. 다 짜고 나면 then() 호출
+function squeezeBottle(bt,targetPt,color,then){
+  if(bt.busy)return;bt.busy=true;bt.classList.remove('wiggle');
+  const b=center(bt),dx=targetPt.x+U()*5-b.x,dy=targetPt.y-U()*20-b.y;
+  const a=bt.animate([{transform:'none'},{transform:`translate(${dx}px,${dy}px) rotate(-150deg)`,offset:.35},
+    {transform:`translate(${dx}px,${dy}px) rotate(-150deg)`,offset:.75},{transform:'none'}],{duration:1300,easing:'ease-in-out'});
+  addCleanup(()=>a.cancel());
+  later(()=>{
+    SFX.squirt();const nz={x:targetPt.x+U()*2,y:targetPt.y-U()*20+b.h*.45};
+    const s=el('div','pour',stage);s.style.background=color;s.style.left=(nz.x-U()*.8)+'px';s.style.top=nz.y+'px';s.style.height=Math.max(U()*2,targetPt.y-nz.y)+'px';
+    later(()=>s.remove(),420);
+    then();
+  },480);
+  later(()=>{bt.busy=false;},1320);
 }
 // 끌어다 놓기 (목표 근처에만 놓아도 성공)
 function draggable(elm,getTarget,onDrop){
@@ -479,7 +555,7 @@ function washTask(done,items){
   const vegs=items.map(([ch,x,y,s])=>emo(stage,ch,x,y,s));
   vegs.forEach(v=>{for(let i=0;i<5;i++){const s=el('div','dirt',v);const a=Math.random()*Math.PI*2,r=rand(.05,.28);
     s.style.left=(50+Math.cos(a)*r*100)+'%';s.style.top=(50+Math.sin(a)*r*100)+'%';s.hp=70;spots.push(s);}});
-  useTool('🧽');
+  useTool('🧽',vegs[vegs.length-1]);
   const scrub=(p,d)=>{
     for(const s of spots){if(s.gone)continue;const c=center(s);
       if(Math.hypot(c.x-p.x,c.y-p.y)<c.w*.7+U()*3){s.hp-=d;s.style.opacity=Math.max(.15,s.hp/70);
@@ -497,7 +573,7 @@ function cutTask(done,{html,W,H,n,after}){
   for(let i=0;i<n;i++){const s=el('div','seg',wrap);s.style.left=(i*100/n)+'%';s.style.width=(100/n)+'%';
     const inner=el('div','seginner',s,html);inner.style.width=uu(W);inner.style.left=uu(-i*W/n);segs.push(s);}
   const lines=[];for(let j=1;j<n;j++){const l=el('div','cutline',wrap);l.style.left=(j*100/n)+'%';l.idx=j;lines.push(l);}
-  useTool('🔪');
+  useTool('🔪',wrap);
   let start=null,used=false;
   const cut=l=>{
     l.cut=true;l.classList.add('gone');SFX.chop();const c=center(l);floatText(c.x,c.y-c.h*.3,'싹둑!');
@@ -526,12 +602,13 @@ function paintTask(done,o){
       if(cv.width)old.getContext('2d').drawImage(cv,0,0);cv.width=Math.round(cv.clientWidth*dpr);cv.height=Math.round(cv.clientHeight*dpr);
       if(old.width)ctx.drawImage(old,0,0,cv.width,cv.height);}};
   requestAnimationFrame(fit);const onR=()=>fit();addEventListener('resize',onR);addCleanup(()=>removeEventListener('resize',onR));
-  useTool(o.tool||'🥄');
+  useTool(o.tool||'🥄',target,o.toolCls);
   let fin=false;
   const dab=p=>{
     const r=relIn(p,cv);if(r.x<-.15||r.x>1.15||r.y<-.15||r.y>1.15)return;
     ctx.fillStyle=o.color;ctx.beginPath();ctx.ellipse(r.x*cv.width,r.y*cv.height,Rr*cv.width,Rr*cv.height,0,0,Math.PI*2);ctx.fill();
-    if(o.speck&&Math.random()<.5){ctx.fillStyle=o.speck;ctx.beginPath();ctx.arc((r.x+rand(-.05,.05))*cv.width,(r.y+rand(-.05,.05))*cv.height,cv.width*.012,0,Math.PI*2);ctx.fill();}
+    if(o.grain){for(let k=0;k<3;k++)drawGrain(ctx,(r.x+rand(-Rr,Rr)*.9)*cv.width,(r.y+rand(-Rr,Rr)*.9)*cv.height,cv.width);}
+    else if(o.speck&&Math.random()<.5){ctx.fillStyle=o.speck;ctx.beginPath();ctx.arc((r.x+rand(-.05,.05))*cv.width,(r.y+rand(-.05,.05))*cv.height,cv.width*.012,0,Math.PI*2);ctx.fill();}
     for(let gx=0;gx<G;gx++)for(let gy=0;gy<G;gy++){if(Math.hypot((gx+.5)/G-r.x,(gy+.5)/G-r.y)<Rr*1.1)cells.add(gx+','+gy);}
   };
   const line=(a,b)=>{const steps=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/(U()*1.5)));for(let i=1;i<=steps;i++)dab({x:a.x+(b.x-a.x)*i/steps,y:a.y+(b.y-a.y)*i/steps});};
@@ -543,7 +620,7 @@ function paintTask(done,o){
 }
 // 영역 안을 문지르기. 진행률(0~1)을 onProg로 알려 주고 1이 되면 done
 function rubTask(done,o){
-  if(o.tool)useTool(o.tool);let total=0,fin=false;
+  if(o.tool)useTool(o.tool,o.region,o.toolCls);let total=0,fin=false;
   strokes({move:(p,l)=>{
     if(fin||!inside(p,o.region,U()*(o.pad??5)))return;
     const d=Math.hypot(p.x-l.x,p.y-l.y);if(d<1)return;rubSound(o.sound||SFX.rub);total+=d;
@@ -600,12 +677,21 @@ function eatTask(done,items,onEat){
     it.style.transition='transform .25s,opacity .25s';it.style.transform='scale(0)';it.style.opacity=0;if(--left===0)later(done,500);}));
   hintFn=()=>({type:'tap',at:items.find(i=>!i.eaten)});
 }
-// 한 덩어리 음식: 누를 때마다 한 입씩 작아지다가 다 먹기
+// 한 덩어리 음식: 누른 쪽 가장자리를 입 모양(동그라미 세 개가 이어진 이빨 자국)으로 한 입씩 베어 먹기
 function biteTask(done,elm,n=4){
-  let b=0;
-  onTap(elm,p=>{if(b>=n)return;b++;SFX.munch();floatText(p.x,p.y,'냠!');const c=center(elm);burst(c.x,c.y,['✨'],4);
-    elm.style.transition='transform .2s,opacity .3s';elm.style.transform=`scale(${1-b/n*.7})`;
-    if(b>=n){elm.style.opacity=0;later(done,500);}});
+  let b=0;const bites=[],masks=[];
+  onTap(elm,p=>{if(b>=n)return;b++;SFX.munch();floatText(p.x,p.y,'냠!');
+    const c=center(elm);let dx=p.x-c.x,dy=p.y-c.y,L=Math.hypot(dx,dy);
+    if(L<c.w*.08){const a=Math.random()*Math.PI*2;dx=Math.cos(a);dy=Math.sin(a);L=1;}
+    dx/=L;dy/=L;
+    const again=bites.filter(q=>q.dx*dx+q.dy*dy>.8).length;   // 같은 쪽을 또 물면 더 안쪽으로
+    bites.push({dx,dy});const depth=.44-.13*again,r=Math.min(c.w,c.h)*.15;
+    for(let k=-1;k<=1;k++){const ox=50+(dx*depth-dy*k*.14)*100,oy=50+(dy*depth+dx*k*.14)*100;
+      masks.push(`radial-gradient(circle ${r}px at ${ox}% ${oy}%, transparent 96%, #000 100%)`);}
+    const m=masks.join(',');elm.style.webkitMaskImage=elm.style.maskImage=m;
+    elm.style.webkitMaskComposite='source-in';elm.style.maskComposite='intersect';
+    burst(c.x+dx*c.w*.4,c.y+dy*c.h*.4,['✨'],4);
+    if(b>=n){elm.style.transition='opacity .4s';elm.style.opacity=0;later(done,600);}});
   hintFn=()=>b<n?{type:'tap',at:elm}:null;
 }
 
@@ -675,7 +761,7 @@ function sdMash(done){
   const chunks=[];for(let i=0;i<8;i++){const c=el('div','chunk',ins);const s=rand(7,10);
     c.style.width=uu(s);c.style.height=uu(s*.8);c.style.left=rand(12,78)+'%';c.style.top=rand(10,60)+'%';
     c.style.marginLeft=c.style.marginTop=uu(-s/2);chunks.push(c);}
-  useTool('🥄');
+  const tool=useTool('🥄',bowl);
   let phase=1,total=0,btl=null;const blobs=[];
   strokes({move:(p,l)=>{
     if(phase!==1&&phase!==3)return;if(!inside(p,ins,U()*5))return;
@@ -687,12 +773,16 @@ function sdMash(done){
   }});
   function startMayo(){
     SFX.good();say('마요네즈를 쭉 짜요! 통을 톡톡 눌러요.');
+    tool.off=true;tool.home();   // 통을 짜는 동안 숟가락은 숨김
     btl=bottle(84,28,'마요');btl.classList.add('wiggle');let taps=0;
     onTap(btl,()=>{
-      if(phase!==2)return;taps++;btl.classList.remove('wiggle');retrigger(btl,'squeeze');SFX.squirt();
-      const b=el('div','blob',ins);b.style.left=rand(20,60)+'%';b.style.top=rand(15,45)+'%';blobs.push(b);
-      const c=center(b);floatText(c.x,c.y-U()*5,'쭉!');
-      if(taps>=3){phase=3;total=0;later(()=>{btl.remove();say('이제 쓱쓱 섞어요!');},500);}
+      if(phase!==2||btl.busy||taps>=3)return;taps++;
+      const lx=rand(20,60),ly=rand(15,45),r=center(ins);
+      const tp={x:r.x-r.w/2+r.w*(lx+11)/100,y:r.y-r.h/2+r.h*(ly+20)/100};   // 마요네즈가 떨어질 자리
+      squeezeBottle(btl,tp,'#fffbe8',()=>{
+        const b=el('div','blob',ins);b.style.left=lx+'%';b.style.top=ly+'%';blobs.push(b);floatText(tp.x,tp.y-U()*5,'쭉!');
+        if(taps>=3){phase=3;total=0;later(()=>{btl.remove();tool.off=false;tool.home();say('이제 쓱쓱 섞어요!');},900);}
+      });
     });
   }
   hintFn=()=>phase===2?{type:'tap',at:btl}:{type:'rub',at:ins};
@@ -700,7 +790,7 @@ function sdMash(done){
 function sdSpread(done){
   box(stage,'board',50,54,62,56);
   const bread=box(stage,'breadtop',50,52,46,44);
-  paintTask(done,{target:bread,color:'rgba(255,214,70,.95)',speck:'rgba(255,255,255,.8)'});
+  paintTask(done,{target:bread,color:'rgba(255,214,70,.95)',speck:'rgba(255,255,255,.8)',tool:KNIFE_SVG});
 }
 function layer(parent,k){const d=el('div','layer L-'+k,parent);if(k==='tomato')d.innerHTML='<i></i><i></i><i></i>';return d;}
 function sdStack(done){
@@ -731,7 +821,8 @@ function sdEat(done){
     sw.style.clipPath=sw.style.webkitClipPath=`inset(0 ${bites*20}% 0 0)`;
     if(bites>=5)later(done,500);
   });
-  hintFn=()=>({type:'tap',at:sw});
+  // 힌트는 아직 남아 있는 왼쪽 부분 가운데를 가리킴 (먹은 자리는 눌러도 반응하지 않으므로)
+  hintFn=()=>{if(bites>=5)return null;const c=center(sw);return{type:'tap',at:{x:c.x-c.w/2+c.w*(1-bites*.2)/2,y:c.y}};};
 }
 
 /* =========================================================
@@ -739,10 +830,26 @@ function sdEat(done){
    ========================================================= */
 const BANANA_H='<div class="banh"></div>';
 function bananaSlice(parent,s){const b=el('div','bslice',parent);b.style.width=b.style.height=uu(s);return b;}
+// 살짝 휘어진 바나나. 속살 위에 껍질 세 갈래(l, r, c)를 덮고 꼭지와 끝을 그림
+const BANANA_SVG=`<svg viewBox="0 0 60 130">
+  <defs><linearGradient id="bpg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f0b400"/><stop offset=".45" stop-color="#ffe04a"/><stop offset="1" stop-color="#e9a900"/></linearGradient>
+  <linearGradient id="bfg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f6e6a8"/><stop offset=".5" stop-color="#fffbe8"/><stop offset="1" stop-color="#f1dc92"/></linearGradient></defs><g transform="translate(30 0) scale(1.6 1) translate(-30 0)">
+  <path d="M26 17 C15 46 17 90 29 117 Q35 122 40 116 C45 88 44 44 34 17 Z" fill="url(#bfg)"/>
+  <path d="M30 40 C27 60 28 85 33 105" fill="none" stroke="#efdc9c" stroke-width="1.5" stroke-linecap="round"/>
+  <g class="bp l"><path d="M25 14 C12 45 14 92 28 120 L31 121 C22 92 22 45 28 14 Z" fill="url(#bpg)" stroke="#c99400" stroke-width="1.2" stroke-linejoin="round"/>
+    <circle cx="20" cy="70" r="1.2" fill="#9a6a10"/><circle cx="22" cy="96" r="1" fill="#9a6a10"/></g>
+  <g class="bp r"><path d="M33 14 C38 45 40 90 38 120 L42 117 C48 88 46 42 35 14 Z" fill="url(#bpg)" stroke="#c99400" stroke-width="1.2" stroke-linejoin="round"/>
+    <circle cx="43" cy="60" r="1.1" fill="#9a6a10"/></g>
+  <g class="bp c"><path d="M28 14 C22 45 22 92 31 121 Q34 123 38 120 C40 90 38 45 33 14 Z" fill="url(#bpg)" stroke="#c99400" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M30.5 30 C27 55 27 85 33 112" fill="none" stroke="#ffef9a" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+    <circle cx="31" cy="82" r="1.2" fill="#9a6a10"/><circle cx="34" cy="50" r="1" fill="#9a6a10"/></g>
+  <path d="M27.5 2 L33 2 L35 16 L26 16 Z" fill="#7a5a1e" stroke="#5a3f12" stroke-width="1" stroke-linejoin="round"/>
+  <ellipse cx="35" cy="121" rx="3" ry="2" fill="#5a3f12"/></g>
+</svg>`;
 function frPeel(done){
-  box(stage,'plate',50,76,50,14);
-  const b=box(stage,'banana',50,44,26,56,'<div class="flesh"></div><div class="bpeel l"></div><div class="bpeel c"></div><div class="bpeel r"></div><div class="bstem"></div>');
-  const strips=[...b.querySelectorAll('.bpeel')];
+  box(stage,'plate',50,80,50,14);
+  const b=box(stage,'banana',50,44,26,56,BANANA_SVG);
+  const strips=[...b.querySelectorAll('.bp')];
   swipeTask({target:b,dir:'down',count:3,
     onSwipe:(n,s)=>{const rest=strips.filter(x=>!x.off);let best=rest[0],bd=1e9;rest.forEach(x=>{const d=Math.abs(center(x).x-s.x);if(d<bd){bd=d;best=x;}});
       best.off=true;best.classList.add('off');SFX.whoosh();floatText(s.x,s.y,'쓱!');},
@@ -780,17 +887,20 @@ function rcScoop(done){
   S.rice=.3;
   box(stage,'ricepot',24,58,32,26);
   const b=riceBowl(70,60);let n=0,cur=null;
+  // 한 번만 옮기면 그릇에 밥이 소복이 담기고 다음 단계로
   const spawn=()=>{cur=emo(stage,'🍚',24,40,15,'drag');
-    draggable(cur,b.bowl,elm=>{elm.remove();n++;S.rice=.3+.7*n/3;b.m.style.transform=`scale(${S.rice})`;SFX.pop();const c=center(b.ins);burst(c.x,c.y,['✨'],4);floatText(c.x,c.y-U()*6,'쏙!');
-      if(n<3)spawn();else later(done,400);});};
+    draggable(cur,b.bowl,elm=>{elm.remove();n++;S.rice=1;b.m.style.transform='scale(1)';SFX.pop();const c=center(b.ins);burst(c.x,c.y,['✨'],6);floatText(c.x,c.y-U()*6,'쏙!');
+      b.m.classList.add('shine');later(done,700);});};
   spawn();
   hintFn=()=>cur&&cur.isConnected?{type:'drag',from:cur,to:b.ins}:null;
 }
 function rcOil(done){
   const b=riceBowl(46,60,64,38);const bt=bottle(84,30,'참기름','oilb');bt.classList.add('wiggle');let n=0;
-  onTap(bt,()=>{if(n>=2)return;n++;bt.classList.remove('wiggle');retrigger(bt,'squeeze');SFX.squirt();
-    const o=el('div','oil',b.ins);o.style.left=(n===1?30:58)+'%';o.style.top=(n===1?30:45)+'%';const c=center(o);floatText(c.x,c.y-U()*4,'똑!');
-    if(n>=2){S.oil=1;later(done,500);}});
+  onTap(bt,()=>{if(n>=2||bt.busy)return;n++;const k=n,ol=k===1?30:58,ot=k===1?30:45,r=center(b.ins);
+    const tp={x:r.x-r.w/2+r.w*(ol+9)/100,y:r.y-r.h/2+r.h*(ot+13)/100};   // 참기름이 떨어질 자리
+    squeezeBottle(bt,tp,'#e9b23a',()=>{
+      const o=el('div','oil',b.ins);o.style.left=ol+'%';o.style.top=ot+'%';floatText(tp.x,tp.y-U()*4,'똑!');
+      if(k>=2){S.oil=1;later(done,950);}});});
   hintFn=()=>({type:'tap',at:bt});
 }
 function rcSesame(done){
@@ -901,35 +1011,54 @@ function pcEat(done){
 /* =========================================================
    피자
    ========================================================= */
+// 썬 토핑 조각 그림 (k: 재료 이름)
+const SLICE={
+  '🍄':'<path d="M5 22 Q20 2 35 22 Z" fill="#d8b48a" stroke="#8a6440" stroke-width="2.5" stroke-linejoin="round"/><path d="M15 21 L15 34 Q20 37 25 34 L25 21 Z" fill="#f3e6cf" stroke="#8a6440" stroke-width="2.5" stroke-linejoin="round"/>',
+  '🫑':'<path d="M20 6 C31 5 36 14 34 22 C32 31 24 35 17 33 C8 31 4 22 7 14 C9 9 14 6 20 6 Z" fill="none" stroke="#2f9a3e" stroke-width="5"/>',
+  '🌽':'<rect x="6" y="8" width="11" height="11" rx="4" fill="#ffd23f" stroke="#d9a400" stroke-width="2"/><rect x="21" y="12" width="11" height="11" rx="4" fill="#ffd23f" stroke="#d9a400" stroke-width="2"/><rect x="12" y="23" width="11" height="11" rx="4" fill="#ffd23f" stroke="#d9a400" stroke-width="2"/>',
+  '🫒':'<circle cx="20" cy="20" r="12" fill="none" stroke="#2b2b2b" stroke-width="7"/>',
+  '🥓':'<path d="M4 16 Q12 8 20 16 T36 16 L36 26 Q28 18 20 26 T4 26 Z" fill="#e2605a" stroke="#9c2f2a" stroke-width="2"/><path d="M5 21 Q12 14 20 21 T35 21" fill="none" stroke="#fbd3c9" stroke-width="2.5"/>',
+  '🍅':'<circle cx="20" cy="20" r="15" fill="#e8402f" stroke="#b72a1c" stroke-width="2"/><circle cx="20" cy="20" r="10" fill="#ff7a62"/><circle cx="15" cy="17" r="2" fill="#ffe9a8"/><circle cx="24" cy="16" r="2" fill="#ffe9a8"/><circle cx="20" cy="25" r="2" fill="#ffe9a8"/>',
+};
+function sliceSvg(k,sizeU,rot){return `<svg viewBox="0 0 40 40" style="width:${uu(sizeU)};height:${uu(sizeU)};transform:rotate(${rot}deg)">${SLICE[k]||''}</svg>`;}
 function pizzaInner(size){
   let h='';if(S.sauce)h+='<div class="sauce"></div>';
-  (S.tops||[]).forEach(t=>{h+=`<span class="ztop" style="left:${t.x}%;top:${t.y}%;font-size:${uu(size*.14)}">${t.e}</span>`;});
+  (S.tops||[]).forEach(t=>{h+=`<span class="ztop" style="left:${t.x}%;top:${t.y}%">${sliceSvg(t.e,size*.17,t.r||0)}</span>`;});
   if(S.cheese)h+='<div class="cheese"></div>';
   return h;
 }
 function renderPizza(x,y,s){return box(stage,'dough'+(S.baked?' baked':''),x,y,s,s,pizzaInner(s));}
 function pzRoll(done){
   const bd=box(stage,'board',50,52,74,64);const d=box(stage,'dough',50,52,50,50);d.style.transform='scale(.45)';
-  rubTask(done,{region:bd,pad:0,tool:'🪵',need:4,base:50,sound:SFX.rub,onProg:pr=>{d.style.transform=`scale(${.45+.55*pr})`;}});
+  rubTask(done,{region:bd,pad:0,tool:PIN_SVG,toolCls:'mid',need:4,base:50,sound:SFX.rub,onProg:pr=>{d.style.transform=`scale(${.45+.55*pr})`;}});
 }
 function pzSauce(done){
   box(stage,'board',50,52,74,64);const d=box(stage,'dough',50,52,50,50);
   paintTask(()=>{S.sauce=1;done();},{target:d,color:'#d8432f',R:.09,cover:.72,round:true,tool:'🥄'});
 }
 const TOPS=['🍄','🫑','🌽','🫒','🥓','🍅'];
+// 재료를 마음껏 올리기: 피자에 놓으면 썬 조각 3~4개로 흩어짐. 하나 이상 올리면 "다 올렸어요" 버튼이 나타남
+const TOP_MAX=12;   // 너무 많이 겹치지 않도록 최대 12번(조각 약 40개)까지
 function pzTop(done){
   S.tops=[];const P=46;const pz=renderPizza(50,44,P);
-  const tr=box(stage,'tray',50,88,90,16);tr.style.width='94%';tr.style.left='3%';let n=0;
+  const tr=box(stage,'tray',50,88,90,16);tr.style.width='94%';tr.style.left='3%';let n=0,fin=false;
+  const btn=el('button','bigbtn green donebtn',stage,'✅ 다 올렸어요');btn.style.display='none';
+  onTap(btn,()=>{if(fin||!n)return;fin=true;SFX.good();btn.classList.add('on');later(done,300);});
   const items=TOPS.map((t,i)=>{const e=emo(stage,t,10+i*16,88,12,'drag');
     draggable(e,pz,(elm,at)=>{
-      if(n>=6){resetDrag(elm);return;}
-      const r=relIn(at,pz);let dx=r.x-.5,dy=r.y-.5;const len=Math.hypot(dx,dy);if(len>.34){dx*=.34/len;dy*=.34/len;}
-      const tp={e:t,x:(.5+dx)*100,y:(.5+dy)*100};S.tops.push(tp);
-      const sp=el('span','ztop',pz,t);sp.style.left=tp.x+'%';sp.style.top=tp.y+'%';sp.style.fontSize=uu(P*.14);sp.style.animation='popin .3s';
-      resetDrag(elm);SFX.pop();const c=center(sp);burst(c.x,c.y,['✨'],3);
-      if(++n===6)later(done,400);});
+      resetDrag(elm);if(fin)return;
+      if(n>=TOP_MAX){SFX.lock();retrigger(btn,'shake');return;}
+      const r=relIn(at,pz),cnt=t==='🌽'?4:3;
+      for(let k=0;k<cnt;k++){
+        let dx=r.x-.5+rand(-.12,.12),dy=r.y-.5+rand(-.12,.12);const len=Math.hypot(dx,dy);if(len>.36){dx*=.36/len;dy*=.36/len;}
+        const tp={e:t,x:(.5+dx)*100,y:(.5+dy)*100,r:Math.round(rand(0,360))};S.tops.push(tp);
+        const sp=el('span','ztop',pz,sliceSvg(t,P*.17,tp.r));sp.style.left=tp.x+'%';sp.style.top=tp.y+'%';sp.style.animation='popin .3s';
+      }
+      SFX.pop();burst(at.x,at.y,['✨'],3);n++;
+      if(n===1){btn.style.display='';btn.classList.add('wiggle');later(()=>say('다 올렸으면 초록 버튼을 눌러요!'),700);}
+    });
     return e;});
-  hintFn=()=>({type:'drag',from:items[n%6],to:pz});
+  hintFn=()=>n<3?{type:'drag',from:items[n%6],to:pz}:{type:'tap',at:btn};
 }
 function pzCheese(done){
   box(stage,'board',50,52,74,64);const pz=renderPizza(50,52,50);
@@ -982,7 +1111,7 @@ function kbNori(done){
 }
 function kbRice(done){
   const{nori}=kbMat();
-  paintTask(()=>{S.rice=1;done();},{target:nori,color:'#fdfcf6',speck:'#ddd5c0',R:.1,cover:.75,tool:'🥄'});
+  paintTask(()=>{S.rice=1;done();},{target:nori,color:'#f1e8d4',grain:true,R:.1,cover:.75,tool:'🥄'});
 }
 function kbFill(done){
   S.fills=[];const{mat,nori}=kbMat();box(stage,'tray',50,86,84,18);let n=0;
@@ -1002,9 +1131,15 @@ function kbCut(done){
   cutTask(done,{html:'<div class="klong"></div>',W:60,H:16,n:5,after:segs=>segs.forEach(s=>{
     s.style.overflow='visible';s.innerHTML=`<div class="kslice" style="position:absolute;left:50%;top:50%;width:${uu(10)};height:${uu(10)};margin:${uu(-5)} 0 0 ${uu(-5)};animation:popin .3s"></div>`;})});
 }
+// 둥근 접시에 김밥 8조각을 둥글게 담고 가운데에 단무지
 function kbEat(done){
-  box(stage,'plate',50,52,80,32);
-  const items=[24,37,50,63,76].map(x=>box(stage,'kslice',x,50,12,12));
+  const plate=box(stage,'plate',50,52,64,64);
+  const at=(cls,dx,dy,s)=>{const e=el('div','obj '+cls,stage);e.style.width=e.style.height=uu(s);
+    e.style.left=`calc(50% + var(--u)*${dx-s/2})`;e.style.top=`calc(52% + var(--u)*${dy-s/2})`;return e;};
+  const items=[];
+  for(let i=0;i<8;i++){const a=-Math.PI/2+i*Math.PI/4,k=at('kslice',Math.cos(a)*19,Math.sin(a)*19,13);
+    k.style.transform=`rotate(${rand(-20,20)}deg)`;k.style.boxShadow=`0 ${uu(.7)} ${uu(1)} rgba(0,0,0,.2)`;items.push(k);}
+  at('danmuji',-2.5,-1.5,9);at('danmuji',2.5,2,9);
   eatTask(done,items);
 }
 
@@ -1116,9 +1251,9 @@ const RECIPES={
     {icon:'😋',say:'팬케이크 완성! 팬케이크를 눌러서 냠냠 먹어요!',setup:pcEat},
   ]},
   pizza:{name:'피자',icon:'🍕',end:'맛있는 피자를 다 만들었어요!',steps:[
-    {icon:'🪵',say:'밀대로 쓱쓱 밀어서 반죽을 넓게 펴요!',setup:pzRoll},
+    {icon:PIN_SVG.replace(`width:${uu(30)};height:${uu(8.5)}`,`width:${uu(5.6)};height:${uu(1.6)}`),say:'밀대로 쓱쓱 밀어서 반죽을 넓게 펴요!',setup:pzRoll},
     {icon:'🍅',say:'반죽 위에 토마토소스를 쓱쓱 발라요!',setup:pzSauce},
-    {icon:'🍄',say:'좋아하는 재료를 피자 위에 여섯 개 올려요!',setup:pzTop},
+    {icon:'🍄',say:'좋아하는 재료를 피자 위에 마음껏 올려요!',setup:pzTop},
     {icon:'🧀',say:'치즈를 쓱쓱 뿌려요!',setup:pzCheese},
     {icon:'♨️',say:'피자를 꾹 잡고 오븐 안으로 넣어요!',setup:pzOven},
     {icon:'🔪',say:'피자를 잘라요. 하얀 점선을 위에서 아래로 쓱 내려요!',setup:pzCut},
