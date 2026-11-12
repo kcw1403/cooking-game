@@ -16,16 +16,20 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*6);
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
 h1{margin:0;font-size:calc(var(--u)*8);font-weight:900;text-align:center;}
-.cards{display:flex;flex-wrap:wrap;gap:calc(var(--u)*6);justify-content:center;}
-.card{width:calc(var(--u)*40);height:calc(var(--u)*44);border-radius:calc(var(--u)*6);text-decoration:none;color:#fff;
+.cards{display:flex;flex-wrap:wrap;gap:calc(var(--u)*5);justify-content:center;max-width:calc(var(--u)*110);}
+.card{width:calc(var(--u)*30);height:calc(var(--u)*38);border-radius:calc(var(--u)*5);text-decoration:none;color:#fff;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*3);
-  font-size:calc(var(--u)*6);font-weight:900;box-shadow:0 calc(var(--u)*1.5) 0 rgba(0,0,0,.18);transition:transform .1s;}
-.card .ic{font-size:calc(var(--u)*20);line-height:1;animation:bob 2s ease-in-out infinite;}
-.card:nth-child(2) .ic{animation-delay:-1s;}
+  font-size:calc(var(--u)*5);font-weight:900;box-shadow:0 calc(var(--u)*1.5) 0 rgba(0,0,0,.18);transition:transform .1s;}
+.card .ic{font-size:calc(var(--u)*16);line-height:1;animation:bob 2s ease-in-out infinite;}
+.card:nth-child(2) .ic{animation-delay:-.7s;}
+.card:nth-child(3) .ic{animation-delay:-1.4s;}
+@media (orientation:portrait){.cards{max-width:calc(var(--u)*80);}.card{width:calc(var(--u)*36);height:calc(var(--u)*42);}}
 .card:active{transform:translateY(calc(var(--u)*1.2));box-shadow:none;}
 .cook{background:linear-gradient(#ffa54f,#ff7a1a);}
 .hangul{background:linear-gradient(#7fb4ff,#4d8ef0);}
-.hangul .ic{font-weight:900;font-size:calc(var(--u)*18);text-shadow:0 calc(var(--u)*.8) 0 rgba(0,0,0,.15);}
+.numbers{background:linear-gradient(#6fd3a3,#33a978);}
+.numbers .ic{font-weight:900;font-size:calc(var(--u)*13);text-shadow:0 calc(var(--u)*.8) 0 rgba(0,0,0,.15);letter-spacing:calc(var(--u)*-.5);}
+.hangul .ic{font-weight:900;font-size:calc(var(--u)*15);text-shadow:0 calc(var(--u)*.8) 0 rgba(0,0,0,.15);}
 @keyframes bob{50%{transform:translateY(calc(var(--u)*-2)) rotate(-4deg)}}
 </style>
 </head>
@@ -34,6 +38,7 @@ h1{margin:0;font-size:calc(var(--u)*8);font-weight:900;text-align:center;}
 <div class="cards">
   <a class="card cook" href="cooking.html" data-say="요리 놀이"><div class="ic">🍳</div>요리 놀이</a>
   <a class="card hangul" href="hangul.html" data-say="한글 놀이터"><div class="ic">가</div>한글 놀이터</a>
+  <a class="card numbers" href="numbers.html" data-say="숫자 놀이"><div class="ic">123</div>숫자 놀이</a>
 </div>
 <script>
 /* 카드를 누르면 이름을 읽어 준 뒤 이동합니다 */
