@@ -153,6 +153,17 @@
   #cardWord .first { color: var(--c1); }
   #cardSplit { font-size: min(3.6vh, 28px); font-weight: 700; color: var(--muted); min-height: 1.3em; }
 
+  /* ---------- 아기 모드: 놀이 2가지, 보기 2개, 탭·칩 숨김, 버튼 크게 ---------- */
+  #modeBtn { font-size: 22px; padding: 10px 22px; border-radius: 30px; }
+  body.baby .menu [data-go="compose"], body.baby .menu [data-go="trace"] { display: none; }
+  body.baby .menu button { min-height: min(52vh, 420px); font-size: clamp(28px, 4.4vw, 44px); }
+  body.baby .menu button span { font-size: clamp(80px, 13vw, 140px); }
+  body.baby #quizTabs, body.baby #wordTabs, body.baby #catTabs, body.baby #quiz .ask { display: none; }
+  body.baby .opt { --s: min(40vw, 40vh, 300px); }
+  body.baby #quiz { justify-content: center; gap: 24px; }
+  body.baby #words { justify-content: center; }
+  body.baby #cardPrev, body.baby #cardNext { font-size: 40px; padding: 14px 34px; }
+
   /* ---------- 칭찬 효과 ---------- */
   .fx { position: fixed; pointer-events: none; font-size: 44px; animation: pop 1.2s ease-out forwards; z-index: 50; }
   @keyframes pop {
@@ -175,6 +186,7 @@
 <main>
   <!-- 홈 -->
   <section class="screen active" id="home">
+    <button class="btn" id="modeBtn"></button>
     <div class="menu">
       <button data-go="compose" style="background:var(--c1)"><span>🧩</span>글자 만들기</button>
       <button data-go="quiz" style="background:var(--c3)"><span>👂</span>듣고 고르기</button>
@@ -840,6 +852,10 @@ function makeQuiz(lv) {
 }
 function newQuiz() {
   quizQ = makeQuiz(quizLv);
+  if (babyMode) {   // 아기 모드: 보기 2개만
+    const other = pick(quizQ.options.filter(o => o !== quizQ.answer));
+    quizQ.options = shuffle([quizQ.answer, other]);
+  }
   runChoice($('quizOpts'), $('quizStars'), quizQ, quizState, newQuiz);
   setTimeout(() => speak(quizQ.say), 300);
 }
@@ -1243,6 +1259,31 @@ $('wordTabs').onclick = e => {
   $('matchMode').style.display = wordMode === 'match' ? 'flex' : 'none';
   wordMode === 'card' ? showCard() : newMatch();
 };
+
+/* ================= 아기 모드 / 언니·형 모드 ================= */
+// 아기 모드: 듣고 고르기(받침 없는 글자, 보기 2개)와 그림 단어(받침 없는 낱말 카드)만 크게 보여 줍니다.
+// 고른 모드는 이 기기에 기억합니다. 처음에는 아기 모드로 시작합니다.
+let babyMode = true;
+try { babyMode = localStorage.getItem('hangul-mode') !== 'big'; } catch (e) {}
+function applyMode() {
+  document.body.classList.toggle('baby', babyMode);
+  $('modeBtn').textContent = babyMode ? '👶 아기 모드' : '🧒 언니·형 모드';
+  // 듣고 고르기: 아기 모드는 '글자', 아니면 '자음'부터
+  quizLv = babyMode ? 'syl' : 'cons'; lastQ = null; quizState.streak = 0; $('quizStars').textContent = '';
+  setTabs($('quizTabs'), $('quizTabs').querySelector(`[data-lv="${quizLv}"]`));
+  // 그림 단어: 아기 모드는 전체 카테고리의 받침 없는 낱말 카드만
+  wordMode = 'card'; $('cardMode').style.display = 'contents'; $('matchMode').style.display = 'none';
+  $('wordTabs').querySelectorAll('[data-mode]').forEach(x => x.classList.toggle('on', x.dataset.mode === 'card'));
+  wordCat = 'all'; setTabs($('catTabs'), $('catTabs').querySelector('[data-cat="all"]'));
+  onlyNoBatchim = babyMode; $('noBatchim').classList.toggle('on', onlyNoBatchim);
+  refreshWordList();
+}
+$('modeBtn').onclick = () => {
+  babyMode = !babyMode;
+  try { localStorage.setItem('hangul-mode', babyMode ? 'baby' : 'big'); } catch (e) {}
+  applyMode(); speak(babyMode ? '아기 모드' : '언니 형 모드');
+};
+applyMode();
 </script>
 </body>
 </html>

@@ -283,6 +283,19 @@ html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;touch-ac
 .cupfill{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(#ffb3c7,#ff8fab);transition:height 1.2s;}
 .straw{background:repeating-linear-gradient(0deg,#fff 0 calc(var(--u)*1.4),#ff4f81 calc(var(--u)*1.4) calc(var(--u)*2.8));border-radius:calc(var(--u)*1);
   transition:left .5s,top .5s,transform .5s;z-index:3;}
+/* 요리 중 🏠 확인 창 */
+#confirm{position:fixed;inset:0;background:rgba(60,30,10,.45);display:none;align-items:center;justify-content:center;z-index:200;}
+#confirm.on{display:flex;}
+#confirm .cbox{background:#fff8ec;border-radius:calc(var(--u)*5);padding:calc(var(--u)*4) calc(var(--u)*6);display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*3);
+  box-shadow:0 calc(var(--u)*1.5) calc(var(--u)*4) rgba(0,0,0,.25);animation:popin .25s;}
+#confirm .q{font-size:calc(var(--u)*6);font-weight:900;color:var(--brown);}
+#confirm .crow{display:flex;gap:calc(var(--u)*5);}
+#confirm .cb{width:calc(var(--u)*24);height:calc(var(--u)*24);border-radius:calc(var(--u)*5);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:calc(var(--u)*1);font-size:calc(var(--u)*11);line-height:1;color:#fff;box-shadow:0 calc(var(--u)*1) 0 rgba(0,0,0,.2);}
+#confirm .cb small{font-size:calc(var(--u)*3.6);font-weight:900;}
+#confirm .cb:active{transform:translateY(calc(var(--u)*.8));box-shadow:none;}
+#cfYes{background:linear-gradient(#ffa54f,#ff7a1a);}
+#cfNo{background:linear-gradient(#7fd36b,#45a83a);}
 .pourstream{position:absolute;width:calc(var(--u)*2);background:linear-gradient(#ffb3c7,#ff8fab);border-radius:calc(var(--u)*1);z-index:3;animation:flow .4s linear infinite;}
 </style>
 </head>
@@ -294,6 +307,15 @@ html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;touch-ac
   </div>
   <div id="stage"></div>
   <div id="caption"><span id="capIcon">🔊</span><span id="capText"></span></div>
+</div>
+<div id="confirm">
+  <div class="cbox">
+    <div class="q">그만할까요?</div>
+    <div class="crow">
+      <div class="cb" id="cfYes">⭕<small>그만하기</small></div>
+      <div class="cb" id="cfNo">❌<small>계속하기</small></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -578,6 +600,14 @@ function eatTask(done,items,onEat){
     it.style.transition='transform .25s,opacity .25s';it.style.transform='scale(0)';it.style.opacity=0;if(--left===0)later(done,500);}));
   hintFn=()=>({type:'tap',at:items.find(i=>!i.eaten)});
 }
+// 한 덩어리 음식: 누를 때마다 한 입씩 작아지다가 다 먹기
+function biteTask(done,elm,n=4){
+  let b=0;
+  onTap(elm,p=>{if(b>=n)return;b++;SFX.munch();floatText(p.x,p.y,'냠!');const c=center(elm);burst(c.x,c.y,['✨'],4);
+    elm.style.transition='transform .2s,opacity .3s';elm.style.transform=`scale(${1-b/n*.7})`;
+    if(b>=n){elm.style.opacity=0;later(done,500);}});
+  hintFn=()=>b<n?{type:'tap',at:elm}:null;
+}
 
 /* =========================================================
    샌드위치
@@ -790,6 +820,10 @@ function rcNori(done){
   draggable(nori,ball,elm=>{elm.remove();el('div','norib',ball);SFX.pop();ball.classList.add('shine');later(done,500);});
   hintFn=()=>nori.isConnected?{type:'drag',from:nori,to:ball}:null;
 }
+function rcEat(done){
+  const ball=riceball();ball.style.borderRadius=BALL_R;el('div','norib',ball);
+  biteTask(done,ball);
+}
 
 /* =========================================================
    팬케이크
@@ -856,6 +890,13 @@ function pcSyrup(done){
   paintTask(()=>{const c=center(cake);const b=emo(stage,'🧈',50,48,10);b.style.animation='popin .4s';done();},
     {target:cake,color:'rgba(140,70,20,.85)',R:.07,cover:.55,round:true,tool:'🍯'});
 }
+function pcEat(done){
+  box(stage,'plate',50,54,60,46);
+  const cake=box(stage,'pcake browned',50,52,40,36);cake.style.right=cake.style.bottom='auto';cake.style.overflow='hidden';
+  const syrup=el('div','',cake);syrup.style.cssText='position:absolute;inset:14%;border-radius:50%;background:rgba(140,70,20,.6)';
+  const butter=el('div','emo',cake,'🧈');butter.style.cssText+=`;position:absolute;inset:0;font-size:${uu(10)}`;
+  biteTask(done,cake);
+}
 
 /* =========================================================
    피자
@@ -909,6 +950,18 @@ function pzOven(done){
 }
 function pzCut(done){
   cutTask(done,{html:`<div class="dough baked" style="position:absolute;inset:0;box-shadow:none">${pizzaInner(44)}</div>`,W:44,H:44,n:4});
+}
+// 피자를 네 조각으로 나눠 놓고 한 조각씩 눌러 먹기
+function pzEat(done){
+  box(stage,'board',50,52,74,64);
+  const P=44,g=1.2;
+  const items=[[0,0],[1,0],[0,1],[1,1]].map(([qx,qy])=>{
+    const pc=el('div','obj',stage);
+    pc.style.cssText+=`;width:${uu(P/2)};height:${uu(P/2)};overflow:hidden;left:calc(50% + var(--u)*${qx?g:-P/2-g});top:calc(52% + var(--u)*${qy?g:-P/2-g})`;
+    const pz=el('div','dough baked',pc,pizzaInner(P));
+    pz.style.cssText+=`;position:absolute;width:${uu(P)};height:${uu(P)};left:${qx?uu(-P/2):'0'};top:${qy?uu(-P/2):'0'}`;
+    return pc;});
+  eatTask(done,items);
 }
 
 /* =========================================================
@@ -1050,6 +1103,7 @@ const RECIPES={
     {icon:'🥄',say:'그릇 안을 쓱쓱 문질러서 골고루 섞어요!',setup:rcMix},
     {icon:'👐',say:'밥을 꾹꾹 눌러서 동글동글 뭉쳐요!',setup:rcSqueeze},
     {icon:'🟩',say:'김을 주먹밥 아래에 붙여요!',setup:rcNori},
+    {icon:'😋',say:'주먹밥 완성! 주먹밥을 눌러서 냠냠 먹어요!',setup:rcEat},
   ]},
   pancake:{name:'팬케이크',icon:'🥞',end:'달콤한 팬케이크를 다 만들었어요!',steps:[
     {icon:'💥',say:'계란을 톡톡 두드려서 그릇에 깨 넣어요!',setup:pcCrack},
@@ -1059,6 +1113,7 @@ const RECIPES={
     {icon:'🔥',say:'빨간 불 버튼을 눌러서 구워요!',setup:pcCook},
     {icon:'🔄',say:'프라이팬을 아래에서 위로 쓱 올려서 뒤집어요!',setup:pcFlip},
     {icon:'🍯',say:'팬케이크 위에 시럽을 쓱쓱 뿌려요!',setup:pcSyrup},
+    {icon:'😋',say:'팬케이크 완성! 팬케이크를 눌러서 냠냠 먹어요!',setup:pcEat},
   ]},
   pizza:{name:'피자',icon:'🍕',end:'맛있는 피자를 다 만들었어요!',steps:[
     {icon:'🪵',say:'밀대로 쓱쓱 밀어서 반죽을 넓게 펴요!',setup:pzRoll},
@@ -1067,6 +1122,7 @@ const RECIPES={
     {icon:'🧀',say:'치즈를 쓱쓱 뿌려요!',setup:pzCheese},
     {icon:'♨️',say:'피자를 꾹 잡고 오븐 안으로 넣어요!',setup:pzOven},
     {icon:'🔪',say:'피자를 잘라요. 하얀 점선을 위에서 아래로 쓱 내려요!',setup:pzCut},
+    {icon:'😋',say:'피자 완성! 피자를 한 조각씩 눌러서 냠냠 먹어요!',setup:pzEat},
   ]},
   kimbap:{name:'김밥',icon:KIMBAP_ICON,end:'맛있는 김밥을 다 만들었어요!',steps:[
     {icon:'🟩',say:'김을 꾹 잡고 김발 위에 올려요!',setup:kbNori},
@@ -1136,10 +1192,27 @@ function showEnd(){
 }
 
 /* ---------- 메뉴로 (길게 누르기) ---------- */
-// 🏠 누르면: 요리 중이면 요리 메뉴로, 요리 메뉴에서는 놀이 선택 화면으로
-const home=$('#home');
-home.addEventListener('click',()=>{if('speechSynthesis' in window)speechSynthesis.cancel();
-  R?showMenu():location.href='index.html';});
+// 🏠 누르면: 요리 메뉴에서는 놀이 선택 화면으로, 완성 화면에서는 요리 메뉴로,
+// 요리 중에는 "그만할까요?" 확인 창 (5초 동안 안 누르면 닫히고 계속 진행)
+const home=$('#home'),cf=$('#confirm');let cfT=null;
+function closeConfirm(){cf.classList.remove('on');clearTimeout(cfT);}
+function openConfirm(){
+  cf.classList.add('on');clearTimeout(idleT);hideHint();speak('그만할까요?');
+  clearTimeout(cfT);cfT=setTimeout(()=>{closeConfirm();resetIdle();},5000);
+}
+home.addEventListener('click',()=>{audioInit();
+  if(!R){if('speechSynthesis' in window)speechSynthesis.cancel();location.href='index.html';}
+  else if(stepIdx>=R.steps.length){if('speechSynthesis' in window)speechSynthesis.cancel();showMenu();}
+  else openConfirm();});
+$('#cfYes').addEventListener('click',()=>{closeConfirm();SFX.pop();if('speechSynthesis' in window)speechSynthesis.cancel();showMenu();});
+$('#cfNo').addEventListener('click',()=>{closeConfirm();SFX.good();speak(curSay);resetIdle();});
+
+/* ---------- 첫 터치 때 소리 켜고 메뉴 안내 읽기 (아이패드는 터치 전에는 소리를 못 냄) ---------- */
+let greeted=false;
+document.addEventListener('pointerup',e=>{
+  if(greeted)return;greeted=true;audioInit();
+  if(!R&&!e.target.closest('.card'))speak(curSay);   // 첫 터치가 요리 카드면 바로 요리 안내가 나오므로 건너뜀
+},true);
 
 /* ---------- iPad 제스처(확대, 스크롤) 막기 ---------- */
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
