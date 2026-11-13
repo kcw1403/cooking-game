@@ -153,11 +153,36 @@
   #cardWord .first { color: var(--c1); }
   #cardSplit { font-size: min(3.6vh, 28px); font-weight: 700; color: var(--muted); min-height: 1.3em; }
 
+  /* ---------- 듣고 그림 찾기 ---------- */
+  :root { --c5: #b07cff; }
+  .lpcards { display: flex; gap: min(4vw, 32px); justify-content: center; flex-wrap: wrap; margin: auto 0; }
+  .lpcard {
+    --s: min(27vw, 46vh, 280px);
+    width: var(--s); height: calc(var(--s) * 1.15); border: none; border-radius: 32px; background: var(--card);
+    box-shadow: 0 7px 0 rgba(0,0,0,.12); display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: background .2s, opacity .2s;
+  }
+  .lpcard .pic { font-size: calc(var(--s) * .55); line-height: 1.05; }
+  .lpcard .pic .dpic { width: calc(var(--s) * .8); height: auto; }
+  .lpcard .word { font-size: calc(var(--s) * .14); font-weight: 800; min-height: 1.3em; color: var(--c2); visibility: hidden; }
+  .lpcard.right { background: #c9f2df; }
+  .lpcard.right .word { visibility: visible; }
+  .lpcard.wrong { opacity: .35; }
+  .lpcard:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,.15); }
+  body.baby .lpcard { --s: min(38vw, 52vh, 340px); }
+  @media (orientation: portrait) { .lpcard { --s: min(42vw, 26vh, 280px); } body.baby .lpcard { --s: min(44vw, 34vh, 320px); } }
+
+  /* 첫 화면 카드: 가로 화면은 한 줄에 3장 */
+  .menu { grid-template-columns: repeat(3, 1fr); width: min(94vw, 980px); }
+  .menu button { min-height: min(28vh, 230px); }
+  @media (orientation: portrait) { .menu { grid-template-columns: repeat(2, 1fr); } }
+
   /* ---------- 아기 모드: 놀이 2가지, 보기 2개, 탭·칩 숨김, 버튼 크게 ---------- */
   #modeBtn { font-size: 22px; padding: 10px 22px; border-radius: 30px; }
   body.baby .menu [data-go="compose"], body.baby .menu [data-go="trace"] { display: none; }
   body.baby .menu button { min-height: min(52vh, 420px); font-size: clamp(28px, 4.4vw, 44px); }
   body.baby .menu button span { font-size: clamp(80px, 13vw, 140px); }
+  @media (orientation: portrait) { body.baby .menu button { min-height: min(30vh, 300px); } }
   body.baby #quizTabs, body.baby #wordTabs, body.baby #catTabs, body.baby #quiz .ask { display: none; }
   body.baby .opt { --s: min(40vw, 40vh, 300px); }
   body.baby #quiz { justify-content: center; gap: 24px; }
@@ -192,6 +217,7 @@
       <button data-go="quiz" style="background:var(--c3)"><span>👂</span>듣고 고르기</button>
       <button data-go="trace" style="background:var(--c2)"><span>✏️</span>따라 쓰기</button>
       <button data-go="words" style="background:var(--c4)"><span>🖼️</span>그림 단어</button>
+      <button data-go="listenpic" style="background:var(--c5)"><span>🔊</span>듣고 그림 찾기</button>
     </div>
     <div id="voiceTip">이 기기에서 한국어 음성을 찾지 못했습니다. 소리가 나지 않으면 기기 설정에서 한국어 음성을 추가해 주세요.</div>
   </section>
@@ -264,6 +290,13 @@
       <button class="btn" id="traceHint">🔢 번호 끄기</button>
       <div class="row" id="colors"></div>
     </div>
+  </section>
+
+  <!-- 듣고 그림 찾기: 낱말을 듣고 그림 카드를 고름 -->
+  <section class="screen" id="listenpic">
+    <div class="stars" id="lpStars"></div>
+    <button class="btn big" id="lpSay">🔊 듣기</button>
+    <div class="lpcards" id="lpCards"></div>
   </section>
 
   <!-- 그림 단어 -->
@@ -598,17 +631,19 @@ function banner(text, ms = 1800) {
 const PRAISE = ['잘했어요!', '맞았어요!', '최고예요!', '대단해요!', '참 잘했어요!'];
 
 /* ================= 화면 전환 ================= */
-const TITLES = { home: '한글 놀이터', compose: '글자 만들기', quiz: '듣고 고르기', trace: '따라 쓰기', words: '그림 단어' };
+const TITLES = { home: '한글 놀이터', compose: '글자 만들기', quiz: '듣고 고르기', trace: '따라 쓰기', words: '그림 단어', listenpic: '듣고 그림 찾기' };
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
   $('title').textContent = TITLES[id];
-  quizState.round++; matchState.round++;   // 화면을 떠나면 예약된 다음 문제 취소
+  quizState.round++; matchState.round++; lpState.round++;   // 화면을 떠나면 예약된 다음 문제 취소
+  clearTimeout(lpIdleT);
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   ms.round++;
   if (id === 'compose') setCmpMode(cmpMode);
   if (id === 'quiz') newQuiz();
   if (id === 'trace') { resizeTrace(); startLetter(); }
   if (id === 'words') { wordMode === 'card' ? showCard() : newMatch(); }
+  if (id === 'listenpic') newListenPic();
 }
 /* 🏠: 놀이 화면에서는 한글 놀이터 첫 화면으로, 첫 화면에서는 놀이 선택 화면으로 */
 $('homeBtn').onclick = () => {
@@ -1259,6 +1294,55 @@ $('wordTabs').onclick = e => {
   $('matchMode').style.display = wordMode === 'match' ? 'flex' : 'none';
   wordMode === 'card' ? showCard() : newMatch();
 };
+
+/* ================= 듣고 그림 찾기 ================= */
+// 낱말을 소리로 듣고 그림 카드 중에서 고름. 아기 모드는 카드 2장(서로 다른 분류에서), 언니·형 모드는 3장(같은 분류 우선)
+const WORD_CAT = new Map(CATS.flatMap(c => c.words.map(w => [w[1], c.id])));
+const lpState = { streak: 0, round: 0, locked: false };
+let lpItem = null, lpLast = null, lpIdleT = null;
+const eunNeun = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return w + (c >= 0 && c % 28 ? '은' : '는'); };
+const lpSay = () => lpItem && speak(`${eunNeun(lpItem[1])} 어디 있을까요?`);
+function lpResetIdle() {   // 8초 동안 반응이 없으면 다시 읽어 주고, 그 뒤 12초마다 반복
+  clearTimeout(lpIdleT);
+  const r = lpState.round;
+  const fire = () => { if (r !== lpState.round || !$('listenpic').classList.contains('active') || lpState.locked) return; lpSay(); lpIdleT = setTimeout(fire, 12000); };
+  lpIdleT = setTimeout(fire, 8000);
+}
+function newListenPic() {
+  const round = ++lpState.round; lpState.locked = false;
+  let item; do { item = pick(WORDS); } while (item[1] === lpLast && WORDS.length > 1);
+  lpItem = item; lpLast = item[1];
+  const n = babyMode ? 2 : 3, cat = WORD_CAT.get(item[1]);
+  const usable = WORDS.filter(w => w[1] !== item[1] && w[0] !== item[0]);
+  let pool = babyMode ? usable.filter(w => WORD_CAT.get(w[1]) !== cat) : usable.filter(w => WORD_CAT.get(w[1]) === cat);
+  let others = [];
+  for (const w of shuffle(pool)) { if (others.length >= n - 1) break; if (!others.some(o => o[0] === w[0])) others.push(w); }
+  for (const w of shuffle(usable)) { if (others.length >= n - 1) break; if (!others.some(o => o[0] === w[0] || o[1] === w[1])) others.push(w); }
+  const box = $('lpCards'); box.innerHTML = '';
+  shuffle([item, ...others]).forEach(w => {
+    const b = document.createElement('button'); b.className = 'lpcard';
+    b.innerHTML = `<div class="pic">${picHTML(w[0])}</div><div class="word">${w[1]}</div>`;
+    b.onclick = () => {
+      if (lpState.locked || b.classList.contains('wrong') || round !== lpState.round) return;
+      if (w === item) {
+        lpState.locked = true; b.classList.add('right'); goodTone(); celebrate(b); addStar();
+        lpState.streak++; $('lpStars').textContent = '⭐'.repeat(lpState.streak % 10 || (lpState.streak ? 10 : 0));
+        setTimeout(() => { if (round === lpState.round) speak(`${item[1]}! ${pick(PRAISE)}`); }, 350);
+        if (lpState.streak % 10 === 0) setTimeout(() => banner('🎉 별 10개 모았어요! 🎉'), 900);
+        setTimeout(() => { if (round === lpState.round) newListenPic(); }, lpState.streak % 10 === 0 ? 2800 : 2000);
+      } else {
+        b.classList.add('wrong', 'shake'); badTone();
+        setTimeout(() => b.classList.remove('shake'), 450);
+        setTimeout(() => { if (round === lpState.round) lpSay(); }, 500);
+      }
+    };
+    box.appendChild(b);
+  });
+  setTimeout(() => { if (round === lpState.round) lpSay(); }, 300);
+  lpResetIdle();
+}
+$('lpSay').onclick = lpSay;
+$('listenpic').addEventListener('pointerdown', lpResetIdle, true);
 
 /* ================= 아기 모드 / 언니·형 모드 ================= */
 // 아기 모드: 듣고 고르기(받침 없는 글자, 보기 2개)와 그림 단어(받침 없는 낱말 카드)만 크게 보여 줍니다.
