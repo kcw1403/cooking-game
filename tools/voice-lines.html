@@ -24,7 +24,7 @@
 <textarea id="out" readonly></textarea>
 <script>
 'use strict';
-const GAMES = [['index', '../index.html'], ['cooking', '../cooking.html'], ['hangul', '../hangul.html'], ['numbers', '../numbers.html']];
+const GAMES = [['index', '../index.html'], ['cooking', '../cooking.html'], ['hangul', '../hangul.html'], ['numbers', '../numbers.html'], ['coloring', '../coloring.html']];
 const load = ([name, src]) => new Promise((ok, no) => {
   const f = document.createElement('iframe'); f.src = src;
   f.onload = () => {

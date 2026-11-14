@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="색칠 놀이">
+<title>색칠 놀이</title>
+<style>
+  :root { --bg: #fff8ef; --ink: #4a3426; --card: #fff; --accent: #ff8a3d; --u: min(1vw, 1vh); }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: linear-gradient(#fff8ef, #ffe9d2); color: var(--ink); overflow: hidden;
+    font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  button { font-family: inherit; color: var(--ink); cursor: pointer; border: none; }
+
+  header { height: 72px; display: flex; align-items: center; gap: 12px; padding: 0 18px; padding-top: env(safe-area-inset-top); }
+  #homeBtn { font-size: 30px; width: 56px; height: 56px; border-radius: 16px; background: var(--card); box-shadow: 0 4px 0 rgba(0,0,0,.1); }
+  #title { font-size: 30px; font-weight: 800; flex: 1; }
+  #modeBtn { font-size: 20px; font-weight: 800; padding: 10px 18px; border-radius: 30px; background: var(--card); box-shadow: 0 4px 0 rgba(0,0,0,.1); }
+  #homeBtn:active, #modeBtn:active, .tbtn:active, .picard:active { transform: translateY(3px); box-shadow: none; }
+
+  main { height: calc(100% - 72px - env(safe-area-inset-top)); }
+  .screen { display: none; height: 100%; }
+  .screen.active { display: flex; }
+
+  /* ---------- 그림 고르기 ---------- */
+  #home { flex-direction: column; align-items: center; overflow-y: auto; overflow-x: hidden; padding: 8px 18px 24px; gap: 14px; touch-action: pan-y; }
+  .ask { font-size: clamp(22px, 3.2vw, 32px); font-weight: 800; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: min(96vw, 980px); }
+  @media (orientation: portrait) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  .picard { position: relative; background: var(--card); border-radius: 22px; padding: 8px; box-shadow: 0 6px 0 rgba(0,0,0,.1); }
+  .picard svg { display: block; width: 100%; height: auto; }
+  .picard .nm { font-size: clamp(15px, 2vw, 20px); font-weight: 800; text-align: center; margin-top: 2px; }
+  .picard .ok { position: absolute; right: 8px; top: 6px; font-size: 26px; }
+  .picard.book { display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(#ffd27a, #ffb238); color: #fff; }
+  .picard.book .ic { font-size: clamp(48px, 7vw, 76px); line-height: 1.1; }
+  .picard.book .nm { color: #fff; }
+
+  /* ---------- 칠하기 ---------- */
+  #paint { gap: 12px; padding: 6px 14px 14px; }
+  #paint.land { flex-direction: row; } #paint.port { flex-direction: column; }
+  #picWrap { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; }
+  #pic { position: relative; background: #fff; border-radius: 22px; box-shadow: 0 8px 18px rgba(80,50,20,.15); overflow: hidden; touch-action: none; }
+  #pic canvas, #pic svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #pic .lines, #pic .shade, #pic .glowsvg { pointer-events: none; }
+  .glow { fill: none; stroke: #ffd54a; stroke-width: 9; stroke-linejoin: round; animation: glow .7s infinite alternate; }
+  @keyframes glow { from { stroke-opacity: .25; } to { stroke-opacity: 1; } }
+  #side { display: flex; gap: 12px; align-items: center; justify-content: center; }
+  #paint.land #side { flex-direction: column; width: 200px; }
+  #paint.port #side { flex-direction: column; }
+  #palette { display: grid; gap: 8px; justify-items: center; }
+  #paint.land #palette { grid-template-columns: repeat(2, 1fr); }
+  #paint.port #palette { grid-template-columns: repeat(6, 1fr); }
+  .crayon { width: 74px; height: 58px; background: none; padding: 0; transition: transform .15s; }
+  .crayon svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .crayon.on { transform: translateX(-10px) scale(1.12); }
+  #paint.port .crayon.on { transform: translateY(-10px) scale(1.12); }
+  #tools { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .tbtn { font-size: 26px; min-width: 60px; height: 60px; padding: 0 12px; border-radius: 18px; background: var(--card); box-shadow: 0 4px 0 rgba(0,0,0,.1); font-weight: 900; }
+  .tbtn.on { background: #ffe9b0; }
+  .tbtn.size i { display: inline-block; border-radius: 50%; background: var(--ink); vertical-align: middle; }
+  #doneBtn { background: linear-gradient(#7ed957, #3fb02b); color: #fff; font-size: 22px; padding: 0 18px; display: none; }
+  #doneBtn.show { display: inline-block; animation: wig 1.2s ease-in-out infinite; }
+  @keyframes wig { 50% { transform: rotate(-4deg) scale(1.05); } }
+
+  /* ---------- 완성 ---------- */
+  #finish { position: fixed; inset: 0; background: rgba(255,248,239,.9); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; z-index: 60; }
+  #finish.on { display: flex; }
+  #finish img { width: min(70vw, 60vh * 4 / 3); border-radius: 22px; box-shadow: 0 10px 24px rgba(80,50,20,.25); animation: popin .5s; background: #fff; }
+  #finish .t { font-size: clamp(26px, 4vw, 40px); font-weight: 900; }
+  #finish .row { display: flex; gap: 18px; }
+  .bigbtn { font-size: clamp(20px, 3vw, 28px); font-weight: 900; color: #fff; padding: 16px 26px; border-radius: 26px; box-shadow: 0 6px 0 rgba(0,0,0,.18); }
+  .bigbtn.o { background: linear-gradient(#ffa54f, #ff7a1a); } .bigbtn.g { background: linear-gradient(#7ed957, #3fb02b); }
+  @keyframes popin { from { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.05); } }
+
+  /* ---------- 내 그림책 ---------- */
+  #book { flex-direction: column; align-items: center; overflow-y: auto; overflow-x: hidden; padding: 8px 18px 24px; gap: 14px; touch-action: pan-y; }
+  .bgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: min(96vw, 980px); }
+  @media (orientation: portrait) { .bgrid { grid-template-columns: repeat(3, 1fr); } }
+  .bitem { background: #fff; border-radius: 18px; padding: 6px; box-shadow: 0 5px 0 rgba(0,0,0,.1); }
+  .bitem img { display: block; width: 100%; border-radius: 12px; pointer-events: none; }
+  .empty { font-size: 24px; font-weight: 800; color: #9a7b62; margin-top: 40px; text-align: center; }
+  #viewer { position: fixed; inset: 0; background: rgba(40,25,10,.75); display: none; align-items: center; justify-content: center; z-index: 70; }
+  #viewer.on { display: flex; }
+  #viewer img { max-width: 92vw; max-height: 86vh; border-radius: 22px; background: #fff; animation: popin .35s; }
+  #confirm { position: fixed; inset: 0; background: rgba(40,25,10,.6); display: none; align-items: center; justify-content: center; z-index: 80; }
+  #confirm.on { display: flex; }
+  #confirm .box { background: #fff; border-radius: 26px; padding: 22px 26px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  #confirm .q { font-size: 26px; font-weight: 900; }
+  #confirm img { width: 260px; border-radius: 14px; }
+
+  .fx { position: fixed; pointer-events: none; font-size: 40px; animation: fly 1.1s ease-out forwards; z-index: 90; }
+  @keyframes fly { 0% { transform: translate(0,0) scale(.4); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity: 0; } }
+/* ---------- 화면 고정 (다섯 파일 공통): 화면 전체가 튕기거나 끌려 움직이지 않게 고정, 글자 확대·선택·길게 누르기 메뉴 막기 ---------- */
+html, body { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+* { overscroll-behavior: contain; }
+img { -webkit-user-drag: none; }
+</style>
+<script src="voice/list.js"></script>
+</head>
+<body>
+<header>
+  <button id="homeBtn" aria-label="처음으로">🏠</button>
+  <div id="title">색칠 놀이</div>
+  <button id="modeBtn"></button>
+</header>
+
+<main>
+  <!-- 그림 고르기 -->
+  <section class="screen active" id="home">
+    <div class="ask">그리고 싶은 그림을 골라요!</div>
+    <div class="grid" id="picGrid"></div>
+  </section>
+
+  <!-- 칠하기 -->
+  <section class="screen" id="paint">
+    <div id="picWrap"><div id="pic"></div></div>
+    <div id="side">
+      <div id="palette"></div>
+      <div id="tools">
+        <button class="tbtn size" id="sizeBig" aria-label="굵은 붓"><i style="width:26px;height:26px"></i></button>
+        <button class="tbtn size" id="sizeSmall" aria-label="가는 붓"><i style="width:12px;height:12px"></i></button>
+        <button class="tbtn" id="resetBtn" aria-label="처음부터">🔄</button>
+        <button class="tbtn" id="doneBtn">✅ 다 칠했어요</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 내 그림책 -->
+  <section class="screen" id="book">
+    <div class="ask">내 그림책</div>
+    <div class="bgrid" id="bookGrid"></div>
+  </section>
+</main>
+
+<div id="finish">
+  <div class="t">다 칠했어요!</div>
+  <img id="finishImg" alt="">
+  <div class="row"><button class="bigbtn o" id="moreBtn">🖍️ 다른 그림</button><button class="bigbtn g" id="toBookBtn">📖 그림책</button></div>
+</div>
+<div id="viewer"><img id="viewImg" alt=""></div>
+<div id="confirm"><div class="box"><div class="q">이 그림을 지울까요?</div><img id="confirmImg" alt="">
+  <div class="row" style="display:flex;gap:18px"><button class="bigbtn o" id="delYes">⭕ 지우기</button><button class="bigbtn g" id="delNo">❌ 그대로</button></div></div></div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const hasBatchim = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return c >= 0 && c % 28 !== 0; };
+const eul = w => w + (hasBatchim(w) ? '을' : '를');
+
+/* ================= 음성 재생 (mp3 우선, 없으면 기기 음성) =================
+   voice/list.js의 VOICE_FILES에 있는 문장은 voice/<이름>.mp3를 재생하고, 없으면 기기 음성(Web Speech API)으로 읽습니다.
+   문장 배열을 주면 조각 mp3를 차례로 이어서 재생합니다. 한 조각이라도 mp3가 없으면 전체를 기기 음성으로 읽습니다.
+   mp3 이름은 문장의 FNV-1a 해시(16진수 8자리)입니다. tools/voice-lines.html도 같은 방식으로 이름을 만듭니다.
+   이 코드는 index.html, cooking.html, hangul.html, numbers.html, coloring.html에 똑같이 들어 있습니다. 고칠 때는 다섯 파일을 함께 고칩니다. */
+const VOICE = (() => {
+  const norm = t => String(t).trim().replace(/\s+/g, ' ');
+  const hash = t => { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); };
+  const heard = new Set();   // 지금까지 읽은 문장 (문장 목록 점검용)
+  const bufs = {};
+  let ctx = null, src = null, token = 0;
+  function unlock() {        // 아이패드는 터치 안에서 소리 장치를 켜야 그 뒤에 소리가 납니다
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') ctx.resume();
+    } catch (e) { /* 소리 장치 없음 */ }
+  }
+  ['pointerup', 'touchend', 'click', 'keydown'].forEach(t => document.addEventListener(t, unlock, true));
+  function load(h) {
+    return bufs[h] = bufs[h] || fetch(`voice/${h}.mp3`)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+      .then(ab => new Promise((ok, no) => ctx.decodeAudioData(ab, ok, no)))
+      .catch(e => { delete bufs[h]; throw e; });
+  }
+  function stop() {
+    token++;
+    if (src) { try { src.onended = null; src.stop(); } catch (e) {} src = null; }
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+  }
+  // parts: 문장 하나 또는 문장 배열, tts(전체 문장): 기기 음성으로 읽는 함수, onend: mp3를 다 재생한 뒤 부를 함수
+  function play(parts, tts, onend) {
+    stop();
+    const list = [].concat(parts).filter(Boolean).map(norm).filter(Boolean);
+    if (!list.length) return;
+    list.forEach(t => heard.add(t));
+    const files = window.VOICE_FILES || {}, hs = list.map(hash);
+    unlock();
+    if (!ctx || !hs.every((h, i) => files[h] === list[i])) { tts(list.join(' ')); return; }
+    const my = token;
+    Promise.all(hs.map(load)).then(bs => {
+      let i = 0;
+      const next = () => {
+        if (my !== token) return;
+        if (i >= bs.length) { src = null; if (onend) onend(); return; }
+        src = ctx.createBufferSource(); src.buffer = bs[i++]; src.connect(ctx.destination);
+        src.onended = next; src.start();
+      };
+      next();
+    }).catch(() => { if (my === token) tts(list.join(' ')); });
+  }
+  return { play, stop, heard, hash, norm };
+})();
+
+let koVoice = null;
+function pickVoice() { const vs = speechSynthesis.getVoices(); koVoice = vs.find(v => /^ko/i.test(v.lang)) || null; }
+if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function ttsSpeak(text) {
+  if (!('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance(text); u.lang = 'ko-KR'; if (koVoice) u.voice = koVoice; u.rate = .9; u.pitch = 1.2;
+  speechSynthesis.speak(u);
+}
+// text: 문장 하나 또는 이어 읽을 문장 배열
+function speak(text) { VOICE.play(text, ttsSpeak); }
+
+/* ---------- 효과음 ---------- */
+let AC = null;
+function tone(freqs, type = 'sine') {
+  try {
+    if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
+    freqs.forEach((f, i) => {
+      const t = AC.currentTime + i * 0.08, o = AC.createOscillator(), g = AC.createGain();
+      o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+      o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + 0.3);
+    });
+  } catch (e) {}
+}
+const fillTone = () => tone([520 + Math.random() * 200, 880]), goodTone = () => tone([660, 880, 1100, 1320]);
+function celebrate(el) {
+  const r = el.getBoundingClientRect();
+  for (let i = 0; i < 12; i++) {
+    const f = document.createElement('div'); f.className = 'fx'; f.textContent = pick(['⭐', '✨', '🎉', '💖']);
+    f.style.left = r.left + r.width / 2 - 20 + 'px'; f.style.top = r.top + r.height / 2 - 20 + 'px';
+    const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 140;
+    f.style.setProperty('--dx', Math.cos(a) * d + 'px'); f.style.setProperty('--dy', Math.sin(a) * d + 'px');
+    document.body.appendChild(f); setTimeout(() => f.remove(), 1200);
+  }
+}
+const PRAISE = ['잘했어요!', '예뻐요!', '최고예요!', '멋져요!'];
+
+/* ================= 그림 =================
+   그림판 크기 400×300. regions: 칠할 수 있는 칸(뒤에 있는 칸부터 앞에 있는 칸 순서). 앞 칸이 뒤 칸을 가립니다.
+   details: 칸 위에 그리는 눈·입 같은 선과 점 (칠하지 않음). {d, fill} 은 채운 점, {d} 는 선.
+   새 그림을 넣을 때는 .claude/skills/svg-3d-style 의 "색칠 그림" 규칙을 따릅니다. */
+const E = (cx, cy, rx, ry) => `M${cx - rx} ${cy}a${rx} ${ry} 0 1 0 ${rx * 2} 0a${rx} ${ry} 0 1 0 ${-rx * 2} 0Z`;   // 타원
+const EYE = (x, y, r = 7) => [{ d: E(x, y, r, r), fill: '#3a2a20' }, { d: E(x - r * .35, y - r * .4, r * .35, r * .35), fill: '#fff' }];
+const PICS = [
+  { id: 'dog', name: '강아지', cat: '동물',
+    regions: [
+      'M272 232C318 224 334 182 318 168C306 188 292 204 268 208Z',               // 꼬리
+      E(200, 215, 82, 66),                                                       // 몸
+      E(200, 236, 42, 34),                                                       // 배
+      E(162, 276, 24, 15), E(238, 276, 24, 15),                                  // 앞발
+      E(200, 118, 72, 66),                                                       // 머리
+      'M140 74C98 66 92 152 120 170C142 154 152 112 140 74Z',                    // 왼쪽 귀
+      'M260 74C302 66 308 152 280 170C258 154 248 112 260 74Z',                  // 오른쪽 귀
+      E(200, 146, 34, 25),                                                       // 주둥이
+      E(200, 133, 11, 8),                                                        // 코
+    ],
+    details: [...EYE(174, 106), ...EYE(226, 106), { d: 'M186 158Q200 170 214 158' }, { d: 'M200 141L200 156' }] },
+  { id: 'cat', name: '고양이', cat: '동물',
+    regions: [
+      'M268 250C330 250 340 190 318 170C312 200 300 225 262 232Z',               // 꼬리
+      E(200, 218, 76, 62),                                                       // 몸
+      E(200, 238, 38, 32),                                                       // 배
+      E(166, 276, 22, 14), E(234, 276, 22, 14),                                  // 앞발
+      'M142 100L130 32L190 72Z', 'M258 100L270 32L210 72Z',                      // 귀
+      'M148 86L140 50L174 72Z', 'M252 86L260 50L226 72Z',                        // 귀 안쪽
+      E(200, 122, 70, 60),                                                       // 머리
+      'M186 130Q200 126 214 130L200 146Z',                                       // 코
+    ],
+    details: [...EYE(174, 112, 8), ...EYE(226, 112, 8), { d: 'M200 146Q193 155 184 150M200 146Q207 155 216 150' },
+      { d: 'M150 132L118 125M150 141L118 143M250 132L282 125M250 141L282 143' }] },
+  { id: 'fish', name: '물고기', cat: '동물',
+    regions: [
+      'M92 150L30 98Q20 150 30 202Z',                                            // 꼬리
+      'M168 94C188 50 252 50 272 97Z',                                           // 등지느러미
+      'M190 204C200 242 236 246 246 204Z',                                       // 배지느러미
+      E(200, 150, 116, 62),                                                      // 몸
+      'M172 93C158 122 158 178 172 207C188 211 204 209 214 206C200 180 200 120 214 95C200 90 186 90 172 93Z', // 줄무늬
+      'M228 160C250 148 272 160 262 182C246 184 234 177 228 160Z',               // 옆지느러미
+      E(334, 88, 11, 11), E(356, 56, 8, 8),                                      // 물방울
+    ],
+    details: [...EYE(270, 134, 8), { d: 'M304 160Q312 166 318 158' }, { d: 'M246 118Q236 150 246 182' }] },
+  { id: 'trex', name: '티라노사우루스', cat: '공룡',
+    regions: [
+      'M128 196C92 200 52 214 22 242C60 240 102 232 138 226Z',                   // 꼬리
+      'M166 222L160 270Q160 282 172 282L192 282Q198 276 190 268L184 262L188 226Z', // 뒷다리
+      'M118 200C108 150 150 110 202 114C242 118 258 150 252 186C246 226 202 246 160 241C134 237 124 223 118 200Z', // 몸
+      'M150 176C160 206 190 226 216 222C236 218 242 196 233 180C210 191 176 191 150 176Z', // 배
+      'M206 226L204 272Q204 284 216 284L234 284Q240 278 232 270L224 264L228 222Z', // 앞다리
+      'M244 168C264 170 272 180 270 192C262 194 255 188 247 185Z',               // 팔
+      'M196 120C190 80 220 54 266 58C306 62 322 84 320 104C318 126 296 136 266 136C240 137 216 140 196 120Z', // 머리
+    ],
+    details: [...EYE(282, 88), { d: E(310, 96, 3, 2), fill: '#3a2a20' }, { d: 'M262 118Q292 126 316 112' },
+      { d: 'M276 120L280 128L284 121M292 122L296 130L300 121' }] },
+  { id: 'brachio', name: '브라키오사우루스', cat: '공룡',
+    regions: [
+      'M120 200C80 205 45 215 20 235C55 238 95 232 130 222Z',                    // 꼬리
+      'M140 210L136 272Q136 282 148 282L166 282Q172 276 164 270L160 264L162 214Z', // 뒷다리
+      'M232 210L230 270Q230 282 242 282L258 282Q264 276 256 270L252 264L254 210Z', // 먼 앞다리
+      E(190, 195, 84, 46),                                                       // 몸
+      'M238 176C252 150 262 110 268 76C272 60 292 58 298 72C294 110 284 160 268 202Z', // 목
+      E(300, 66, 27, 18),                                                        // 머리
+      'M190 216L188 274Q188 284 200 284L218 284Q224 278 216 272L212 266L214 214Z', // 앞다리
+      E(168, 180, 11, 7), E(200, 168, 10, 6), E(218, 190, 9, 6),                 // 점무늬
+    ],
+    details: [...EYE(308, 60, 5), { d: 'M302 75Q314 79 324 71' }, { d: E(322, 62, 2, 1.5), fill: '#3a2a20' }] },
+  { id: 'stego', name: '스테고사우루스', cat: '공룡',
+    regions: [
+      'M102 164Q106 128 120 114Q134 128 138 164Z', 'M137 152Q141 114 155 100Q169 114 173 152Z',   // 등판
+      'M172 148Q176 106 190 92Q204 106 208 148Z', 'M207 152Q211 114 225 100Q239 114 243 152Z',
+      'M242 164Q246 128 260 114Q274 128 278 164Z',
+      'M106 195C70 200 40 205 16 190C38 222 80 230 116 220Z',                    // 꼬리
+      E(190, 190, 96, 48),                                                       // 몸
+      'M272 185C290 170 318 172 330 186C336 196 326 206 310 206C296 206 282 202 272 195Z', // 머리
+      'M134 222L131 272Q131 282 143 282L161 282Q167 276 159 270L155 264L157 224Z', // 뒷다리
+      'M224 222L222 272Q222 282 234 282L252 282Q258 276 250 270L246 264L248 224Z', // 앞다리
+    ],
+    details: [...EYE(312, 186, 4.5), { d: 'M318 199Q326 200 330 194' }, { d: 'M40 206L30 190M56 210L50 194' }] },
+  { id: 'car', name: '자동차', cat: '탈것',
+    regions: [
+      'M112 170L142 110Q148 100 162 100L250 100Q262 100 270 110L308 170Z',        // 지붕
+      'M50 202Q50 170 82 166L320 166Q352 168 354 202L354 216Q354 226 342 226L62 226Q50 226 50 216Z', // 차체
+      'M200 116L254 116Q262 117 266 125L286 160L200 160Z',                        // 앞 창문
+      'M150 160L168 124Q172 116 182 116L190 116L190 160Z',                        // 뒤 창문
+      E(120, 228, 33, 33), E(286, 228, 33, 33),                                  // 바퀴
+      E(120, 228, 13, 13), E(286, 228, 13, 13),                                  // 바퀴 가운데
+      E(341, 186, 9, 8),                                                         // 앞불
+    ],
+    details: [{ d: 'M195 168L195 222' }, { d: 'M210 188L226 188' }, { d: 'M60 196L72 196' }] },
+  { id: 'train', name: '기차', cat: '탈것',
+    regions: [
+      E(116, 44, 17, 13),                                                        // 연기
+      'M96 70L126 70L121 112L101 112Z',                                          // 굴뚝
+      'M80 110L212 110L212 190L80 190Q58 190 58 150Q58 110 80 110Z',              // 몸통
+      'M200 72L282 72Q292 72 292 82L292 190L200 190Z',                           // 운전실
+      'M190 60L302 60Q308 60 308 66L308 78L184 78L184 66Q184 60 190 60Z',        // 지붕
+      'M222 90L268 90Q272 90 272 94L272 126Q272 130 268 130L222 130Q218 130 218 126L218 94Q218 90 222 90Z', // 창문
+      'M50 190L322 190L322 210L50 210Z',                                         // 바닥
+      'M50 190L50 216L24 216Z',                                                  // 앞 받침
+      E(100, 226, 24, 24), E(170, 226, 24, 24), E(262, 222, 30, 30),             // 바퀴
+    ],
+    details: [{ d: 'M100 202L170 202L262 198' }, { d: E(100, 226, 5, 5), fill: '#4a3426' }, { d: E(170, 226, 5, 5), fill: '#4a3426' }, { d: E(262, 222, 6, 6), fill: '#4a3426' }] },
+  { id: 'plane', name: '비행기', cat: '탈것',
+    regions: [
+      'M72 150L52 80Q50 72 60 72L82 72L122 150Z',                                // 꼬리 날개
+      'M172 150L152 110L188 110L212 150Z',                                       // 먼 날개
+      'M60 150Q60 125 90 122L290 118Q340 120 352 150Q340 182 290 182L90 178Q60 175 60 150Z', // 몸통
+      'M62 160L42 186Q40 193 50 193L72 193L102 165Z',                            // 꼬리 아래 날개
+      'M172 160L132 230Q130 238 140 238L172 238L238 160Z',                       // 앞 날개
+      'M302 128Q326 128 338 146L302 146Z',                                       // 조종석 창
+      E(140, 140, 9, 9), E(176, 139, 9, 9), E(212, 138, 9, 9), E(248, 137, 9, 9), // 창문
+      'M300 252Q300 232 322 234Q330 217 350 224Q372 220 376 240Q392 244 388 258L300 264Q290 260 300 252Z', // 구름
+    ],
+    details: [{ d: 'M346 150L356 150' }] },
+  { id: 'cake', name: '케이크', cat: '음식·자연',
+    regions: [
+      E(200, 262, 152, 24),                                                      // 접시
+      'M88 182Q200 202 312 182L312 246Q200 270 88 246Z',                          // 아래 층
+      E(200, 182, 112, 20),                                                      // 아래 층 윗면
+      'M88 182Q200 202 312 182L312 197Q298 214 288 198Q274 216 262 199Q248 217 236 200Q222 218 210 201Q196 219 184 201Q170 218 158 200Q144 216 132 199Q118 214 106 198Q96 210 88 197Z', // 생크림
+      'M128 122Q200 138 272 122L272 174Q200 192 128 174Z',                        // 위 층
+      E(200, 122, 72, 15),                                                       // 위 층 윗면
+      'M192 72L208 72L208 120L192 120Z',                                         // 초
+      'M200 38C213 52 213 64 200 69C187 64 187 52 200 38Z',                       // 불꽃
+      E(160, 152, 11, 11), E(200, 157, 11, 11), E(240, 152, 11, 11),             // 딸기
+    ],
+    details: [{ d: 'M156 146Q160 142 164 146' }, { d: 'M196 151Q200 147 204 151' }, { d: 'M236 146Q240 142 244 146' }] },
+  { id: 'apple', name: '사과', cat: '음식·자연',
+    regions: [
+      'M0 278Q100 258 200 270Q300 282 400 264L400 300L0 300Z',                   // 풀밭
+      'M330 210C318 200 290 202 288 228C286 252 304 272 320 271C326 271 328 268 330 268C332 268 334 271 340 271C356 272 374 252 372 228C370 202 342 200 330 210Z', // 작은 사과
+      'M325 214C323 202 329 190 337 184L345 189C337 197 335 206 336 214Z',        // 작은 사과 꼭지
+      'M200 92C170 70 105 75 100 140C95 205 140 265 180 262C190 261 195 255 200 255C205 255 210 261 220 262C260 265 305 205 300 140C295 75 230 70 200 92Z', // 큰 사과
+      'M196 95C194 75 200 55 210 45L218 50C208 62 205 78 206 95Z',                // 꼭지
+      'M210 70C225 40 265 40 280 52C262 75 232 82 210 70Z',                       // 잎
+      'M130 130C130 110 145 100 155 104C150 118 145 130 140 142C134 142 130 138 130 130Z', // 반짝이
+    ],
+    details: [{ d: 'M214 68Q245 58 274 52' }] },
+  { id: 'rainbow', name: '무지개', cat: '음식·자연',
+    regions: [
+      ...[[172, 148], [148, 124], [124, 100], [100, 76]].map(([a, b]) => `M${200 - a} 250A${a} ${a} 0 0 1 ${200 + a} 250L${200 + b} 250A${b} ${b} 0 0 0 ${200 - b} 250Z`), // 무지개 띠
+      E(70, 70, 34, 34),                                                         // 해
+      'M10 255Q8 230 35 232Q42 212 68 218Q92 212 98 236Q120 238 116 260Q110 272 90 270L28 272Q10 270 10 255Z', // 왼쪽 구름
+      'M390 255Q392 230 365 232Q358 212 332 218Q308 212 302 236Q280 238 284 260Q290 272 310 270L372 272Q390 270 390 255Z', // 오른쪽 구름
+    ],
+    details: [{ d: 'M70 22L70 10M70 118L70 130M22 70L10 70M118 70L130 70M36 36L28 28M104 104L112 112M36 104L28 112M104 36L112 28' },
+      { d: E(60, 64, 3.5, 3.5), fill: '#3a2a20' }, { d: E(80, 64, 3.5, 3.5), fill: '#3a2a20' }, { d: 'M58 80Q70 90 82 80' }] },
+];
+
+/* ================= 모드, 색 ================= */
+let babyMode = true;
+try { babyMode = localStorage.getItem('color-mode') !== 'big'; } catch (e) {}
+const COLORS = [
+  ['빨간색', '#ff5a5a'], ['주황색', '#ff9f40'], ['노란색', '#ffd93b'], ['초록색', '#4cc764'], ['파란색', '#4aa3ff'], ['보라색', '#a76bff'],
+  ['분홍색', '#ff7eb6'], ['갈색', '#a8714a'], ['하늘색', '#8fd3ff'], ['연두색', '#b6e86a'], ['검은색', '#4a4a4a'], ['하얀색', '#ffffff'],
+];
+const colorsNow = () => babyMode ? COLORS.slice(0, 8) : COLORS;
+let curColor = COLORS[0][1], brush = 16;
+
+// 색을 밝게/어둡게 (크레용 입체감용)
+function shadeHex(hex, k) {
+  const n = parseInt(hex.slice(1), 16), c = [n >> 16, n >> 8 & 255, n & 255].map(v => Math.round(k > 0 ? v + (255 - v) * k : v * (1 + k)));
+  return '#' + c.map(v => v.toString(16).padStart(2, '0')).join('');
+}
+// 크레용 그림: 왼쪽 위 빛, 3단 그라데이션, 종이띠 (그림체 규칙)
+function crayonSVG(hex, i) {
+  const l = shadeHex(hex, .45), d = shadeHex(hex, -.3), id = 'cr' + i;
+  return `<svg viewBox="0 0 100 78"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${l}"/><stop offset=".5" stop-color="${hex}"/><stop offset="1" stop-color="${d}"/></linearGradient></defs>
+    <ellipse cx="50" cy="72" rx="38" ry="4" fill="rgba(0,0,0,.15)"/>
+    <path d="M8 26 Q8 18 16 18 L70 18 L96 39 L70 60 L16 60 Q8 60 8 52Z" fill="url(#${id})"/>
+    <rect x="22" y="18" width="30" height="42" fill="#fff" opacity=".85"/>
+    <rect x="22" y="18" width="30" height="42" fill="url(#${id})" opacity=".25"/>
+    <path d="M14 24 L64 24" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".5"/></svg>`;
+}
+
+/* ================= 칠하기 엔진 =================
+   칠한 색은 canvas(paint)에, 칸마다의 빛·그늘은 shade, 테두리 선은 lines에 그립니다 (모두 1600×1200, 화면에서는 CSS로 줄여 보임).
+   칸 하나를 칠할 때는 그 칸 안쪽이면서 앞에 있는 칸들 바깥으로만 칠해지게 자릅니다(clip). */
+const VW = 400, VH = 300, K = 4;
+let pic = null, paths = [], minus = [], boxes = [], painted = new Set(), stroked = false;
+let cvPaint, cvShade, cvLines, glowSvg;
+const pctx = () => cvPaint.getContext('2d');
+const RECT = (() => { const p = new Path2D(); p.rect(-20, -20, VW + 40, VH + 40); return p; })();
+function makeCanvas(cls) { const c = document.createElement('canvas'); c.width = VW * K; c.height = VH * K; c.className = cls; return c; }
+// 칸 i의 보이는 부분으로 자르기: 칸 i 안 ∩ (앞 칸들 바깥)
+function clipRegion(ctx, i) {
+  ctx.clip(paths[i]);
+  for (let j = i + 1; j < paths.length; j++) ctx.clip(minus[j], 'evenodd');
+}
+function bboxOf(d) {
+  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'), p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  s.setAttribute('style', 'position:absolute;width:0;height:0;visibility:hidden'); p.setAttribute('d', d); s.appendChild(p); document.body.appendChild(s);
+  const b = p.getBBox(); s.remove(); return b;
+}
+function drawLines() {
+  const ctx = cvLines.getContext('2d'); ctx.setTransform(K, 0, 0, K, 0, 0); ctx.clearRect(0, 0, VW, VH);
+  ctx.lineJoin = ctx.lineCap = 'round'; ctx.strokeStyle = '#4a3426';
+  paths.forEach(p => {   // 뒤 칸 선은 앞 칸이 가림
+    ctx.globalCompositeOperation = 'destination-out'; ctx.fill(p);
+    ctx.globalCompositeOperation = 'source-over'; ctx.lineWidth = 4.2; ctx.stroke(p);
+  });
+  pic.details.forEach(dt => { const p = new Path2D(dt.d); if (dt.fill) { ctx.fillStyle = dt.fill; ctx.fill(p); } else { ctx.lineWidth = 3.4; ctx.stroke(p); } });
+}
+// 칸 i에 빛(왼쪽 위)과 그늘(오른쪽 아래)을 한 번 그림
+function drawShade(i) {
+  const ctx = cvShade.getContext('2d'), b = boxes[i];
+  ctx.save(); ctx.setTransform(K, 0, 0, K, 0, 0); clipRegion(ctx, i);
+  const g = ctx.createRadialGradient(b.x + b.width * .35, b.y + b.height * .3, 0, b.x + b.width * .35, b.y + b.height * .3, Math.max(b.width, b.height) * .85);
+  g.addColorStop(0, 'rgba(255,255,255,.4)'); g.addColorStop(.35, 'rgba(255,255,255,0)'); g.addColorStop(.75, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(60,30,0,.16)');
+  ctx.fillStyle = g; ctx.fillRect(b.x - 2, b.y - 2, b.width + 4, b.height + 4); ctx.restore();
+}
+function regionAt(vx, vy) {
+  const ctx = cvShade.getContext('2d'); ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+  for (let i = paths.length - 1; i >= 0; i--) if (ctx.isPointInPath(paths[i], vx, vy)) { ctx.restore(); return i; }
+  ctx.restore(); return -1;
+}
+function fillRegion(i, color) {
+  const ctx = pctx(); ctx.save(); ctx.setTransform(K, 0, 0, K, 0, 0); clipRegion(ctx, i);
+  ctx.fillStyle = color; ctx.fillRect(-20, -20, VW + 40, VH + 40); ctx.restore();
+  if (!painted.has(i)) { painted.add(i); drawShade(i); }
+}
+function openPic(p) {
+  pic = p; paths = p.regions.map(d => new Path2D(d)); boxes = p.regions.map(bboxOf);
+  minus = paths.map(pp => { const m = new Path2D(); m.addPath(RECT); m.addPath(pp); return m; });
+  painted = new Set(); stroked = false;
+  const box = $('pic'); box.innerHTML = '';
+  cvPaint = makeCanvas('paint'); cvShade = makeCanvas('shade'); cvLines = makeCanvas('lines');
+  glowSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); glowSvg.setAttribute('viewBox', `0 0 ${VW} ${VH}`); glowSvg.classList.add('glowsvg');
+  box.append(cvPaint, cvShade, cvLines, glowSvg);
+  drawLines(); layout();
+  $('doneBtn').classList.remove('show');
+}
+
+/* ---------- 터치: 아기 모드는 톡 채우기, 언니·형 모드는 문질러 칠하기 ---------- */
+let drawing = null;   // { region, last:{x,y} }
+const toV = e => { const r = $('pic').getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * VW, y: (e.clientY - r.top) / r.height * VH }; };
+function strokeSeg(i, a, b) {
+  const ctx = pctx(); ctx.save(); ctx.setTransform(K, 0, 0, K, 0, 0); clipRegion(ctx, i);
+  ctx.strokeStyle = ctx.fillStyle = curColor; ctx.lineWidth = brush; ctx.lineCap = ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x + .01, b.y); ctx.stroke(); ctx.restore();
+}
+function onDown(e) {
+  if (!pic) return;
+  const v = toV(e), i = regionAt(v.x, v.y); clearGlow();
+  if (i < 0) return;
+  if (babyMode) {
+    fillRegion(i, curColor); fillTone();
+    if (painted.size === paths.length) setTimeout(finishPic, 500);
+    return;
+  }
+  drawing = { region: i, last: v, id: e.pointerId };
+  try { $('pic').setPointerCapture(e.pointerId); } catch (err) {}
+  strokeSeg(i, v, v);
+  if (!painted.has(i)) { painted.add(i); drawShade(i); }
+  if (!stroked) { stroked = true; $('doneBtn').classList.add('show'); }
+}
+function onMove(e) {
+  if (!drawing || e.pointerId !== drawing.id) return;
+  const co = e.getCoalescedEvents ? e.getCoalescedEvents() : [], evs = co.length ? co : [e];   // 합쳐진 움직임이 없으면 이번 움직임만
+  for (const ev of evs) { const v = toV(ev); strokeSeg(drawing.region, drawing.last, v); drawing.last = v; }
+}
+function onUp(e) { if (drawing && e.pointerId === drawing.id) drawing = null; }
+
+/* ---------- 화면 배치: 가로는 오른쪽에 색, 세로는 아래에 색. 그림은 4:3로 꽉 차게 ---------- */
+function layout() {
+  const P = $('paint'), land = innerWidth > innerHeight;
+  P.classList.toggle('land', land); P.classList.toggle('port', !land);
+  const w = $('picWrap').clientWidth, h = $('picWrap').clientHeight; if (!w || !h) return;
+  const s = Math.min(w / VW, h / VH); $('pic').style.width = VW * s + 'px'; $('pic').style.height = VH * s + 'px';
+}
+addEventListener('resize', () => { if ($('paint').classList.contains('active')) layout(); });
+
+function renderPalette() {
+  const box = $('palette'); box.innerHTML = '';
+  colorsNow().forEach(([name, hex], i) => {
+    const b = document.createElement('button'); b.className = 'crayon' + (hex === curColor ? ' on' : ''); b.innerHTML = crayonSVG(hex, i); b.setAttribute('aria-label', name);
+    b.onclick = () => { curColor = hex; box.querySelectorAll('.crayon').forEach(x => x.classList.toggle('on', x === b)); tone([700]); speak(name); };
+    box.appendChild(b);
+  });
+  const big = !babyMode;
+  $('sizeBig').style.display = $('sizeSmall').style.display = big ? '' : 'none';
+  $('sizeBig').classList.toggle('on', brush === 16); $('sizeSmall').classList.toggle('on', brush === 7);
+}
+$('sizeBig').onclick = () => { brush = 16; renderPalette(); tone([500]); };
+$('sizeSmall').onclick = () => { brush = 7; renderPalette(); tone([800]); };
+$('resetBtn').onclick = () => { openPic(pic); speak('처음부터 다시 칠해요!'); };
+$('doneBtn').onclick = () => finishPic();
+
+/* ================= 완성, 그림책 ================= */
+const loadBook = () => { try { return JSON.parse(localStorage.getItem('color-book') || '[]'); } catch (e) { return []; } };
+const saveBook = b => { try { localStorage.setItem('color-book', JSON.stringify(b)); return true; } catch (e) { return false; } };
+const doneSet = () => { try { return new Set(JSON.parse(localStorage.getItem('color-done') || '[]')); } catch (e) { return new Set(); } };
+function snapshot(w = 480) {
+  const c = document.createElement('canvas'); c.width = w; c.height = w * VH / VW; const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+  [cvPaint, cvShade, cvLines].forEach(cv => x.drawImage(cv, 0, 0, c.width, c.height));
+  return c.toDataURL('image/jpeg', .85);
+}
+function finishPic() {
+  if (!pic || $('finish').classList.contains('on')) return;
+  const img = snapshot();
+  let book = loadBook(); book.unshift({ id: pic.id, img, t: Date.now() }); book = book.slice(0, 30);
+  while (!saveBook(book) && book.length > 1) book.pop();   // 저장 공간이 모자라면 오래된 그림부터 덜어냄
+  const ds = doneSet(); ds.add(pic.id); try { localStorage.setItem('color-done', JSON.stringify([...ds])); } catch (e) {}
+  $('finishImg').src = img; $('finish').classList.add('on');
+  goodTone(); celebrate($('finishImg')); speak(['다 칠했어요! 그림책에 넣었어요!', pick(PRAISE)]);
+}
+$('moreBtn').onclick = () => { $('finish').classList.remove('on'); show('home'); };
+$('toBookBtn').onclick = () => { $('finish').classList.remove('on'); show('book'); };
+
+function renderBook() {
+  const g = $('bookGrid'), book = loadBook(); g.innerHTML = '';
+  if (!book.length) { g.innerHTML = '<div class="empty" style="grid-column:1/-1">아직 그림이 없어요.<br>그림을 칠해 봐요!</div>'; speak('아직 그림이 없어요. 그림을 칠해 봐요!'); return; }
+  book.forEach((it, idx) => {
+    const d = document.createElement('div'); d.className = 'bitem'; d.innerHTML = `<img src="${it.img}" alt="">`;
+    let lt = null, longed = false;
+    d.addEventListener('pointerdown', () => { longed = false; lt = setTimeout(() => { longed = true; askDelete(idx); }, 800); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => d.addEventListener(t, () => clearTimeout(lt)));
+    d.addEventListener('click', () => { if (longed) return; $('viewImg').src = it.img; $('viewer').classList.add('on'); tone([660, 990]); });
+    g.appendChild(d);
+  });
+  speak('내 그림책');
+}
+$('viewer').onclick = () => $('viewer').classList.remove('on');
+let delIdx = -1;
+function askDelete(idx) { delIdx = idx; $('confirmImg').src = loadBook()[idx].img; $('confirm').classList.add('on'); speak('이 그림을 지울까요?'); }
+$('delYes').onclick = () => { const b = loadBook(); b.splice(delIdx, 1); saveBook(b); $('confirm').classList.remove('on'); renderBook(); };
+$('delNo').onclick = () => $('confirm').classList.remove('on');
+
+/* ================= 그림 고르기 화면 ================= */
+function thumbSVG(p) {   // 선만 있는 작은 그림 (앞 칸이 뒤 칸 선을 가리도록 흰색으로 채워 그림)
+  return `<svg viewBox="0 0 ${VW} ${VH}"><g fill="#fff" stroke="#4a3426" stroke-width="5" stroke-linejoin="round">${p.regions.map(d => `<path d="${d}"/>`).join('')}</g>
+    ${p.details.map(dt => dt.fill ? `<path d="${dt.d}" fill="${dt.fill}"/>` : `<path d="${dt.d}" fill="none" stroke="#4a3426" stroke-width="4" stroke-linecap="round"/>`).join('')}</svg>`;
+}
+function renderHome() {
+  const g = $('picGrid'), ds = doneSet(); g.innerHTML = '';
+  const bk = document.createElement('button'); bk.className = 'picard book'; bk.innerHTML = '<div class="ic">📖</div><div class="nm">내 그림책</div>';
+  bk.onclick = () => show('book'); g.appendChild(bk);
+  PICS.forEach(p => {
+    const b = document.createElement('button'); b.className = 'picard';
+    b.innerHTML = thumbSVG(p) + `<div class="nm">${p.name}</div>` + (ds.has(p.id) ? '<div class="ok">⭐</div>' : '');
+    b.onclick = () => { tone([600, 900]); startPic(p); };
+    g.appendChild(b);
+  });
+}
+function startPic(p) {
+  pic = p; show('paint'); openPic(p); renderPalette();
+  speak([`${eul(p.name)} 칠해 볼까요?`, babyMode ? '색을 고르고, 칸을 톡 눌러서 칠해요!' : '색을 고르고, 손가락으로 쓱쓱 칠해요!']);
+}
+
+/* ================= 반응이 없을 때 안내 ================= */
+// 칠하기 화면에서 8초 동안 아무것도 누르지 않으면 안내를 읽고, 아기 모드는 안 칠한 칸을 반짝이게 합니다. 그 뒤 12초마다 반복
+let idleT = null;
+function clearGlow() { if (glowSvg) glowSvg.innerHTML = ''; }
+function resetIdle() {
+  clearTimeout(idleT); clearGlow();
+  if (!$('paint').classList.contains('active') || $('finish').classList.contains('on')) return;
+  const fire = () => {
+    if (babyMode) {
+      const i = paths.findIndex((_, k) => !painted.has(k));
+      if (i >= 0) { glowSvg.innerHTML = `<path class="glow" d="${pic.regions[i]}"/>`; speak('아직 안 칠한 칸이 있어요!'); }
+    } else speak(stroked ? '다 칠했으면 초록 버튼을 눌러요!' : '색을 고르고 쓱쓱 칠해 봐요!');
+    idleT = setTimeout(fire, 12000);
+  };
+  idleT = setTimeout(fire, 8000);
+}
+document.addEventListener('pointerdown', resetIdle, true);
+
+/* ================= 화면 전환, 모드 ================= */
+const TITLES = { home: '색칠 놀이', paint: '색칠 놀이', book: '내 그림책' };
+function show(id) {
+  VOICE.stop();
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  $('title').textContent = id === 'paint' && pic ? pic.name : TITLES[id];
+  if (id === 'home') { renderHome(); speak('그리고 싶은 그림을 골라요!'); }
+  if (id === 'book') renderBook();
+  if (id === 'paint') requestAnimationFrame(layout);
+  resetIdle();
+}
+function applyMode() { $('modeBtn').textContent = babyMode ? '👶 아기 모드' : '🧒 언니·형 모드'; if (!colorsNow().some(c => c[1] === curColor)) curColor = COLORS[0][1]; }
+$('modeBtn').onclick = () => {
+  babyMode = !babyMode; try { localStorage.setItem('color-mode', babyMode ? 'baby' : 'big'); } catch (e) {}
+  applyMode(); speak(babyMode ? '아기 모드' : '언니 형 모드');
+  if ($('paint').classList.contains('active')) { openPic(pic); renderPalette(); }
+};
+// 🏠: 칠하기·그림책에서는 그림 고르기로, 그림 고르기에서는 놀이 선택 화면으로
+$('homeBtn').onclick = () => { if ($('home').classList.contains('active')) location.href = 'index.html'; else { $('finish').classList.remove('on'); show('home'); } };
+
+const picEl = $('pic');
+picEl.addEventListener('pointerdown', onDown);
+picEl.addEventListener('pointermove', onMove);
+['pointerup', 'pointercancel'].forEach(t => picEl.addEventListener(t, onUp));
+
+/* ================= 음성 문장 목록 ================= */
+// 이 놀이에서 읽을 수 있는 문장을 모두 돌려줍니다. tools/voice-lines.html이 이 목록으로 mp3 문장표를 만듭니다.
+// speak()에 새 문장을 넣으면 여기에도 꼭 추가합니다.
+function voiceLines() {
+  return ['그리고 싶은 그림을 골라요!', '색을 고르고, 칸을 톡 눌러서 칠해요!', '색을 고르고, 손가락으로 쓱쓱 칠해요!', '처음부터 다시 칠해요!',
+    '다 칠했어요! 그림책에 넣었어요!', '아직 안 칠한 칸이 있어요!', '다 칠했으면 초록 버튼을 눌러요!', '색을 고르고 쓱쓱 칠해 봐요!',
+    '아직 그림이 없어요. 그림을 칠해 봐요!', '내 그림책', '이 그림을 지울까요?', '아기 모드', '언니 형 모드',
+    ...PRAISE, ...COLORS.map(c => c[0]), ...PICS.map(p => `${eul(p.name)} 칠해 볼까요?`)];
+}
+
+/* ================= 화면 고정: 확대·튕김·끌려 움직임 막기 =================
+   아이패드 Safari는 user-scalable=no를 무시하므로, 두 손가락 확대·두 번 눌러 확대·화면 끌기·길게 누르기 메뉴를 코드로 막습니다.
+   한 손가락 끌기는 실제로 스크롤할 내용이 있는 목록(overflow-y: auto) 안에서만 허용합니다.
+   이 코드는 index.html, cooking.html, hangul.html, numbers.html, coloring.html에 똑같이 들어 있습니다. 고칠 때는 다섯 파일을 함께 고칩니다. */
+(() => {
+  const stop = e => e.preventDefault();
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, stop, { passive: false }));
+  // 손가락이 닿은 곳에서 위로 올라가며, 지금 스크롤할 수 있는 목록을 찾음
+  const scroller = el => {
+    for (; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+      const oy = getComputedStyle(el).overflowY;
+      if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight + 1) return el;
+    }
+    return null;
+  };
+  let sc = null;
+  document.addEventListener('touchstart', e => { sc = e.touches.length === 1 ? scroller(e.target) : null; if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  document.addEventListener('touchmove', e => { if (e.touches.length > 1 || !sc) e.preventDefault(); }, { passive: false });
+  document.addEventListener('dblclick', stop, { passive: false });
+  document.addEventListener('contextmenu', stop);
+  // 컴퓨터에서 Ctrl+휠, Ctrl +/-/0 확대 막기
+  document.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+  document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && ['+', '-', '=', '0'].includes(e.key)) e.preventDefault(); });
+})();
+
+applyMode(); renderHome();
+let greeted = false;   // 아이패드는 터치 전에는 소리를 못 내므로 첫 터치 때 안내
+document.addEventListener('pointerup', e => { if (greeted) return; greeted = true; if ($('home').classList.contains('active') && !e.target.closest('.picard')) speak('그리고 싶은 그림을 골라요!'); }, true);
+</script>
+</body>
+</html>

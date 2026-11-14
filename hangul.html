@@ -199,6 +199,11 @@
     position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
     background: rgba(255,248,236,.85); font-size: min(9vw, 64px); font-weight: 800; z-index: 40; text-align: center;
   }
+/* ---------- 화면 고정 (다섯 파일 공통): 화면 전체가 튕기거나 끌려 움직이지 않게 고정, 글자 확대·선택·길게 누르기 메뉴 막기 ---------- */
+html, body { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+* { overscroll-behavior: contain; }
+img { -webkit-user-drag: none; }
 </style>
 </head>
 <body>
@@ -579,7 +584,7 @@ if ('speechSynthesis' in window) {
    voice/list.js의 VOICE_FILES에 있는 문장은 voice/<이름>.mp3를 재생하고, 없으면 기기 음성(Web Speech API)으로 읽습니다.
    문장 배열을 주면 조각 mp3를 차례로 이어서 재생합니다. 한 조각이라도 mp3가 없으면 전체를 기기 음성으로 읽습니다.
    mp3 이름은 문장의 FNV-1a 해시(16진수 8자리)입니다. tools/voice-lines.html도 같은 방식으로 이름을 만듭니다.
-   이 코드는 index.html, cooking.html, hangul.html, numbers.html에 똑같이 들어 있습니다. 고칠 때는 네 파일을 함께 고칩니다. */
+   이 코드는 index.html, cooking.html, hangul.html, numbers.html, coloring.html에 똑같이 들어 있습니다. 고칠 때는 다섯 파일을 함께 고칩니다. */
 const VOICE = (() => {
   const norm = t => String(t).trim().replace(/\s+/g, ' ');
   const hash = t => { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); };
@@ -1437,6 +1442,30 @@ $('modeBtn').onclick = () => {
   try { localStorage.setItem('hangul-mode', babyMode ? 'baby' : 'big'); } catch (e) {}
   applyMode(); speak(babyMode ? '아기 모드' : '언니 형 모드');
 };
+/* ================= 화면 고정: 확대·튕김·끌려 움직임 막기 =================
+   아이패드 Safari는 user-scalable=no를 무시하므로, 두 손가락 확대·두 번 눌러 확대·화면 끌기·길게 누르기 메뉴를 코드로 막습니다.
+   한 손가락 끌기는 실제로 스크롤할 내용이 있는 목록(overflow-y: auto) 안에서만 허용합니다.
+   이 코드는 index.html, cooking.html, hangul.html, numbers.html, coloring.html에 똑같이 들어 있습니다. 고칠 때는 다섯 파일을 함께 고칩니다. */
+(() => {
+  const stop = e => e.preventDefault();
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, stop, { passive: false }));
+  // 손가락이 닿은 곳에서 위로 올라가며, 지금 스크롤할 수 있는 목록을 찾음
+  const scroller = el => {
+    for (; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+      const oy = getComputedStyle(el).overflowY;
+      if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight + 1) return el;
+    }
+    return null;
+  };
+  let sc = null;
+  document.addEventListener('touchstart', e => { sc = e.touches.length === 1 ? scroller(e.target) : null; if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  document.addEventListener('touchmove', e => { if (e.touches.length > 1 || !sc) e.preventDefault(); }, { passive: false });
+  document.addEventListener('dblclick', stop, { passive: false });
+  document.addEventListener('contextmenu', stop);
+  // 컴퓨터에서 Ctrl+휠, Ctrl +/-/0 확대 막기
+  document.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+  document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && ['+', '-', '=', '0'].includes(e.key)) e.preventDefault(); });
+})();
 applyMode();
 </script>
 </body>

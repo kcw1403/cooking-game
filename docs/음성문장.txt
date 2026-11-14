@@ -1,9 +1,10 @@
 # 음성 문장 목록 (tools/voice-lines.html로 만듦. 직접 고치지 않습니다)
-# 문장 1103개, 글자 6304자
+# 문장 1141개, 글자 6681자
 # 형식: mp3 이름<TAB>문장<TAB>쓰는 놀이
 41857883	요리 놀이	index
 d2366115	한글 놀이터	index
 b977095e	숫자 놀이	index
+018bad28	색칠 놀이	index
 65bdd6be	만들고 싶은 요리를 눌러요!	cooking
 bf58fa9c	그만할까요?	cooking
 2305b23b	보글보글! 거품을 톡톡 터뜨려 볼까요?	cooking
@@ -17,8 +18,8 @@ b25662eb	다 올렸으면 초록 버튼을 눌러요!	cooking
 37963454	오븐에서 맛있게 익고 있어요!	cooking
 70acf494	계속 꾹 누르고 있어요!	cooking
 f607c3ef	이제 컵을 눌러서 쭉쭉 마셔요!	cooking
-bd08dee4	잘했어요!	cooking,hangul,numbers
-5320f3c4	최고예요!	cooking,hangul,numbers
+bd08dee4	잘했어요!	cooking,hangul,numbers,coloring
+5320f3c4	최고예요!	cooking,hangul,numbers,coloring
 a863bc61	우와, 멋져요!	cooking
 513d1984	참 잘했어요!	cooking,hangul
 6bbdfccc	대단해요!	cooking,hangul,numbers
@@ -79,8 +80,8 @@ db3e36c2	빨간 버튼을 꾹 누르고 있으면 믹서가 돌아가요!	cookin
 b8a21865	빨대를 눌러서 컵에 꽂아요!	cooking
 8366f1de	맞았어요!	hangul,numbers
 c3c83526	다시 해 볼까요?	hangul
-2ef6076f	아기 모드	hangul
-154b5ea6	언니 형 모드	hangul
+2ef6076f	아기 모드	hangul,coloring
+154b5ea6	언니 형 모드	hangul,coloring
 bd1704e6	기역	hangul
 9a1d52f1	기역을 찾아 볼까요?	hangul
 704b3895	니은	hangul
@@ -1104,3 +1105,40 @@ e947873e	여섯 개가 열 개보다 적어요!	numbers
 f37eeea0	일곱 개가 열 개보다 적어요!	numbers
 f097bc97	열 개가 여덟 개보다 많아요!	numbers
 985efb4e	여덟 개가 열 개보다 적어요!	numbers
+0446ee62	그리고 싶은 그림을 골라요!	coloring
+8b0898fe	색을 고르고, 칸을 톡 눌러서 칠해요!	coloring
+5a5457b2	색을 고르고, 손가락으로 쓱쓱 칠해요!	coloring
+f450456e	처음부터 다시 칠해요!	coloring
+99d0306b	다 칠했어요! 그림책에 넣었어요!	coloring
+925cb445	아직 안 칠한 칸이 있어요!	coloring
+6e9f0127	다 칠했으면 초록 버튼을 눌러요!	coloring
+e9b772f9	색을 고르고 쓱쓱 칠해 봐요!	coloring
+f883473d	아직 그림이 없어요. 그림을 칠해 봐요!	coloring
+cf664fa8	내 그림책	coloring
+6773faa2	이 그림을 지울까요?	coloring
+c035f5a6	예뻐요!	coloring
+272cf465	멋져요!	coloring
+75638a20	빨간색	coloring
+48d4818d	주황색	coloring
+53683c24	노란색	coloring
+832717b5	초록색	coloring
+06261428	파란색	coloring
+93f3090c	보라색	coloring
+4e0ccb89	분홍색	coloring
+fd4a855a	갈색	coloring
+d52d666c	하늘색	coloring
+46ad06ec	연두색	coloring
+0afb898c	검은색	coloring
+b7f41144	하얀색	coloring
+d0f2e72d	강아지를 칠해 볼까요?	coloring
+393d22ab	고양이를 칠해 볼까요?	coloring
+b8557c78	물고기를 칠해 볼까요?	coloring
+c1a623b0	티라노사우루스를 칠해 볼까요?	coloring
+b084a642	브라키오사우루스를 칠해 볼까요?	coloring
+0eafc51c	스테고사우루스를 칠해 볼까요?	coloring
+4b837ab7	자동차를 칠해 볼까요?	coloring
+167f92ba	기차를 칠해 볼까요?	coloring
+1bbbc3eb	비행기를 칠해 볼까요?	coloring
+bf209e84	케이크를 칠해 볼까요?	coloring
+dcd3800a	사과를 칠해 볼까요?	coloring
+c65201cc	무지개를 칠해 볼까요?	coloring

@@ -23,7 +23,7 @@
 - 사용자가 "듣고 있다가 고쳐 달라고 하면 고쳐 줘"라고 하면, 고쳐 달라고 할 때까지 피드백을 번호 목록으로 기록만 한다.
 
 ## 프로젝트 개요
-- 만 3세 전후 유아용 아이패드 놀이 웹앱이다. 놀이는 요리 놀이, 한글 놀이터, 숫자 놀이 세 가지다.
+- 만 3세 전후 유아용 아이패드 놀이 웹앱이다. 놀이는 요리 놀이, 한글 놀이터, 숫자 놀이, 색칠 놀이 네 가지다.
 - 접속 주소: https://kcw1403.github.io/cooking-game/ (GitHub Pages, `main` 브랜치 루트 배포)
 - 자세한 소개는 `README.md`, 개발 과정·피드백·QA·남은 할 일은 `docs/개발기록.md`에 있다. **작업을 이어서 시작할 때는 `docs/개발기록.md`의 "남은 할 일"부터 확인한다.**
 
@@ -34,11 +34,12 @@
 | `cooking.html` | 요리 놀이 7종 (`RECIPES` 객체에 요리별 단계 정의) |
 | `hangul.html` | 한글 놀이터 (아기 모드 / 언니·형 모드) |
 | `numbers.html` | 숫자 놀이터 (1~5 / 1~10) |
+| `coloring.html` | 색칠 놀이 (아기 모드 톡 채우기 / 언니·형 모드 문질러 칠하기, 내 그림책). 그림은 `PICS` 배열(칸 `regions`, 눈·입 `details`) |
 | `index_v1_sandwich.html` | 첫 버전 보관용, 수정하지 않음 |
 | `img/fluent/` | 요리 놀이 3D 그림 (Fluent Emoji 3D PNG, 파일 이름은 이모지 코드). `LICENSE`를 지우지 않는다 |
 | `tools/make-voice.ps1` | 음성 mp3 만들기 (Azure TTS). 키는 사용자 환경 변수 `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`에서 읽는다 |
 | `voice/list.js` | 음성 mp3 목록 (`VOICE_FILES`: mp3 이름 → 문장). mp3도 `voice/`에 둔다 |
-| `tools/voice-lines.html` | 개발용 도구. 네 화면의 `voiceLines()`를 모아 음성 문장표를 만든다 |
+| `tools/voice-lines.html` | 개발용 도구. 다섯 화면의 `voiceLines()`를 모아 음성 문장표를 만든다 |
 | `docs/음성문장.txt` | 음성 문장표 (mp3 이름, 문장, 쓰는 놀이). `tools/voice-lines.html` 결과를 저장한 것 |
 
 ## 코드 규칙
@@ -46,10 +47,10 @@
 - 요리 놀이(`cooking.html`)는 화면에 들어온 이모지 글자를 `img/fluent/<코드>.png`(Microsoft Fluent Emoji 3D, MIT)로 자동으로 바꾼다. 새 이모지를 쓰면 같은 저장소의 3D PNG를 `img/fluent/`에 넣고 `FLUENT` 목록에 코드를 추가한다. 그림이 없는 이모지는 글자 그대로 보인다.
 - 그림을 SVG·CSS·canvas로 직접 그릴 때는 프로젝트 스킬 `svg-3d-style`(`.claude/skills/svg-3d-style/SKILL.md`)의 3D 그림체 규칙을 따른다.
 - 크기는 `--u: min(1vw, 1vh)` 단위로 정해 가로·세로 화면 모두에 맞춘다.
-- 터치는 Pointer Events를 쓰고, iOS 확대·스크롤·길게 누르기 메뉴를 막는다.
+- 터치는 Pointer Events를 쓰고, iOS 확대·스크롤·길게 누르기 메뉴를 막는다. 막는 코드는 "화면 고정" CSS·JS 블록으로 다섯 화면에 똑같이 들어 있다(두 손가락 확대, 두 번 눌러 확대, 화면 끌기·튕김, 길게 누르기 메뉴, Ctrl+휠). 한 손가락 끌기는 실제로 스크롤할 내용이 있는 `overflow-y: auto` 목록 안에서만 허용한다. 새 화면을 만들면 이 블록을 그대로 넣는다.
 - 요리 놀이의 각 단계는 `hintFn`으로 다음에 할 동작(tap / rub / drag)을 알려 줘야 한다. 힌트 손가락과 자동 테스트가 이 값을 쓴다.
 - 음성은 `speak()`(요리 놀이는 `say()`)로만 읽는다. `speak()`는 `VOICE.play()`를 거쳐, `voice/list.js`에 있는 문장은 `voice/<문장 해시>.mp3`를 재생하고 없으면 Web Speech API(ko-KR)로 읽는다. 문장 배열을 주면 조각을 이어서 읽는다 (예: `speak([낱말 + '!', 칭찬])`).
-- `VOICE` 코드는 `index.html`, `cooking.html`, `hangul.html`, `numbers.html`에 똑같이 들어 있다. 고칠 때는 네 파일을 함께 고친다.
+- `VOICE` 코드는 `index.html`, `cooking.html`, `hangul.html`, `numbers.html`, `coloring.html`에 똑같이 들어 있다. 고칠 때는 다섯 파일을 함께 고친다.
 - 읽는 문장을 새로 넣거나 바꾸면 그 파일의 `voiceLines()`에도 반영하고, `tools/voice-lines.html`로 `docs/음성문장.txt`를 다시 만든다. 숫자·낱말·칭찬을 이어 붙이는 문장은 한 문장으로 합치지 말고 배열로 나눠서 문장 수를 줄인다.
 - mp3로 바꾸는 작업 진행 상황은 `docs/개발기록.md` 5장에 있다.
 - 코드 주석과 문서는 한국어로 쓴다.
