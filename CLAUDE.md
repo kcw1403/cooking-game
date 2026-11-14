@@ -34,7 +34,7 @@
 | `cooking.html` | 요리 놀이 7종 (`RECIPES` 객체에 요리별 단계 정의) |
 | `hangul.html` | 한글 놀이터 (아기 모드 / 언니·형 모드) |
 | `numbers.html` | 숫자 놀이터 (1~5 / 1~10) |
-| `coloring.html` | 색칠 놀이 (아기 모드 12색 톡 채우기 / 언니·형 모드 24색 문질러 칠하기, 내 그림책). 그림 72장은 `PICS` 배열(칸 `regions`, 눈·입 `details`, 카테고리 `cat`), 카테고리는 `CATS`, 색은 `COLORS` |
+| `coloring.html` | 색칠 놀이 (아기 모드 12색 톡 채우기 / 언니·형 모드 24색 문질러 칠하기, 내 그림책). 그림 72장은 `PICS` 배열(칸 `regions`, 눈·입 `details`, 카테고리 `cat`), 카테고리는 `CATS`, 색은 `COLORS`(크레용을 누르면 `tintsOf`로 연한 색~진한 색 7칸 바) |
 | `index_v1_sandwich.html` | 첫 버전 보관용, 수정하지 않음 |
 | `img/fluent/` | 요리 놀이 3D 그림 (Fluent Emoji 3D PNG, 파일 이름은 이모지 코드). `LICENSE`를 지우지 않는다 |
 | `tools/make-voice.ps1` | 음성 mp3 만들기 (Azure TTS). 키는 사용자 환경 변수 `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`에서 읽는다 |

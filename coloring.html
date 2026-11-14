@@ -75,6 +75,17 @@
   /* 지금 고른 색 크게 보기 */
   #curSw { width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 0 0 4px var(--ink), inset -6px -8px 0 rgba(0,0,0,.15), inset 6px 6px 0 rgba(255,255,255,.35); flex: none; }
   #curSw.pop { animation: pickc .35s; }
+  /* 색 바: 크레용을 누르면 옆에 그 색의 연한 색 → 진한 색 7칸이 나옴 (가로 화면은 세로 바, 세로 화면은 가로 바) */
+  #shadeBar { position: fixed; z-index: 30; display: none; gap: 8px; padding: 10px; border-radius: 40px; background: #fff;
+    box-shadow: 0 0 0 4px var(--ink), 0 10px 22px rgba(0,0,0,.28); }
+  #shadeBar.on { display: flex; animation: barIn .2s ease-out; }
+  #shadeBar.v { flex-direction: column; } #shadeBar.h { flex-direction: row; }
+  @keyframes barIn { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: scale(1); } }
+  .tint { position: relative; width: 50px; height: 50px; border-radius: 50%; padding: 0; flex: none; transition: transform .15s;
+    box-shadow: 0 0 0 2px rgba(74,52,38,.35), inset -5px -6px 0 rgba(0,0,0,.14), inset 5px 5px 0 rgba(255,255,255,.35); }
+  .tint.on { transform: scale(1.22); box-shadow: 0 0 0 4px var(--ink), 0 4px 8px rgba(0,0,0,.25), inset -5px -6px 0 rgba(0,0,0,.14), inset 5px 5px 0 rgba(255,255,255,.35); z-index: 1; }
+  .tint.on::after { content: '✔'; position: absolute; right: -8px; top: -9px; width: 22px; height: 22px; border-radius: 50%; background: #3fb02b; color: #fff;
+    font-size: 13px; font-weight: 900; line-height: 22px; text-align: center; box-shadow: 0 0 0 2px #fff; }
   #tools { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; }
   .tbtn { font-size: 26px; min-width: 60px; height: 60px; padding: 0 12px; border-radius: 18px; background: var(--card); box-shadow: 0 4px 0 rgba(0,0,0,.1); font-weight: 900; }
   .tbtn.on { background: #ffe9b0; }
@@ -139,6 +150,7 @@ img { -webkit-user-drag: none; }
     <div id="picWrap"><div id="pic"></div></div>
     <div id="side">
       <div id="palette"></div>
+      <div id="shadeBar" aria-label="연한 색, 진한 색"></div>
       <div id="tools">
         <div id="curSw" aria-hidden="true"></div>
         <button class="tbtn size" id="sizeBig" aria-label="굵은 붓"><i style="width:26px;height:26px"></i></button>
@@ -1110,7 +1122,7 @@ const COLORS = [
   ['회색', '#9a9a9a', 0], ['은색', '#cdd5dc', 0], ['검은색', '#3c3c3c', 1], ['하얀색', '#ffffff', 1],
 ];
 const colorsNow = () => babyMode ? COLORS.filter(c => c[2]) : COLORS;
-let curColor = COLORS[0][1], brush = 16;
+let curColor = COLORS[0][1], curBase = curColor, brush = 16;   // curBase: 고른 크레용 색, curColor: 색 바에서 고른 실제 칠할 색
 
 // 색을 밝게/어둡게 (크레용 입체감용)
 function shadeHex(hex, k) {
@@ -1196,7 +1208,7 @@ function strokeSeg(i, a, b) {
 }
 function onDown(e) {
   if (!pic) return;
-  const v = toV(e), i = regionAt(v.x, v.y); clearGlow();
+  const v = toV(e), i = regionAt(v.x, v.y); clearGlow(); closeBar();   // 그림을 만지면 색 바를 닫음
   if (i < 0) return;
   if (babyMode) {
     fillRegion(i, curColor); fillTone();
@@ -1223,20 +1235,46 @@ function layout() {
   const w = $('picWrap').clientWidth, h = $('picWrap').clientHeight; if (!w || !h) return;
   const s = Math.min(w / VW, h / VH); $('pic').style.width = VW * s + 'px'; $('pic').style.height = VH * s + 'px';
 }
-addEventListener('resize', () => { if ($('paint').classList.contains('active')) layout(); });
+addEventListener('resize', () => { closeBar(); if ($('paint').classList.contains('active')) layout(); });
 
 function renderPalette() {
   const box = $('palette'); box.innerHTML = ''; box.classList.toggle('many', !babyMode);
   colorsNow().forEach(([name, hex], i) => {
-    const b = document.createElement('button'); b.className = 'crayon' + (hex === curColor ? ' on' : ''); b.innerHTML = crayonSVG(hex, i); b.setAttribute('aria-label', name);
-    b.onclick = () => { curColor = hex; box.querySelectorAll('.crayon').forEach(x => x.classList.toggle('on', x === b)); showCur(true); tone([700]); speak(name); };
+    const b = document.createElement('button'); b.className = 'crayon' + (hex === curBase ? ' on' : ''); b.innerHTML = crayonSVG(hex, i); b.setAttribute('aria-label', name);
+    b.onclick = () => { curBase = curColor = hex; box.querySelectorAll('.crayon').forEach(x => x.classList.toggle('on', x === b)); showCur(true); tone([700]); speak(name); openBar(b); };
     box.appendChild(b);
   });
   const big = !babyMode;
   $('sizeBig').style.display = $('sizeSmall').style.display = big ? '' : 'none';
   $('sizeBig').classList.toggle('on', brush === 16); $('sizeSmall').classList.toggle('on', brush === 7);
-  showCur(false);
+  closeBar(); showCur(false);
 }
+/* ---------- 색 바: 고른 크레용 색의 연한 색 → 진한 색 7칸 ---------- */
+// 하얀색처럼 아주 밝은 색은 더 밝게 할 수 없으므로 하얀색부터 어두워지는 쪽으로만 7칸
+const TINT_K = [.62, .42, .21, 0, -.2, -.38, -.55], TINT_K_LIGHT = [0, -.08, -.16, -.25, -.35, -.47, -.6];
+const tintsOf = hex => { const n = parseInt(hex.slice(1), 16), lum = ((n >> 16) * .3 + (n >> 8 & 255) * .59 + (n & 255) * .11) / 255;
+  return (lum > .95 ? TINT_K_LIGHT : TINT_K).map(k => shadeHex(hex, k)); };
+function openBar(crayon) {
+  const bar = $('shadeBar'), land = $('paint').classList.contains('land');
+  bar.innerHTML = '';
+  tintsOf(curBase).forEach((hex, i) => {
+    const t = document.createElement('button'); t.className = 'tint' + (hex === curColor ? ' on' : ''); t.style.background = hex;
+    t.setAttribute('aria-label', i < 3 ? '연한 색' : i > 3 ? '진한 색' : '크레용 색');
+    t.onclick = () => { curColor = hex; bar.querySelectorAll('.tint').forEach(x => x.classList.toggle('on', x === t)); showCur(true); tone([1000 - i * 70]); };
+    bar.appendChild(t);
+  });
+  bar.className = 'on ' + (land ? 'v' : 'h');
+  // 크기는 offsetWidth로 잼 (나타나는 애니메이션의 scale에 영향받지 않게)
+  const w = bar.offsetWidth, h = bar.offsetHeight, r = crayon.getBoundingClientRect(), clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  if (land) {   // 가로 화면: 색 칸(오른쪽) 바로 왼쪽, 누른 크레용 높이에
+    bar.style.left = $('side').getBoundingClientRect().left - w - 14 + 'px';
+    bar.style.top = clamp(r.top + r.height / 2 - h / 2, 8, innerHeight - h - 8) + 'px';
+  } else {      // 세로 화면: 색 칸(아래) 바로 위, 누른 크레용 위치에
+    bar.style.top = $('palette').getBoundingClientRect().top - h - 16 + 'px';
+    bar.style.left = clamp(r.left + r.width / 2 - w / 2, 8, innerWidth - w - 8) + 'px';
+  }
+}
+function closeBar() { $('shadeBar').className = ''; }
 // 지금 고른 색을 큰 동그라미와 붓 굵기 점에 보여 줌
 function showCur(pop) {
   const sw = $('curSw'); sw.style.background = curColor;
@@ -1344,7 +1382,7 @@ document.addEventListener('pointerdown', resetIdle, true);
 /* ================= 화면 전환, 모드 ================= */
 const TITLES = { home: '색칠 놀이', paint: '색칠 놀이', book: '내 그림책' };
 function show(id) {
-  VOICE.stop();
+  VOICE.stop(); closeBar();
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
   $('title').textContent = id === 'paint' && pic ? pic.name : TITLES[id];
   if (id === 'home') { renderHome(); speak('그리고 싶은 그림을 골라요!'); }
@@ -1352,7 +1390,7 @@ function show(id) {
   if (id === 'paint') requestAnimationFrame(layout);
   resetIdle();
 }
-function applyMode() { $('modeBtn').textContent = babyMode ? '👶 아기 모드' : '🧒 언니·형 모드'; if (!colorsNow().some(c => c[1] === curColor)) curColor = COLORS[0][1]; }
+function applyMode() { $('modeBtn').textContent = babyMode ? '👶 아기 모드' : '🧒 언니·형 모드'; if (!colorsNow().some(c => c[1] === curBase)) curBase = curColor = COLORS[0][1]; }
 $('modeBtn').onclick = () => {
   babyMode = !babyMode; try { localStorage.setItem('color-mode', babyMode ? 'baby' : 'big'); } catch (e) {}
   applyMode(); speak(babyMode ? '아기 모드' : '언니 형 모드');

@@ -1359,6 +1359,19 @@ $('wordTabs').onclick = e => {
 // 낱말을 소리로 듣고 그림 카드 중에서 고름. 아기 모드는 카드 2장(서로 다른 분류에서), 언니·형 모드는 3장(같은 분류 우선)
 const WORD_CAT = new Map(CATS.flatMap(c => c.words.map(w => [w[1], c.id])));
 const lpState = { streak: 0, round: 0, locked: false };
+/* 아이 손가락용 누르기: click 대신 Pointer Events로 받음.
+   click은 누르는 동안 손가락이 조금 미끄러지거나, 다른 손가락·손바닥이 화면에 닿아 있으면(화면 고정 코드가 두 손가락 터치를 막음) 생기지 않아
+   카드가 눌리지 않을 때가 있었음. 손가락을 뗀 곳이 카드 근처(여유 30px)면 누른 것으로 봄 */
+function onTap(el, fn) {
+  let id = null;
+  el.addEventListener('pointerdown', e => { if (id === null) { id = e.pointerId; try { el.setPointerCapture(e.pointerId); } catch (err) {} } });
+  el.addEventListener('pointerup', e => {
+    if (e.pointerId !== id) return; id = null;
+    const r = el.getBoundingClientRect(), m = 30;
+    if (e.clientX >= r.left - m && e.clientX <= r.right + m && e.clientY >= r.top - m && e.clientY <= r.bottom + m) fn();
+  });
+  el.addEventListener('pointercancel', e => { if (e.pointerId === id) id = null; });
+}
 let lpItem = null, lpLast = null, lpIdleT = null;
 const eunNeun = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return w + (c >= 0 && c % 28 ? '은' : '는'); };
 const lpSay = () => lpItem && speak(`${eunNeun(lpItem[1])} 어디 있을까요?`);
@@ -1382,7 +1395,7 @@ function newListenPic() {
   shuffle([item, ...others]).forEach(w => {
     const b = document.createElement('button'); b.className = 'lpcard';
     b.innerHTML = `<div class="pic">${picHTML(w[0])}</div><div class="word">${w[1]}</div>`;
-    b.onclick = () => {
+    onTap(b, () => {
       if (lpState.locked || b.classList.contains('wrong') || round !== lpState.round) return;
       if (w === item) {
         lpState.locked = true; b.classList.add('right'); goodTone(); celebrate(b); addStar();
@@ -1395,7 +1408,7 @@ function newListenPic() {
         setTimeout(() => b.classList.remove('shake'), 450);
         setTimeout(() => { if (round === lpState.round) lpSay(); }, 500);
       }
-    };
+    });
     box.appendChild(b);
   });
   setTimeout(() => { if (round === lpState.round) lpSay(); }, 300);
