@@ -1,7 +1,7 @@
 # 우리 놀이터
 
 만 3세 전후 유아가 아이패드에서 손가락으로 하는 놀이 모음입니다. 요리 놀이, 한글 놀이터, 숫자 놀이 세 가지가 있습니다.
-설치나 로그인 없이 웹 브라우저로 열리고, 모든 놀이가 HTML 파일 하나씩으로 되어 있습니다. 그림, 소리, 음성은 외부 파일 없이 코드로 만듭니다.
+설치나 로그인 없이 웹 브라우저로 열리고, 모든 놀이가 HTML 파일 하나씩으로 되어 있습니다. 그림과 효과음은 대부분 코드로 만들고, 음성 mp3(`voice/`)와 요리 놀이 3D 그림(`img/fluent/`)만 파일로 둡니다.
 
 - 접속 주소: https://kcw1403.github.io/cooking-game/
 - 개발 과정, 피드백, QA 기록: [docs/개발기록.md](docs/개발기록.md)
@@ -49,5 +49,10 @@ GitHub Pages가 `main` 브랜치의 루트(`/`)를 그대로 배포합니다. �
 
 - 화면 크기: CSS 단위 `--u: min(1vw, 1vh)`로 가로·세로 화면 모두에 맞춥니다.
 - 터치: Pointer Events를 쓰고, 확대·스크롤·길게 누르기 메뉴 같은 iOS 제스처를 막아 둡니다.
-- 소리: 효과음은 Web Audio로 합성하고, 음성은 Web Speech API(ko-KR)로 읽습니다.
-- 그림: 이모지, CSS 도형, SVG를 씁니다. 바나나, 밀대, 버터나이프, 피자 토핑 조각, 밥알은 SVG로 직접 그렸습니다.
+- 소리: 효과음은 Web Audio로 합성합니다. 음성은 `voice/`에 mp3가 있는 문장은 mp3로, 없는 문장은 Web Speech API(ko-KR)로 읽습니다.
+- 그림: 이모지, CSS 도형, SVG를 씁니다. 바나나, 밀대, 버터나이프, 피자 토핑 조각, 밥알은 SVG로 직접 그렸습니다. 요리 놀이의 이모지는 3D 그림(`img/fluent/`)으로 바꿔 보여 줍니다.
+
+## 출처
+
+- 요리 놀이 3D 그림: [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji) (MIT 라이선스, `img/fluent/LICENSE`)
+- 음성: Microsoft Azure Speech 텍스트 음성 변환(ko-KR-SunHiNeural)으로 만든 mp3

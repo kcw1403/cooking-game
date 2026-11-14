@@ -36,6 +36,8 @@ html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;touch-ac
 #capIcon{font-size:calc(var(--u)*4.5);}
 
 .obj{position:absolute;}
+/* 이모지 대신 넣는 Fluent 3D 그림: 글자 크기(1em)에 맞춤, 터치는 부모 요소가 받음 */
+img.fe{width:1em;height:1em;display:inline-block;vertical-align:-.12em;pointer-events:none;-webkit-user-drag:none;user-select:none;}
 .emo{display:flex;align-items:center;justify-content:center;line-height:1;}
 .tool{position:absolute;font-size:calc(var(--u)*11);pointer-events:none;z-index:40;transform:var(--tt,translate(-30%,-85%));line-height:1;}
 .tool.mid{--tt:translate(-50%,-50%);}
@@ -355,6 +357,44 @@ function box(parent,cls,xPct,yPct,wU,hU,html){
   return e;
 }
 function emo(parent,ch,x,y,s,cls){const e=box(parent,'emo '+(cls||''),x,y,s,s,ch);e.style.fontSize=uu(s*.85);return e;}
+
+/* ---------- 이모지 → Fluent 3D 그림 ----------
+   화면에 들어온 이모지 글자를 img/fluent/<코드>.png 그림으로 바꿉니다 (그림 파일이 있는 이모지만).
+   그림은 글자 크기(1em)로 그려서, 크기를 정하는 기존 font-size를 그대로 씁니다.
+   이모지를 새로 쓰면 img/fluent/에 그림을 추가하고 아래 FLUENT 목록에도 코드를 넣습니다.
+   그림 출처: Microsoft Fluent Emoji 3D (MIT 라이선스, img/fluent/LICENSE) */
+const FLUENT=new Set(['2728','1f944','1f60b','1f345','1f52a','1f95a','1f353','1f525','1f96c','1f95b','1f35a','1f9c0','1f35e','1f300',
+  '1f344','1f9fd','1f4a7','1f3e0','1f31f','1f955','1fad2','1f953','1f964','2668','1f4a5','1f504','1f7e9','1f36f','1f9c8','1f34e',
+  '1f33d','1fad1','1f446','1f373','1f450','1f6b0','1f95e','1f37d','1f389','1f50a','1f355','274c','1f9c2','1f90f','1fae7','1f347',
+  '2705','1f96a','1f359','1fad7','1f362','1f361','1f34c','2b50','2b55','23f3']);
+const EMOJI_RE=/\p{Extended_Pictographic}️?/gu;
+const feCode=ch=>[...ch].filter(c=>c!=='️').map(c=>c.codePointAt(0).toString(16)).join('-');
+function fluentText(node){
+  const t=node.nodeValue;EMOJI_RE.lastIndex=0;
+  if(!EMOJI_RE.test(t))return;
+  const frag=document.createDocumentFragment();let last=0;EMOJI_RE.lastIndex=0;let m,changed=false;
+  while((m=EMOJI_RE.exec(t))){
+    const code=feCode(m[0]);if(!FLUENT.has(code))continue;
+    if(m.index>last)frag.appendChild(document.createTextNode(t.slice(last,m.index)));
+    const img=document.createElement('img');img.className='fe';img.src=`img/fluent/${code}.png`;img.alt=m[0];img.draggable=false;
+    frag.appendChild(img);last=m.index+m[0].length;changed=true;
+  }
+  if(!changed)return;
+  if(last<t.length)frag.appendChild(document.createTextNode(t.slice(last)));
+  node.parentNode.replaceChild(frag,node);
+}
+function fluentize(root){
+  if(root.nodeType===3){if(root.parentNode)fluentText(root);return;}
+  if(root.nodeType!==1||/^(SCRIPT|STYLE|TEXTAREA)$/.test(root.tagName))return;
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),list=[];
+  while(w.nextNode())list.push(w.currentNode);
+  list.forEach(fluentText);
+}
+new MutationObserver(ms=>ms.forEach(m=>{
+  if(m.type==='characterData')fluentize(m.target);else m.addedNodes.forEach(fluentize);
+})).observe(document.body,{childList:true,subtree:true,characterData:true});
+fluentize(document.body);
+FLUENT.forEach(c=>{new Image().src=`img/fluent/${c}.png`;});   // 미리 불러 두기 (처음 나올 때 깜빡이지 않게)
 function sRect(){return stage.getBoundingClientRect();}
 function pt(e){const r=sRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
 function center(elm){const r=elm.getBoundingClientRect(),s=sRect();return{x:r.left-s.left+r.width/2,y:r.top-s.top+r.height/2,w:r.width,h:r.height};}
@@ -914,12 +954,31 @@ function frPeel(done){
     done:()=>{b.classList.add('shine');later(done,500);}});
 }
 function skewer(){const sk=box(stage,'skewer',50,40,76,22,'<div class="stick"></div><div class="skewfruits"></div>');return{sk,row:sk.querySelector('.skewfruits')};}
-const FRUITS=['🍓','banana','🍎','🍇'];
-function addFruit(row,k){return k==='banana'?bananaSlice(row,11):el('span','',row,k);}
+// 포도 한 알: 🍇 그림은 포도송이 전체라 꼬치에는 한 알을 3D 그림체에 맞춰 SVG로 그림
+const GRAPE_SVG=`<svg viewBox="0 0 100 100" style="width:100%;height:100%;display:block;overflow:visible">
+  <defs><radialGradient id="grpg" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#c79bf2"/><stop offset=".45" stop-color="#8a4fd0"/><stop offset="1" stop-color="#4a1f86"/></radialGradient></defs>
+  <ellipse cx="52" cy="92" rx="30" ry="5" fill="rgba(0,0,0,.15)"/>
+  <circle cx="50" cy="54" r="38" fill="url(#grpg)"/>
+  <ellipse cx="37" cy="38" rx="11" ry="7" fill="#fff" opacity=".55" transform="rotate(-30 37 38)"/>
+  <circle cx="62" cy="70" r="4" fill="#fff" opacity=".18"/>
+  <path d="M50 17 C50 10 53 5 58 2" fill="none" stroke="#6b4a1e" stroke-width="5" stroke-linecap="round"/></svg>`;
+function grapeBall(parent,s){const g=el('div','grape',parent,GRAPE_SVG);g.style.width=g.style.height=uu(s);return g;}
+// 사과 한 조각: 통사과(🍎) 대신, 위쪽에 빨간 껍질이 붙은 하얀 속살 조각
+const APPLE_SVG=`<svg viewBox="0 0 100 100" style="width:100%;height:100%;display:block;overflow:visible">
+  <defs><linearGradient id="apfl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#f3dfae"/></linearGradient>
+    <linearGradient id="apsk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6b6b"/><stop offset=".55" stop-color="#e3262f"/><stop offset="1" stop-color="#a5121c"/></linearGradient></defs>
+  <ellipse cx="50" cy="93" rx="34" ry="5" fill="rgba(0,0,0,.15)"/>
+  <path d="M12 38 Q50 20 88 38 L82 82 Q50 92 18 82 Z" fill="url(#apfl)" stroke="#e2c98c" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M12 38 Q50 20 88 38 L86 48 Q50 32 14 48 Z" fill="url(#apsk)"/>
+  <path d="M24 33 Q40 26 52 26" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+  <ellipse cx="44" cy="62" rx="4" ry="6" fill="#8a5a2b" opacity=".75"/><ellipse cx="58" cy="62" rx="4" ry="6" fill="#8a5a2b" opacity=".75"/></svg>`;
+function appleChunk(parent,s){const a=el('div','applechunk',parent,APPLE_SVG);a.style.width=a.style.height=uu(s);return a;}
+const FRUITS=['🍓','banana','apple','grape'];
+function addFruit(row,k){return k==='banana'?bananaSlice(row,11):k==='grape'?grapeBall(row,10):k==='apple'?appleChunk(row,12):el('span','',row,k);}
 function frSkewer(done){
   const{sk,row}=skewer();box(stage,'tray',50,82,84,20);let n=0;
   const els=FRUITS.map((k,i)=>{
-    const x=20+i*20;const e=k==='banana'?box(stage,'drag bslice',x,82,13,13):emo(stage,k,x,82,15,'drag');
+    const x=20+i*20;const e=k==='banana'?box(stage,'drag bslice',x,82,13,13):k==='grape'?box(stage,'drag',x,82,12,12,GRAPE_SVG):k==='apple'?box(stage,'drag',x,82,14,14,APPLE_SVG):emo(stage,k,x,82,15,'drag');
     draggable(e,sk,elm=>{elm.remove();const f=addFruit(row,k);SFX.pop();const c=center(f);burst(c.x,c.y,['✨'],4);if(++n===4)later(done,400);});
     return e;});
   hintFn=()=>{const e=els.find(e=>e.isConnected);return e?{type:'drag',from:e,to:sk}:null;};

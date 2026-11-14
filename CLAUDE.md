@@ -35,12 +35,15 @@
 | `hangul.html` | 한글 놀이터 (아기 모드 / 언니·형 모드) |
 | `numbers.html` | 숫자 놀이터 (1~5 / 1~10) |
 | `index_v1_sandwich.html` | 첫 버전 보관용, 수정하지 않음 |
+| `img/fluent/` | 요리 놀이 3D 그림 (Fluent Emoji 3D PNG, 파일 이름은 이모지 코드). `LICENSE`를 지우지 않는다 |
+| `tools/make-voice.ps1` | 음성 mp3 만들기 (Azure TTS). 키는 사용자 환경 변수 `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`에서 읽는다 |
 | `voice/list.js` | 음성 mp3 목록 (`VOICE_FILES`: mp3 이름 → 문장). mp3도 `voice/`에 둔다 |
 | `tools/voice-lines.html` | 개발용 도구. 네 화면의 `voiceLines()`를 모아 음성 문장표를 만든다 |
 | `docs/음성문장.txt` | 음성 문장표 (mp3 이름, 문장, 쓰는 놀이). `tools/voice-lines.html` 결과를 저장한 것 |
 
 ## 코드 규칙
-- 각 놀이는 HTML 파일 하나에 CSS·JS를 모두 넣는다. 외부 라이브러리, 이미지, 소리 파일을 쓰지 않는다. 그림은 이모지, CSS, SVG로 그린다. 예외: 음성 mp3와 그 목록(`voice/`)만 따로 둔다.
+- 각 놀이는 HTML 파일 하나에 CSS·JS를 모두 넣는다. 외부 라이브러리, 이미지, 소리 파일을 쓰지 않는다. 그림은 이모지, CSS, SVG로 그린다. 예외: 음성 mp3와 그 목록(`voice/`), 요리 놀이 3D 그림(`img/fluent/`)만 따로 둔다.
+- 요리 놀이(`cooking.html`)는 화면에 들어온 이모지 글자를 `img/fluent/<코드>.png`(Microsoft Fluent Emoji 3D, MIT)로 자동으로 바꾼다. 새 이모지를 쓰면 같은 저장소의 3D PNG를 `img/fluent/`에 넣고 `FLUENT` 목록에 코드를 추가한다. 그림이 없는 이모지는 글자 그대로 보인다.
 - 크기는 `--u: min(1vw, 1vh)` 단위로 정해 가로·세로 화면 모두에 맞춘다.
 - 터치는 Pointer Events를 쓰고, iOS 확대·스크롤·길게 누르기 메뉴를 막는다.
 - 요리 놀이의 각 단계는 `hintFn`으로 다음에 할 동작(tap / rub / drag)을 알려 줘야 한다. 힌트 손가락과 자동 테스트가 이 값을 쓴다.
