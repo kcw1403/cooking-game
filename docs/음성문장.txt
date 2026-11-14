@@ -1,0 +1,1106 @@
+# 음성 문장 목록 (tools/voice-lines.html로 만듦. 직접 고치지 않습니다)
+# 문장 1103개, 글자 6304자
+# 형식: mp3 이름<TAB>문장<TAB>쓰는 놀이
+41857883	요리 놀이	index
+d2366115	한글 놀이터	index
+b977095e	숫자 놀이	index
+65bdd6be	만들고 싶은 요리를 눌러요!	cooking
+bf58fa9c	그만할까요?	cooking
+2305b23b	보글보글! 거품을 톡톡 터뜨려 볼까요?	cooking
+897bdc84	마요네즈를 쭉 짜요! 통을 톡톡 눌러요.	cooking
+dc12a53a	이제 쓱쓱 섞어요!	cooking
+240de176	마지막으로 빵을 덮어요!	cooking
+6f65941b	지글지글! 거품을 톡톡 터뜨려 볼까요?	cooking
+c0b6f915	피자가 꽉 찼어요! 초록 버튼을 눌러요!	cooking
+b25662eb	다 올렸으면 초록 버튼을 눌러요!	cooking
+5eeff664	빨간 버튼을 눌러서 구워요!	cooking
+37963454	오븐에서 맛있게 익고 있어요!	cooking
+70acf494	계속 꾹 누르고 있어요!	cooking
+f607c3ef	이제 컵을 눌러서 쭉쭉 마셔요!	cooking
+bd08dee4	잘했어요!	cooking,hangul,numbers
+5320f3c4	최고예요!	cooking,hangul,numbers
+a863bc61	우와, 멋져요!	cooking
+513d1984	참 잘했어요!	cooking,hangul
+6bbdfccc	대단해요!	cooking,hangul,numbers
+338e3e39	맛있는 샌드위치를 다 만들었어요!	cooking
+5cb57c9a	채소에 묻은 흙을 쓱쓱 문질러서 깨끗하게 씻어요!	cooking
+cfeee857	토마토를 잘라요. 하얀 점선을 위에서 아래로 쓱 내려요!	cooking
+b163bb7c	계란을 꾹 잡고 냄비 안으로 쏙 넣어요!	cooking
+be286022	빨간 불 버튼을 눌러서 계란을 삶아요!	cooking
+362dcc52	삶은 계란을 톡톡 두드려서 깨 볼까요?	cooking
+2ee21e40	계란 껍질을 손가락으로 쏙쏙 떼어 내요!	cooking
+c210b3b5	그릇 안을 쓱쓱 문질러서 계란을 으깨요!	cooking
+616f99a5	빵 위에 계란을 쓱쓱 발라요!	cooking
+3e04445f	재료를 빵 위로 하나씩 옮겨서 쌓아요!	cooking
+41ca2185	샌드위치 완성! 샌드위치를 눌러서 냠냠 먹어요!	cooking
+f4e1956e	알록달록 과일 꼬치를 다 만들었어요!	cooking
+39049d8b	딸기와 사과를 쓱쓱 문질러서 씻어요!	cooking
+3f581241	바나나 껍질을 위에서 아래로 쓱 내려서 벗겨요!	cooking
+6e1e96f3	바나나를 잘라요. 하얀 점선을 위에서 아래로 쓱 내려요!	cooking
+95a88993	과일을 꼬치에 하나씩 끼워요!	cooking
+89d61e1c	과일 꼬치 완성! 과일을 하나씩 눌러서 냠냠 먹어요!	cooking
+a365300c	동글동글 주먹밥을 다 만들었어요!	cooking
+55800268	밥을 꾹 잡고 그릇으로 옮겨 담아요!	cooking
+eee607ae	참기름 병을 톡톡 눌러서 넣어요!	cooking
+c65318c1	깨 통을 톡톡 눌러서 깨를 뿌려요!	cooking
+749d41b7	그릇 안을 쓱쓱 문질러서 골고루 섞어요!	cooking
+779fa930	밥을 꾹꾹 눌러서 동글동글 뭉쳐요!	cooking
+eb076ef7	김을 주먹밥 아래에 붙여요!	cooking
+6e19924d	주먹밥 완성! 주먹밥을 눌러서 냠냠 먹어요!	cooking
+afa0b622	달콤한 팬케이크를 다 만들었어요!	cooking
+d388face	계란을 톡톡 두드려서 그릇에 깨 넣어요!	cooking
+c9fa26e1	우유와 밀가루를 꾹 잡고 그릇으로 옮겨서 부어요!	cooking
+ff2c5c17	그릇 안을 쓱쓱 문질러서 섞어요!	cooking
+bc47b8a9	숟가락을 프라이팬으로 옮겨서 반죽을 부어요!	cooking
+5d6b6b54	빨간 불 버튼을 눌러서 구워요!	cooking
+39d2044e	프라이팬을 아래에서 위로 쓱 올려서 뒤집어요!	cooking
+4a6faba3	팬케이크 위에 시럽을 쓱쓱 뿌려요!	cooking
+aae4c225	팬케이크 완성! 팬케이크를 눌러서 냠냠 먹어요!	cooking
+baae4c79	맛있는 피자를 다 만들었어요!	cooking
+dee31eae	밀대로 쓱쓱 밀어서 반죽을 넓게 펴요!	cooking
+c35cae77	반죽 위에 토마토소스를 쓱쓱 발라요!	cooking
+4f7dcb0e	좋아하는 재료를 피자 위에 마음껏 올려요!	cooking
+8acd7e72	치즈를 쓱쓱 뿌려요!	cooking
+beb9b8ed	피자를 꾹 잡고 오븐 안으로 넣어요!	cooking
+731e9b65	피자를 잘라요. 하얀 점선을 위에서 아래로 쓱 내려요!	cooking
+9e49b553	피자 완성! 피자를 한 조각씩 눌러서 냠냠 먹어요!	cooking
+56e999fe	맛있는 김밥을 다 만들었어요!	cooking
+4e3654ea	김을 꾹 잡고 김발 위에 올려요!	cooking
+a4c51f27	김 위에 밥을 쓱쓱 펴요!	cooking
+b0c28b82	재료를 밥 위에 하나씩 올려요!	cooking
+2059a0c3	김발을 아래에서 위로 쓱 올려서 돌돌 말아요!	cooking
+5d9ac05e	김밥을 잘라요. 하얀 점선을 위에서 아래로 쓱 내려요!	cooking
+e1b5d388	김밥 완성! 김밥을 하나씩 눌러서 냠냠 먹어요!	cooking
+9b174ede	시원한 과일 스무디를 다 만들었어요!	cooking
+5de9c18c	과일을 꾹 잡고 믹서 안에 쏙쏙 넣어요!	cooking
+4d683b1f	우유를 믹서에 부어요!	cooking
+db3e36c2	빨간 버튼을 꾹 누르고 있으면 믹서가 돌아가요!	cooking
+0eded171	믹서 통을 꾹 잡고 컵으로 옮겨서 따라요!	cooking
+b8a21865	빨대를 눌러서 컵에 꽂아요!	cooking
+8366f1de	맞았어요!	hangul,numbers
+c3c83526	다시 해 볼까요?	hangul
+2ef6076f	아기 모드	hangul
+154b5ea6	언니 형 모드	hangul
+bd1704e6	기역	hangul
+9a1d52f1	기역을 찾아 볼까요?	hangul
+704b3895	니은	hangul
+680a8238	니은을 찾아 볼까요?	hangul
+b1b110b4	디귿	hangul
+48408e93	디귿을 찾아 볼까요?	hangul
+0123399d	리을	hangul
+7e420050	리을을 찾아 볼까요?	hangul
+fe722511	미음	hangul
+0b5173e4	미음을 찾아 볼까요?	hangul
+1448acfa	비읍	hangul
+ee0f5ba5	비읍을 찾아 볼까요?	hangul
+febf2004	시옷	hangul
+b93895c3	시옷을 찾아 볼까요?	hangul
+c10c35f6	이응	hangul
+46efc761	이응을 찾아 볼까요?	hangul
+8918a9f7	지읒	hangul
+6be0d3ee	지읒을 찾아 볼까요?	hangul
+b657db9c	치읓	hangul
+254868ab	치읓을 찾아 볼까요?	hangul
+a50503a5	키읔	hangul
+32b8d9a8	키읔을 찾아 볼까요?	hangul
+b96bb04e	티읕	hangul
+ef87a549	티읕을 찾아 볼까요?	hangul
+a818d857	피읖	hangul
+4d711e4e	피읖을 찾아 볼까요?	hangul
+9a642720	히읗	hangul
+4e82f58f	히읗을 찾아 볼까요?	hangul
+3a0a894f	쌍기역	hangul
+a4f879d6	쌍기역을 찾아 볼까요?	hangul
+effe53c1	쌍디귿	hangul
+2993b8b4	쌍디귿을 찾아 볼까요?	hangul
+7400719b	쌍비읍	hangul
+f79da9f2	쌍비읍을 찾아 볼까요?	hangul
+d76a4ba1	쌍시옷	hangul
+4581f514	쌍시옷을 찾아 볼까요?	hangul
+83e9236e	쌍지읒	hangul
+896d37e9	쌍지읒을 찾아 볼까요?	hangul
+c09f5313	아	hangul
+39dff1e2	아를 찾아 볼까요?	hangul
+e49f8bbf	애	hangul
+96cfca5e	애를 찾아 볼까요?	hangul
+f89fab3b	야	hangul
+4e8d83aa	야를 찾아 볼까요?	hangul
+9c9f1a67	얘	hangul
+1d3bb7c6	얘를 찾아 볼까요?	hangul
+b09f39e3	어	hangul
+38d745b2	어를 찾아 볼까요?	hangul
+549ea90f	에	hangul
+962116ae	에를 찾아 볼까요?	hangul
+689ec88b	여	hangul
+46c4d7ba	여를 찾아 볼까요?	hangul
+0ca483b7	예	hangul
+d7ffe596	예를 찾아 볼까요?	hangul
+20a4a333	오	hangul
+a86176c2	오를 찾아 볼까요?	hangul
+c4a4125f	와	hangul
+959771be	와를 찾아 볼까요?	hangul
+d8a431db	왜	hangul
+24b3050a	왜를 찾아 볼까요?	hangul
+fca46a87	외	hangul
+459649a6	외를 찾아 볼까요?	hangul
+90a3c083	요	hangul
+b5998d12	요를 찾아 볼까요?	hangul
+b4a3f92f	우	hangul
+a5ea4b8e	우를 찾아 볼까요?	hangul
+48a34f2b	워	hangul
+9b06169a	워를 찾아 볼까요?	hangul
+6ca387d7	웨	hangul
+83e005f6	웨를 찾아 볼까요?	hangul
+00a2ddd3	위	hangul
+af432c22	위를 찾아 볼까요?	hangul
+24a3167f	유	hangul
+e014059e	유를 찾아 볼까요?	hangul
+38a335fb	으	hangul
+316566ea	으를 찾아 볼까요?	hangul
+dca2a527	의	hangul
+5c719506	의를 찾아 볼까요?	hangul
+f0a2c4a3	이	hangul
+32f560f2	이를 찾아 볼까요?	hangul
+f4cabfb2	ㄸ은 받침이 될 수 없어요	hangul
+e2799e41	ㅃ은 받침이 될 수 없어요	hangul
+b06c26e7	ㅉ은 받침이 될 수 없어요	hangul
+0462591f	가	hangul
+1862789b	개	hangul
+3c62b147	갸	hangul
+d0620743	걔	hangul
+f4623fef	거	hangul
+886195eb	게	hangul
+ac61ce97	겨	hangul
+40612493	계	hangul
+64615d3f	고	hangul
+78617cbb	과	hangul
+1c60ebe7	괘	hangul
+30610b63	괴	hangul
+d4607a8f	교	hangul
+e8609a0b	구	hangul
+8c600937	궈	hangul
+a06028b3	궤	hangul
+445f97df	귀	hangul
+585fb75b	규	hangul
+7c5ff007	그	hangul
+10659203	긔	hangul
+3465caaf	기	hangul
+c86520ab	까	hangul
+ec655957	깨	hangul
+8064af53	꺄	hangul
+a464e7ff	꺠	hangul
+b865077b	꺼	hangul
+5c6476a7	께	hangul
+70649623	껴	hangul
+1464054f	꼐	hangul
+286424cb	꼬	hangul
+cc6393f7	꽈	hangul
+e063b373	꽤	hangul
+8463229f	꾀	hangul
+9863421b	꾜	hangul
+bc637ac7	꾸	hangul
+5062d0c3	꿔	hangul
+7463096f	꿰	hangul
+085c136b	뀌	hangul
+2c5c4c17	뀨	hangul
+c05ba213	끄	hangul
+e45bdabf	끠	hangul
+f85bfa3b	끼	hangul
+9c5b6967	나	hangul
+b05b88e3	내	hangul
+545af80f	냐	hangul
+685b178b	냬	hangul
+0c5a86b7	너	hangul
+205aa633	네	hangul
+c45a155f	녀	hangul
+d85a34db	녜	hangul
+fc5a6d87	노	hangul
+9059c383	놔	hangul
+b459fc2f	놰	hangul
+4859522b	뇌	hangul
+6c598ad7	뇨	hangul
+005f2cd3	누	hangul
+245f657f	눠	hangul
+385f84fb	눼	hangul
+dc5ef427	뉘	hangul
+f05f13a3	뉴	hangul
+945e82cf	느	hangul
+a85ea24b	늬	hangul
+4c5e1177	니	hangul
+605e30f3	다	hangul
+045da01f	대	hangul
+185dbf9b	댜	hangul
+3c5df847	댸	hangul
+d05d4e43	더	hangul
+f45d86ef	데	hangul
+885cdceb	뎌	hangul
+ac5d1597	뎨	hangul
+405c6b93	도	hangul
+645ca43f	돠	hangul
+785cc3bb	돼	hangul
+1c55e6e7	되	hangul
+30560663	됴	hangul
+d455758f	두	hangul
+e855950b	둬	hangul
+8c550437	뒈	hangul
+a05523b3	뒤	hangul
+445492df	듀	hangul
+5854b25b	드	hangul
+7c54eb07	듸	hangul
+10544103	디	hangul
+345479af	따	hangul
+c853cfab	때	hangul
+ec540857	땨	hangul
+80535e53	떄	hangul
+a45396ff	떠	hangul
+b853b67b	떼	hangul
+5c5325a7	뗘	hangul
+70534523	뗴	hangul
+1459004f	또	hangul
+28591fcb	똬	hangul
+cc588ef7	뙈	hangul
+e058ae73	뙤	hangul
+84581d9f	뚀	hangul
+98583d1b	뚜	hangul
+bc5875c7	뚸	hangul
+5057cbc3	뛔	hangul
+7458046f	뛰	hangul
+08575a6b	뜌	hangul
+2c579317	뜨	hangul
+c056e913	띄	hangul
+e45721bf	띠	hangul
+f857413b	라	hangul
+9c56b067	래	hangul
+b056cfe3	랴	hangul
+54563f0f	럐	hangul
+68565e8b	러	hangul
+0c4f81b7	레	hangul
+204fa133	려	hangul
+c44f105f	례	hangul
+d84f2fdb	로	hangul
+fc4f6887	롸	hangul
+904ebe83	뢔	hangul
+b44ef72f	뢰	hangul
+484e4d2b	료	hangul
+6c4e85d7	루	hangul
+004ddbd3	뤄	hangul
+244e147f	뤠	hangul
+384e33fb	뤼	hangul
+dc4da327	류	hangul
+f04dc2a3	르	hangul
+944d31cf	릐	hangul
+a84d514b	리	hangul
+4c4cc077	마	hangul
+604cdff3	매	hangul
+04529b1f	먀	hangul
+1852ba9b	먜	hangul
+3c52f347	머	hangul
+d0524943	메	hangul
+f45281ef	며	hangul
+8851d7eb	몌	hangul
+ac521097	모	hangul
+40516693	뫄	hangul
+64519f3f	뫠	hangul
+7851bebb	뫼	hangul
+1c512de7	묘	hangul
+30514d63	무	hangul
+d450bc8f	뭐	hangul
+e850dc0b	뭬	hangul
+8c504b37	뮈	hangul
+a0506ab3	뮤	hangul
+444fd9df	므	hangul
+584ff95b	믜	hangul
+7c503207	미	hangul
+10493c03	바	hangul
+344974af	배	hangul
+c848caab	뱌	hangul
+ec490357	뱨	hangul
+80485953	버	hangul
+a44891ff	베	hangul
+b848b17b	벼	hangul
+5c4820a7	볘	hangul
+70484023	보	hangul
+1447af4f	봐	hangul
+2847cecb	봬	hangul
+cc473df7	뵈	hangul
+e0475d73	뵤	hangul
+8446cc9f	부	hangul
+9846ec1b	붜	hangul
+bc4724c7	붸	hangul
+50467ac3	뷔	hangul
+7446b36f	뷰	hangul
+084c556b	브	hangul
+2c4c8e17	븨	hangul
+c04be413	비	hangul
+e44c1cbf	빠	hangul
+f84c3c3b	빼	hangul
+9c4bab67	뺘	hangul
+b04bcae3	뺴	hangul
+544b3a0f	뻐	hangul
+684b598b	뻬	hangul
+0c4ac8b7	뼈	hangul
+204ae833	뼤	hangul
+c44a575f	뽀	hangul
+d84a76db	뽜	hangul
+fc4aaf87	뽸	hangul
+904a0583	뾔	hangul
+b44a3e2f	뾰	hangul
+4849942b	뿌	hangul
+6c49ccd7	뿨	hangul
+00a796d3	쀄	hangul
+24a7cf7f	쀠	hangul
+38a7eefb	쀼	hangul
+dca75e27	쁘	hangul
+f0a77da3	쁴	hangul
+94a6eccf	삐	hangul
+a8a70c4b	사	hangul
+4ca67b77	새	hangul
+60a69af3	샤	hangul
+04a60a1f	섀	hangul
+18a6299b	서	hangul
+3ca66247	세	hangul
+d0a5b843	셔	hangul
+f4a5f0ef	셰	hangul
+88a546eb	소	hangul
+aca57f97	솨	hangul
+40a4d593	쇄	hangul
+64a50e3f	쇠	hangul
+78a52dbb	쇼	hangul
+1caae8e7	수	hangul
+30ab0863	숴	hangul
+d4aa778f	쉐	hangul
+e8aa970b	쉬	hangul
+8caa0637	슈	hangul
+a0aa25b3	스	hangul
+44a994df	싀	hangul
+58a9b45b	시	hangul
+7ca9ed07	싸	hangul
+10a94303	쌔	hangul
+34a97baf	쌰	hangul
+c8a8d1ab	썌	hangul
+eca90a57	써	hangul
+80a86053	쎄	hangul
+a4a898ff	쎠	hangul
+b8a8b87b	쎼	hangul
+5ca827a7	쏘	hangul
+70a84723	쏴	hangul
+14a16a4f	쐐	hangul
+28a189cb	쐬	hangul
+cca0f8f7	쑈	hangul
+e0a11873	쑤	hangul
+84a0879f	쒀	hangul
+98a0a71b	쒜	hangul
+bca0dfc7	쒸	hangul
+50a035c3	쓔	hangul
+74a06e6f	쓰	hangul
+089fc46b	씌	hangul
+2c9ffd17	씨	hangul
+94a233cf	자	hangul
+a8a2534b	재	hangul
+4ca1c277	쟈	hangul
+60a1e1f3	쟤	hangul
+049b051f	저	hangul
+189b249b	제	hangul
+3c9b5d47	져	hangul
+d09ab343	졔	hangul
+f49aebef	조	hangul
+889a41eb	좌	hangul
+ac9a7a97	좨	hangul
+4099d093	죄	hangul
+649a093f	죠	hangul
+789a28bb	주	hangul
+1c9997e7	줘	hangul
+3099b763	줴	hangul
+d499268f	쥐	hangul
+e899460b	쥬	hangul
+8c98b537	즈	hangul
+a098d4b3	즤	hangul
+449843df	지	hangul
+5898635b	짜	hangul
+7c989c07	째	hangul
+109e3e03	쨔	hangul
+349e76af	쨰	hangul
+c89dccab	쩌	hangul
+ec9e0557	쩨	hangul
+809d5b53	쪄	hangul
+a49d93ff	쪠	hangul
+b89db37b	쪼	hangul
+5c9d22a7	쫘	hangul
+709d4223	쫴	hangul
+149cb14f	쬐	hangul
+289cd0cb	쬬	hangul
+cc9c3ff7	쭈	hangul
+e09c5f73	쭤	hangul
+849bce9f	쮀	hangul
+989bee1b	쮜	hangul
+bc9c26c7	쮸	hangul
+509b7cc3	쯔	hangul
+749bb56f	쯰	hangul
+0894bf6b	찌	hangul
+2c94f817	차	hangul
+c0944e13	채	hangul
+e49486bf	챠	hangul
+f894a63b	챼	hangul
+9c941567	처	hangul
+b09434e3	체	hangul
+5493a40f	쳐	hangul
+6893c38b	쳬	hangul
+0c9332b7	초	hangul
+20935233	촤	hangul
+c492c15f	쵀	hangul
+d892e0db	최	hangul
+fc931987	쵸	hangul
+90926f83	추	hangul
+b492a82f	춰	hangul
+4891fe2b	췌	hangul
+6c9236d7	취	hangul
+0097d8d3	츄	hangul
+2498117f	츠	hangul
+389830fb	츼	hangul
+dc97a027	치	hangul
+f097bfa3	카	hangul
+94972ecf	캐	hangul
+a8974e4b	캬	hangul
+4c96bd77	컈	hangul
+6096dcf3	커	hangul
+04964c1f	케	hangul
+18966b9b	켜	hangul
+3c96a447	켸	hangul
+d095fa43	코	hangul
+f49632ef	콰	hangul
+889588eb	쾌	hangul
+ac95c197	쾨	hangul
+40951793	쿄	hangul
+6495503f	쿠	hangul
+78956fbb	쿼	hangul
+1c8e92e7	퀘	hangul
+308eb263	퀴	hangul
+d48e218f	큐	hangul
+e88e410b	크	hangul
+8c8db037	킈	hangul
+a08dcfb3	키	hangul
+448d3edf	타	hangul
+588d5e5b	태	hangul
+7c8d9707	탸	hangul
+108ced03	턔	hangul
+348d25af	터	hangul
+c88c7bab	테	hangul
+ec8cb457	텨	hangul
+808c0a53	톄	hangul
+a48c42ff	토	hangul
+b88c627b	톼	hangul
+5c8bd1a7	퇘	hangul
+708bf123	퇴	hangul
+1491ac4f	툐	hangul
+2891cbcb	투	hangul
+cc913af7	퉈	hangul
+e0915a73	퉤	hangul
+8490c99f	튀	hangul
+9890e91b	튜	hangul
+bc9121c7	트	hangul
+509077c3	틔	hangul
+7490b06f	티	hangul
+0890066b	파	hangul
+2c903f17	패	hangul
+c08f9513	퍄	hangul
+e48fcdbf	퍠	hangul
+f88fed3b	퍼	hangul
+9c8f5c67	페	hangul
+b08f7be3	펴	hangul
+548eeb0f	폐	hangul
+688f0a8b	포	hangul
+0c882db7	퐈	hangul
+20884d33	퐤	hangul
+c487bc5f	푀	hangul
+d887dbdb	표	hangul
+fc881487	푸	hangul
+90876a83	풔	hangul
+b487a32f	풰	hangul
+4886f92b	퓌	hangul
+6c8731d7	퓨	hangul
+008687d3	프	hangul
+2486c07f	픠	hangul
+3886dffb	피	hangul
+dc864f27	하	hangul
+f0866ea3	해	hangul
+9485ddcf	햐	hangul
+a885fd4b	햬	hangul
+4c856c77	허	hangul
+60858bf3	헤	hangul
+048b471f	혀	hangul
+188b669b	혜	hangul
+3c8b9f47	호	hangul
+d08af543	화	hangul
+f48b2def	홰	hangul
+888a83eb	회	hangul
+ac8abc97	효	hangul
+408a1293	후	hangul
+648a4b3f	훠	hangul
+788a6abb	훼	hangul
+1c89d9e7	휘	hangul
+3089f963	휴	hangul
+d489688f	흐	hangul
+e889880b	희	hangul
+8c88f737	히	hangul
+de066b4b	티라노사우루스	hangul
+ee1b17de	티라노사우루스!	hangul
+69b8623a	티라노사우루스는 어디 있을까요?	hangul
+123b9730	트리케라톱스	hangul
+c4cecfc3	트리케라톱스!	hangul
+deb915fd	트리케라톱스는 어디 있을까요?	hangul
+b38c5a9c	톱	hangul
+f779aa2f	스테고사우루스	hangul
+a286b40a	스테고사우루스!	hangul
+23423f36	스테고사우루스는 어디 있을까요?	hangul
+652df03d	브라키오사우루스	hangul
+6350fc14	브라키오사우루스!	hangul
+5c5ccc18	브라키오사우루스는 어디 있을까요?	hangul
+08e4a4ab	프테라노돈	hangul
+89ef053e	프테라노돈!	hangul
+61b3b226	프테라노돈은 어디 있을까요?	hangul
+4c5c7e77	돈	hangul
+888d22ff	안킬로사우루스	hangul
+d42de37a	안킬로사우루스!	hangul
+69db8da6	안킬로사우루스는 어디 있을까요?	hangul
+cc9f65f7	안	hangul
+a88ddc4b	킬	hangul
+b35c8197	스피노사우루스	hangul
+10a03182	스피노사우루스!	hangul
+304883ee	스피노사우루스는 어디 있을까요?	hangul
+f5bc0e12	벨로키랍토르	hangul
+0a0a5a49	벨로키랍토르!	hangul
+ac791fab	벨로키랍토르는 어디 있을까요?	hangul
+ac489e97	벨	hangul
+87568f58	랍	hangul
+efb9c422	뼈!	hangul
+6863e88e	뼈는 어디 있을까요?	hangul
+3c92ed89	화산	hangul
+034c1f78	화산!	hangul
+cd3734b8	화산은 어디 있을까요?	hangul
+b4a71f2f	산	hangul
+1d040cce	개!	hangul
+a5ee812a	개는 어디 있을까요?	hangul
+6892b2ba	고양이	hangul
+39ef2a01	고양이!	hangul
+7862a563	고양이는 어디 있을까요?	hangul
+939f0c3c	양	hangul
+8ce1c439	토끼	hangul
+df67b1c8	토끼!	hangul
+120a201c	토끼는 어디 있을까요?	hangul
+5b25e9c1	사자	hangul
+5caf2ba0	사자!	hangul
+cbf84af4	사자는 어디 있을까요?	hangul
+f0a50922	호랑이	hangul
+d6cd2fb9	호랑이!	hangul
+4ee4be9b	호랑이는 어디 있을까요?	hangul
+9356a23c	랑	hangul
+f4445313	코끼리	hangul
+b98ef7b6	코끼리!	hangul
+7b36e672	코끼리는 어디 있을까요?	hangul
+9ab439cd	기린	hangul
+75b72e84	기린!	hangul
+5a4d22fc	기린은 어디 있을까요?	hangul
+b44d642f	린	hangul
+6adb12f6	원숭이	hangul
+0ddea875	원숭이!	hangul
+639f1dc7	원숭이는 어디 있을까요?	hangul
+54a3620f	원	hangul
+27aafa38	숭	hangul
+7461766f	곰	hangul
+836d3cca	곰!	hangul
+476bd1ca	곰은 어디 있을까요?	hangul
+f3e47fa1	돼지	hangul
+70b4b680	돼지!	hangul
+cf625ed4	돼지는 어디 있을까요?	hangul
+e62e6ffe	소!	hangul
+2b38c7da	소는 어디 있을까요?	hangul
+544ccd0f	말	hangul
+e2e6ff6a	말!	hangul
+33378d6a	말은 어디 있을까요?	hangul
+ebd066e1	여우	hangul
+f911c040	여우!	hangul
+7c9e7d14	여우는 어디 있을까요?	hangul
+0abe3e31	판다	hangul
+f97bb330	판다!	hangul
+06e76c84	판다는 어디 있을까요?	hangul
+1490194f	판	hangul
+5b17e3ea	쥐!	hangul
+9d307116	쥐는 어디 있을까요?	hangul
+806011a7	양!	hangul
+d0ef5385	양은 어디 있을까요?	hangul
+d0f07b72	얼룩말	hangul
+3d9223a9	얼룩말!	hangul
+72e35c57	얼룩말은 어디 있을까요?	hangul
+b89f467b	얼	hangul
+6b4e8444	룩	hangul
+1776ba3d	하마	hangul
+0be6fa14	하마!	hangul
+a30ce218	하마는 어디 있을까요?	hangul
+675e3bf8	닭	hangul
+9258369b	닭!	hangul
+98682441	닭은 어디 있을까요?	hangul
+0155e84d	오리	hangul
+863ce204	오리!	hangul
+63b64248	오리는 어디 있을까요?	hangul
+ad2464e5	고래	hangul
+544aa08c	고래!	hangul
+136e9b30	고래는 어디 있을까요?	hangul
+e7883d89	문어	hangul
+23790f78	문어!	hangul
+e74f558c	문어는 어디 있을까요?	hangul
+3c516047	문	hangul
+7b9eccfe	게!	hangul
+16389eda	게는 어디 있을까요?	hangul
+bbd28ffa	거북이	hangul
+877875c1	거북이!	hangul
+4d3f67a3	거북이는 어디 있을까요?	hangul
+8346cb0c	북	hangul
+44086ba3	물고기	hangul
+9b413da6	물고기!	hangul
+31095c22	물고기는 어디 있을까요?	hangul
+385159fb	물	hangul
+775bfe68	상어	hangul
+2ed14ceb	상어!	hangul
+db1e1e05	상어는 어디 있을까요?	hangul
+43a66d4c	상	hangul
+2dfdb22b	돌고래	hangul
+705f45be	돌고래!	hangul
+f42ffe1a	돌고래는 어디 있을까요?	hangul
+485c782b	돌	hangul
+4c9afc52	오징어	hangul
+0afb6909	오징어!	hangul
+65492feb	오징어는 어디 있을까요?	hangul
+4f985530	징	hangul
+717cc045	새우	hangul
+0b62dd6c	새우!	hangul
+ee0cdf10	새우는 어디 있을까요?	hangul
+4793ac19	나비	hangul
+e5781c28	나비!	hangul
+1b3b42fc	나비는 어디 있을까요?	hangul
+c67994d9	개미	hangul
+69658268	개미!	hangul
+369e86bc	개미는 어디 있을까요?	hangul
+884865eb	벌	hangul
+53f83cfe	벌!	hangul
+60bbefe6	벌은 어디 있을까요?	hangul
+ce15f035	거미	hangul
+8088ef7c	거미!	hangul
+06407a20	거미는 어디 있을까요?	hangul
+f536904a	무당벌레	hangul
+6fe55871	무당벌레!	hangul
+c6968d53	무당벌레는 어디 있을까요?	hangul
+7b5e5b74	당	hangul
+60fc2042	달팽이	hangul
+0fe6fbd9	달팽이!	hangul
+0c823f3b	달팽이는 어디 있을까요?	hangul
+685e3d8b	달	hangul
+37905068	팽	hangul
+36e20015	사과	hangul
+99c651dc	사과!	hangul
+8e3b5800	사과는 어디 있을까요?	hangul
+6f4628db	바나나	hangul
+2572818e	바나나!	hangul
+914cfd6a	바나나는 어디 있을까요?	hangul
+e940b75d	포도	hangul
+ace0d834	포도!	hangul
+e259cbb8	포도는 어디 있을까요?	hangul
+6f7bb355	딸기	hangul
+f3bb7f9c	딸기!	hangul
+a8919c40	딸기는 어디 있을까요?	hangul
+3c548647	딸	hangul
+1223b8f6	수박	hangul
+653bfa75	수박!	hangul
+0a17729b	수박은 어디 있을까요?	hangul
+0f493a70	박	hangul
+afa5faf9	복숭아	hangul
+5a49e208	복숭아!	hangul
+fe495edc	복숭아는 어디 있을까요?	hangul
+6f483e90	복	hangul
+7bba0b81	레몬	hangul
+65e04ce0	레몬!	hangul
+a08d9340	레몬은 어디 있을까요?	hangul
+a8520a4b	몬	hangul
+48da735d	체리	hangul
+2be3cc34	체리!	hangul
+9ec2e7b8	체리는 어디 있을까요?	hangul
+b69b6fe5	파인애플	hangul
+3ab0f18c	파인애플!	hangul
+7f046884	파인애플은 어디 있을까요?	hangul
+fca2d787	인	hangul
+0886946b	플	hangul
+7504b815	키위	hangul
+6a6df9dc	키위!	hangul
+9028a000	키위는 어디 있을까요?	hangul
+605fc3f3	귤	hangul
+88c14396	귤!	hangul
+94de211e	귤은 어디 있을까요?	hangul
+956905f8	망고	hangul
+0d54349b	망고!	hangul
+feced2f5	망고는 어디 있을까요?	hangul
+574cd1c8	망	hangul
+458c3d61	멜론	hangul
+bbc46bc0	멜론!	hangul
+e365aea0	멜론은 어디 있을까요?	hangul
+d85255db	멜	hangul
+e44f42bf	론	hangul
+be7e1818	당근	hangul
+198021bb	당근!	hangul
+77d99e61	당근은 어디 있을까요?	hangul
+785fe9bb	근	hangul
+f6644e0d	감자	hangul
+0be70f44	감자!	hangul
+e2ef2a08	감자는 어디 있을까요?	hangul
+1462724f	감	hangul
+70313d10	옥수수	hangul
+ce835423	옥수수!	hangul
+23f27bdd	옥수수는 어디 있을까요?	hangul
+1fa4a1a0	옥	hangul
+6e42a56f	토마토	hangul
+e0ea39ca	토마토!	hangul
+63faa976	토마토는 어디 있을까요?	hangul
+a9c9dbc5	오이	hangul
+2cc527ec	오이!	hangul
+25d7bc90	오이는 어디 있을까요?	hangul
+94ac5890	양파	hangul
+bc4f9ea3	양파!	hangul
+c8cd135d	양파는 어디 있을까요?	hangul
+6e480b34	버섯	hangul
+b069720f	버섯!	hangul
+0208d8cd	버섯은 어디 있을까요?	hangul
+29a6445e	섯	hangul
+6bfab19d	우유	hangul
+b7a5caf4	우유!	hangul
+71ea6ff8	우유는 어디 있을까요?	hangul
+66187071	피자	hangul
+0878cdf0	피자!	hangul
+85256ec4	피자는 어디 있을까요?	hangul
+f15b5e7d	치즈	hangul
+4ed58ad4	치즈!	hangul
+83390258	치즈는 어디 있을까요?	hangul
+ef4c2e10	빵	hangul
+e5ecb723	빵!	hangul
+84066949	빵은 어디 있을까요?	hangul
+17df8291	달걀	hangul
+44dabb10	달걀!	hangul
+e4494210	달걀은 어디 있을까요?	hangul
+c461f45f	걀	hangul
+6e6c0839	주먹밥	hangul
+ec10bdc8	주먹밥!	hangul
+74705f68	주먹밥은 어디 있을까요?	hangul
+3b52f1b4	먹	hangul
+1f4953a0	밥	hangul
+8a09a683	아이스크림	hangul
+ef315106	아이스크림!	hangul
+7134edae	아이스크림은 어디 있을까요?	hangul
+b84d6a7b	림	hangul
+455138a7	케이크	hangul
+a4dbfaf2	케이크!	hangul
+5af3859e	케이크는 어디 있을까요?	hangul
+1e404cba	사탕	hangul
+3a389801	사탕!	hangul
+230904af	사탕은 어디 있을까요?	hangul
+4f8d5030	탕	hangul
+938b033e	자동차	hangul
+62d5e9cd	자동차!	hangul
+28b9bf1f	자동차는 어디 있을까요?	hangul
+5b5c9614	동	hangul
+02094685	기차	hangul
+d89a342c	기차!	hangul
+5fe00150	기차는 어디 있을까요?	hangul
+e94d85d5	버스	hangul
+3909df1c	버스!	hangul
+d19686c0	버스는 어디 있을까요?	hangul
+e4b3f4fa	비행기	hangul
+e24a74c1	비행기!	hangul
+63aba4a3	비행기는 어디 있을까요?	hangul
+8b85cfa4	행	hangul
+dda27b8a	배!	hangul
+5a34f1b6	배는 어디 있을까요?	hangul
+0d188633	자전거	hangul
+af9b0e56	자전거!	hangul
+7403b312	자전거는 어디 있을까요?	hangul
+009afed3	전	hangul
+22b63f90	헬리콥터	hangul
+55e643a3	헬리콥터!	hangul
+6a31ae5d	헬리콥터는 어디 있을까요?	hangul
+6885988b	헬	hangul
+df9611e0	콥	hangul
+c300ff0a	구급차	hangul
+2591b0b1	구급차!	hangul
+4fb34d13	구급차는 어디 있을까요?	hangul
+0b658a24	급	hangul
+cea083ca	소방차	hangul
+31afaaf1	소방차!	hangul
+580d0ed3	소방차는 어디 있을까요?	hangul
+2b496684	방	hangul
+cb119560	경찰차	hangul
+edadf553	경찰차!	hangul
+400a874d	경찰차는 어디 있을까요?	hangul
+b761dfe8	경	hangul
+349504af	찰	hangul
+4dbedad8	로켓	hangul
+5c72b5fb	로켓!	hangul
+4e438fa1	로켓은 어디 있을까요?	hangul
+159666e2	켓	hangul
+a99ba9fe	트랙터	hangul
+df0c6a0d	트랙터!	hangul
+7cb846df	트랙터는 어디 있을까요?	hangul
+9b56aed4	랙	hangul
+e7efd97c	택시	hangul
+7b932d67	택시!	hangul
+328924b1	택시는 어디 있을까요?	hangul
+578d5cc8	택	hangul
+4d688005	모자	hangul
+ff81b8ac	모자!	hangul
+32dcccd0	모자는 어디 있을까요?	hangul
+676de1f9	바지	hangul
+a9fa8708	바지!	hangul
+a14d45dc	바지는 어디 있을까요?	hangul
+506b6284	양말	hangul
+3e0c49bf	양말!	hangul
+a16e361d	양말은 어디 있을까요?	hangul
+fbf3b54d	우산	hangul
+0ca69904	우산!	hangul
+1281b77c	우산은 어디 있을까요?	hangul
+3131c24d	시계	hangul
+dd551004	시계!	hangul
+5c484848	시계는 어디 있을까요?	hangul
+1daed402	가방	hangul
+dd37f319	가방!	hangul
+34466927	가방은 어디 있을까요?	hangul
+0aa16615	의자	hangul
+f013e3dc	의자!	hangul
+73019a00	의자는 어디 있을까요?	hangul
+6f616e90	공	hangul
+076140a3	공!	hangul
+323222c9	공은 어디 있을까요?	hangul
+2a2a10ee	운동화	hangul
+2f3875dd	운동화!	hangul
+2486482f	운동화는 어디 있을까요?	hangul
+b0a3f2e3	운	hangul
+7e751823	장갑	hangul
+1454cb26	장갑!	hangul
+722242ce	장갑은 어디 있을까요?	hangul
+9fa24520	장	hangul
+136270bc	갑	hangul
+6989df7e	안경	hangul
+830aa28d	안경!	hangul
+72b8da33	안경은 어디 있을까요?	hangul
+0085f560	곰인형	hangul
+13e11553	곰인형!	hangul
+28147ad9	곰인형은 어디 있을까요?	hangul
+0f8b5870	형	hangul
+bf944c80	책	hangul
+3774a173	책!	hangul
+e726bc79	책은 어디 있을까요?	hangul
+bfd04db1	연필	hangul
+84ea19b0	연필!	hangul
+b6c428b0	연필은 어디 있을까요?	hangul
+749edb6f	연	hangul
+c0862313	필	hangul
+f526ee79	선물	hangul
+44493488	선물!	hangul
+5ff66c28	선물은 어디 있을까요?	hangul
+24a63c7f	선	hangul
+259ff6a6	해!	hangul
+7734a322	해는 어디 있을까요?	hangul
+f65b129e	달!	hangul
+1ff71606	달은 어디 있을까요?	hangul
+4047f493	별	hangul
+e3463436	별!	hangul
+22ea2c3e	별은 어디 있을까요?	hangul
+778c18a9	나무	hangul
+b98a9e18	나무!	hangul
+3b429b2c	나무는 어디 있을까요?	hangul
+c56388f2	꽃	hangul
+8eb06429	꽃!	hangul
+e95f2cd7	꽃은 어디 있을까요?	hangul
+5e57fa1d	구름	hangul
+c07eec74	구름!	hangul
+8c36c0cc	구름은 어디 있을까요?	hangul
+804d1253	름	hangul
+e9783ab6	비!	hangul
+eb19db72	비는 어디 있을까요?	hangul
+5e6c7477	눈사람	hangul
+fabb2362	눈사람!	hangul
+f0e10622	눈사람은 어디 있을까요?	hangul
+0c5f3fb7	눈	hangul
+885690eb	람	hangul
+d140f15f	무지개	hangul
+e73c295a	무지개!	hangul
+7049ab06	무지개는 어디 있을까요?	hangul
+018683b1	번개	hangul
+f6c11bb0	번개!	hangul
+59b4b404	번개는 어디 있을까요?	hangul
+8c486c37	번	hangul
+2ace027d	파도	hangul
+be4db6d4	파도!	hangul
+16cb9658	파도는 어디 있을까요?	hangul
+7115e30a	산!	hangul
+4bcdc70a	산은 어디 있을까요?	hangul
+ba40468b	낙엽	hangul
+dd2f3d9e	낙엽!	hangul
+bb694906	낙엽은 어디 있을까요?	hangul
+9b5b67d4	낙	hangul
+779ee028	엽	hangul
+0ff11922	눈!	hangul
+80bd28e2	눈은 어디 있을까요?	hangul
+be192846	코!	hangul
+e586e542	코는 어디 있을까요?	hangul
+7fa212c0	입	hangul
+cd23b833	입!	hangul
+51660339	입은 어디 있을까요?	hangul
+a07c44da	귀!	hangul
+3f596d86	귀는 어디 있을까요?	hangul
+94a559cf	손	hangul
+ee4c91aa	손!	hangul
+67e132aa	손은 어디 있을까요?	hangul
+1849489b	발	hangul
+f55d7cce	발!	hangul
+6aaa19d6	발은 어디 있을까요?	hangul
+523b58a6	이!	hangul,numbers
+3a5add22	이는 어디 있을까요?	hangul
+13d2408d	다리	hangul
+dffbcec4	다리!	hangul
+2d0c8688	다리는 어디 있을까요?	hangul
+6541269a	혀!	hangul
+c33be1c6	혀는 어디 있을까요?	hangul
+603cc483	일부터 오까지	numbers
+65fbd110	일부터 십까지	numbers
+b2bf8683	하나씩 눌러서 세어 봐요!	numbers
+1518313f	몇 개일까요?	numbers
+19eeb0db	그림을 하나씩 눌러서 세어 봐요!	numbers
+324dd133	몇 개일까요? 그림을 하나씩 눌러서 세어 봐요!	numbers
+2fff375d	어느 쪽이 더 많을까요?	numbers
+c0829320	어느 쪽이 더 적을까요?	numbers
+e78499ad	하나	numbers
+1ba751e9	모두 하나! 숫자 일	numbers
+394c3346	하나! 숫자 일을 찾아요!	numbers
+824f2bee	일!	numbers
+14f3f8cd	한 개! 일!	numbers
+8861c2d2	한 개!	numbers
+dc558227	둘	numbers
+fa79c3f3	모두 둘! 숫자 이	numbers
+c498edf0	둘! 숫자 이를 찾아요!	numbers
+b60a9119	두 개! 이!	numbers
+7485cbd6	두 개!	numbers
+cda5b38a	셋	numbers
+d0e21342	모두 셋! 숫자 삼	numbers
+724e4d39	셋! 숫자 삼을 찾아요!	numbers
+091fccae	삼!	numbers
+8be98559	세 개! 삼!	numbers
+b6dcf16e	세 개!	numbers
+ac6d4ed2	세 개가 한 개보다 많아요!	numbers
+b8af982d	한 개가 세 개보다 적어요!	numbers
+315ac0f6	넷	numbers
+da27dd76	모두 넷! 숫자 사	numbers
+78b9c2a5	넷! 숫자 사를 찾아요!	numbers
+e8f88ade	사!	numbers
+34ff69b5	네 개! 사!	numbers
+2307ed8a	네 개!	numbers
+0b43163e	네 개가 한 개보다 많아요!	numbers
+b0323d09	한 개가 네 개보다 적어요!	numbers
+31eb9cfa	네 개가 두 개보다 많아요!	numbers
+74386fc5	두 개가 네 개보다 적어요!	numbers
+9176bd54	다섯	numbers
+7f369de4	모두 다섯! 숫자 오	numbers
+576184cb	다섯! 숫자 오를 찾아요!	numbers
+752cb556	오!	numbers
+da1662e2	다섯 개! 오!	numbers
+bb5ee173	다섯 개!	numbers
+d0c953c9	다섯 개가 한 개보다 많아요!	numbers
+4df51128	한 개가 다섯 개보다 적어요!	numbers
+ba753e8d	다섯 개가 두 개보다 많아요!	numbers
+efac9074	두 개가 다섯 개보다 적어요!	numbers
+a3901df5	다섯 개가 세 개보다 많아요!	numbers
+2cfb948c	세 개가 다섯 개보다 적어요!	numbers
+54c92d2c	여섯	numbers
+cc49f503	모두 여섯! 숫자 육	numbers
+88b8f768	여섯! 숫자 육을 찾아요!	numbers
+e6b9beb7	육!	numbers
+06f38923	여섯 개! 육!	numbers
+24fdb1eb	여섯 개!	numbers
+6b372641	여섯 개가 한 개보다 많아요!	numbers
+6ef71930	한 개가 여섯 개보다 적어요!	numbers
+daf4f435	여섯 개가 두 개보다 많아요!	numbers
+8f486a9c	두 개가 여섯 개보다 적어요!	numbers
+df42374d	여섯 개가 세 개보다 많아요!	numbers
+4e3a70e4	세 개가 여섯 개보다 적어요!	numbers
+5e5bce59	여섯 개가 네 개보다 많아요!	numbers
+d85a83f8	네 개가 여섯 개보다 적어요!	numbers
+31cc04fe	일곱	numbers
+89da571a	모두 일곱! 숫자 칠	numbers
+4282faa9	일곱! 숫자 칠을 찾아요!	numbers
+78c4bcba	칠!	numbers
+56ec6e30	일곱 개! 칠!	numbers
+f40406c9	일곱 개!	numbers
+f4d5a3d7	일곱 개가 한 개보다 많아요!	numbers
+86530dd2	한 개가 일곱 개보다 적어요!	numbers
+40d6f95b	일곱 개가 두 개보다 많아요!	numbers
+9a423d76	두 개가 일곱 개보다 적어요!	numbers
+d13d1803	일곱 개가 세 개보다 많아요!	numbers
+4ffbe18e	세 개가 일곱 개보다 적어요!	numbers
+a60cd93f	일곱 개가 네 개보다 많아요!	numbers
+6009124a	네 개가 일곱 개보다 적어요!	numbers
+0b6efd34	일곱 개가 다섯 개보다 많아요!	numbers
+90faffb3	다섯 개가 일곱 개보다 적어요!	numbers
+857ceebc	여덟	numbers
+e8ded73c	모두 여덟! 숫자 팔	numbers
+0fd068fb	여덟! 숫자 팔을 찾아요!	numbers
+34ce1e86	팔!	numbers
+21d7d86a	여덟 개! 팔!	numbers
+ebd726bb	여덟 개!	numbers
+6f2fceb1	여덟 개가 한 개보다 많아요!	numbers
+fda46160	한 개가 여덟 개보다 적어요!	numbers
+3c003765	여덟 개가 두 개보다 많아요!	numbers
+b553a48c	두 개가 여덟 개보다 적어요!	numbers
+5281efbd	여덟 개가 세 개보다 많아요!	numbers
+748af394	세 개가 여덟 개보다 적어요!	numbers
+ecdf1c69	여덟 개가 네 개보다 많아요!	numbers
+42cc96c8	네 개가 여덟 개보다 적어요!	numbers
+5b83637e	여덟 개가 다섯 개보다 많아요!	numbers
+74640929	다섯 개가 여덟 개보다 적어요!	numbers
+8216da96	여덟 개가 여섯 개보다 많아요!	numbers
+a0758611	여섯 개가 여덟 개보다 적어요!	numbers
+951eecae	아홉	numbers
+2f537b16	모두 아홉! 숫자 구	numbers
+7394dcfd	아홉! 숫자 구를 찾아요!	numbers
+fa12b01e	구!	numbers
+9e50b1dc	아홉 개! 구!	numbers
+efcc6fb9	아홉 개!	numbers
+e8f76b67	아홉 개가 한 개보다 많아요!	numbers
+bd8704b2	한 개가 아홉 개보다 적어요!	numbers
+adac82ab	아홉 개가 두 개보다 많아요!	numbers
+65f98466	두 개가 아홉 개보다 적어요!	numbers
+59f81813	아홉 개가 세 개보다 많아요!	numbers
+57d87bfe	세 개가 아홉 개보다 적어요!	numbers
+b270a5af	아홉 개가 네 개보다 많아요!	numbers
+eddc5f2a	네 개가 아홉 개보다 적어요!	numbers
+86f9ae84	아홉 개가 다섯 개보다 많아요!	numbers
+542c7eb3	다섯 개가 아홉 개보다 적어요!	numbers
+c924026c	아홉 개가 여섯 개보다 많아요!	numbers
+4271ba2b	여섯 개가 아홉 개보다 적어요!	numbers
+a76198de	아홉 개가 일곱 개보다 많아요!	numbers
+c79e35a9	일곱 개가 아홉 개보다 적어요!	numbers
+709ed523	열	numbers
+8abeea3c	모두 열! 숫자 십	numbers
+6ed0466b	열! 숫자 십을 찾아요!	numbers
+094be69b	십!	numbers
+bb7637c8	열 개! 십!	numbers
+b93848ba	열 개!	numbers
+50400d8e	열 개가 한 개보다 많아요!	numbers
+12f07239	한 개가 열 개보다 적어요!	numbers
+0b27c80a	열 개가 두 개보다 많아요!	numbers
+cf2146d5	두 개가 열 개보다 적어요!	numbers
+85251b92	열 개가 세 개보다 많아요!	numbers
+be17d84d	세 개가 열 개보다 적어요!	numbers
+4d0829d6	열 개가 네 개보다 많아요!	numbers
+9eadff31	네 개가 열 개보다 적어요!	numbers
+ba48b1df	열 개가 다섯 개보다 많아요!	numbers
+ab6a4c26	다섯 개가 열 개보다 적어요!	numbers
+9967d9c7	열 개가 여섯 개보다 많아요!	numbers
+e947873e	여섯 개가 열 개보다 적어요!	numbers
+76977a1d	열 개가 일곱 개보다 많아요!	numbers
+f37eeea0	일곱 개가 열 개보다 적어요!	numbers
+f097bc97	열 개가 여덟 개보다 많아요!	numbers
+985efb4e	여덟 개가 열 개보다 적어요!	numbers

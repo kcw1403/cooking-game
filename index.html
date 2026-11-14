@@ -32,6 +32,7 @@ h1{margin:0;font-size:calc(var(--u)*8);font-weight:900;text-align:center;}
 .hangul .ic{font-weight:900;font-size:calc(var(--u)*15);text-shadow:0 calc(var(--u)*.8) 0 rgba(0,0,0,.15);}
 @keyframes bob{50%{transform:translateY(calc(var(--u)*-2)) rotate(-4deg)}}
 </style>
+<script src="voice/list.js"></script>
 </head>
 <body>
 <h1>무엇을 하고 놀까요?</h1>
@@ -41,15 +42,72 @@ h1{margin:0;font-size:calc(var(--u)*8);font-weight:900;text-align:center;}
   <a class="card numbers" href="numbers.html" data-say="숫자 놀이"><div class="ic">123</div>숫자 놀이</a>
 </div>
 <script>
-/* 카드를 누르면 이름을 읽어 준 뒤 이동합니다 */
+/* ================= 음성 재생 (mp3 우선, 없으면 기기 음성) =================
+   voice/list.js의 VOICE_FILES에 있는 문장은 voice/<이름>.mp3를 재생하고, 없으면 기기 음성(Web Speech API)으로 읽습니다.
+   문장 배열을 주면 조각 mp3를 차례로 이어서 재생합니다. 한 조각이라도 mp3가 없으면 전체를 기기 음성으로 읽습니다.
+   mp3 이름은 문장의 FNV-1a 해시(16진수 8자리)입니다. tools/voice-lines.html도 같은 방식으로 이름을 만듭니다.
+   이 코드는 index.html, cooking.html, hangul.html, numbers.html에 똑같이 들어 있습니다. 고칠 때는 네 파일을 함께 고칩니다. */
+const VOICE = (() => {
+  const norm = t => String(t).trim().replace(/\s+/g, ' ');
+  const hash = t => { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); };
+  const heard = new Set();   // 지금까지 읽은 문장 (문장 목록 점검용)
+  const bufs = {};
+  let ctx = null, src = null, token = 0;
+  function unlock() {        // 아이패드는 터치 안에서 소리 장치를 켜야 그 뒤에 소리가 납니다
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') ctx.resume();
+    } catch (e) { /* 소리 장치 없음 */ }
+  }
+  ['pointerup', 'touchend', 'click', 'keydown'].forEach(t => document.addEventListener(t, unlock, true));
+  function load(h) {
+    return bufs[h] = bufs[h] || fetch(`voice/${h}.mp3`)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+      .then(ab => new Promise((ok, no) => ctx.decodeAudioData(ab, ok, no)))
+      .catch(e => { delete bufs[h]; throw e; });
+  }
+  function stop() {
+    token++;
+    if (src) { try { src.onended = null; src.stop(); } catch (e) {} src = null; }
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+  }
+  // parts: 문장 하나 또는 문장 배열, tts(전체 문장): 기기 음성으로 읽는 함수, onend: mp3를 다 재생한 뒤 부를 함수
+  function play(parts, tts, onend) {
+    stop();
+    const list = [].concat(parts).filter(Boolean).map(norm).filter(Boolean);
+    if (!list.length) return;
+    list.forEach(t => heard.add(t));
+    const files = window.VOICE_FILES || {}, hs = list.map(hash);
+    unlock();
+    if (!ctx || !hs.every((h, i) => files[h] === list[i])) { tts(list.join(' ')); return; }
+    const my = token;
+    Promise.all(hs.map(load)).then(bs => {
+      let i = 0;
+      const next = () => {
+        if (my !== token) return;
+        if (i >= bs.length) { src = null; if (onend) onend(); return; }
+        src = ctx.createBufferSource(); src.buffer = bs[i++]; src.connect(ctx.destination);
+        src.onended = next; src.start();
+      };
+      next();
+    }).catch(() => { if (my === token) tts(list.join(' ')); });
+  }
+  return { play, stop, heard, hash, norm };
+})();
+
+/* 음성 문장 목록: tools/voice-lines.html이 이 목록으로 mp3 문장표를 만듭니다 */
+function voiceLines(){return [...document.querySelectorAll('.card')].map(a=>a.dataset.say);}
+
+/* 카드를 누르면 이름을 읽어 준 뒤 이동합니다 (다 읽거나 1.5초가 지나면 이동) */
 document.querySelectorAll('.card').forEach(a=>a.addEventListener('click',e=>{
   e.preventDefault();
   let moved=false;const go=()=>{if(!moved){moved=true;location.href=a.getAttribute('href');}};
-  if('speechSynthesis' in window){
-    speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(a.dataset.say);u.lang='ko-KR';u.rate=.95;u.pitch=1.25;
-    u.onend=go;speechSynthesis.speak(u);setTimeout(go,1500);
-  }else go();
+  VOICE.play(a.dataset.say,t=>{
+    if(!('speechSynthesis' in window)){go();return;}
+    const u=new SpeechSynthesisUtterance(t);u.lang='ko-KR';u.rate=.95;u.pitch=1.25;
+    u.onend=go;speechSynthesis.speak(u);
+  },go);
+  setTimeout(go,1500);
 }));
 /* 확대·길게 누르기 메뉴 막기 */
 document.addEventListener('gesturestart',e=>e.preventDefault());

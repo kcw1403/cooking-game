@@ -330,6 +330,7 @@
 
 <div id="banner"></div>
 
+<script src="voice/list.js"></script>
 <script>
 /* ================= 한글 데이터 ================= */
 const CHO  = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
@@ -574,14 +575,68 @@ if ('speechSynthesis' in window) {
 } else {
   $('voiceTip').style.display = 'block';
 }
-function speak(text, rate = 0.8) {
+/* ================= 음성 재생 (mp3 우선, 없으면 기기 음성) =================
+   voice/list.js의 VOICE_FILES에 있는 문장은 voice/<이름>.mp3를 재생하고, 없으면 기기 음성(Web Speech API)으로 읽습니다.
+   문장 배열을 주면 조각 mp3를 차례로 이어서 재생합니다. 한 조각이라도 mp3가 없으면 전체를 기기 음성으로 읽습니다.
+   mp3 이름은 문장의 FNV-1a 해시(16진수 8자리)입니다. tools/voice-lines.html도 같은 방식으로 이름을 만듭니다.
+   이 코드는 index.html, cooking.html, hangul.html, numbers.html에 똑같이 들어 있습니다. 고칠 때는 네 파일을 함께 고칩니다. */
+const VOICE = (() => {
+  const norm = t => String(t).trim().replace(/\s+/g, ' ');
+  const hash = t => { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); };
+  const heard = new Set();   // 지금까지 읽은 문장 (문장 목록 점검용)
+  const bufs = {};
+  let ctx = null, src = null, token = 0;
+  function unlock() {        // 아이패드는 터치 안에서 소리 장치를 켜야 그 뒤에 소리가 납니다
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') ctx.resume();
+    } catch (e) { /* 소리 장치 없음 */ }
+  }
+  ['pointerup', 'touchend', 'click', 'keydown'].forEach(t => document.addEventListener(t, unlock, true));
+  function load(h) {
+    return bufs[h] = bufs[h] || fetch(`voice/${h}.mp3`)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+      .then(ab => new Promise((ok, no) => ctx.decodeAudioData(ab, ok, no)))
+      .catch(e => { delete bufs[h]; throw e; });
+  }
+  function stop() {
+    token++;
+    if (src) { try { src.onended = null; src.stop(); } catch (e) {} src = null; }
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+  }
+  // parts: 문장 하나 또는 문장 배열, tts(전체 문장): 기기 음성으로 읽는 함수, onend: mp3를 다 재생한 뒤 부를 함수
+  function play(parts, tts, onend) {
+    stop();
+    const list = [].concat(parts).filter(Boolean).map(norm).filter(Boolean);
+    if (!list.length) return;
+    list.forEach(t => heard.add(t));
+    const files = window.VOICE_FILES || {}, hs = list.map(hash);
+    unlock();
+    if (!ctx || !hs.every((h, i) => files[h] === list[i])) { tts(list.join(' ')); return; }
+    const my = token;
+    Promise.all(hs.map(load)).then(bs => {
+      let i = 0;
+      const next = () => {
+        if (my !== token) return;
+        if (i >= bs.length) { src = null; if (onend) onend(); return; }
+        src = ctx.createBufferSource(); src.buffer = bs[i++]; src.connect(ctx.destination);
+        src.onended = next; src.start();
+      };
+      next();
+    }).catch(() => { if (my === token) tts(list.join(' ')); });
+  }
+  return { play, stop, heard, hash, norm };
+})();
+
+function ttsSpeak(text, rate) {
   if (!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'ko-KR'; if (koVoice) u.voice = koVoice;
   u.rate = rate; u.pitch = 1.1;
   speechSynthesis.speak(u);
 }
+// text: 문장 하나 또는 이어 읽을 문장 배열 (예: [낱말, 칭찬])
+function speak(text, rate = 0.8) { VOICE.play(text, t => ttsSpeak(t, rate)); }
 
 let actx = null;
 function tone(freqs) {
@@ -637,7 +692,7 @@ function show(id) {
   $('title').textContent = TITLES[id];
   quizState.round++; matchState.round++; lpState.round++;   // 화면을 떠나면 예약된 다음 문제 취소
   clearTimeout(lpIdleT);
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  VOICE.stop();
   ms.round++;
   if (id === 'compose') setCmpMode(cmpMode);
   if (id === 'quiz') newQuiz();
@@ -810,7 +865,7 @@ function missionTap(j, btn) {
   renderMission();
   if (ms.si < ms.syls.length) { tone([660, 880]); speak(ms.syls[ms.si - 1]); syncVGroup(); return; }
   ms.lock = true; goodTone(); addStar(); celebrate($('mSlots'));
-  setTimeout(() => speak(ms.word + '! ' + pick(PRAISE)), 300);
+  setTimeout(() => speak([ms.word + '!', pick(PRAISE)]), 300);
   const r = ms.round;
   setTimeout(() => { if (r === ms.round) newMission(); }, 2800);
 }
@@ -842,7 +897,7 @@ function runChoice(box, starBox, q, state, onNext) {
         goodTone(); celebrate(b); addStar();
         state.streak++;
         starBox.textContent = '⭐'.repeat(state.streak % 10 || (state.streak ? 10 : 0));
-        setTimeout(() => speak(q.praiseSay ? q.praiseSay + ', ' + pick(PRAISE) : pick(PRAISE)), 350);
+        setTimeout(() => speak(q.praiseSay ? [q.praiseSay + '!', pick(PRAISE)] : pick(PRAISE)), 350);
         if (state.streak % 10 === 0) setTimeout(() => banner('🎉 별 10개 모았어요! 🎉'), 900);
         setTimeout(next, state.streak % 10 === 0 ? 2800 : 1700);
       } else {
@@ -1327,7 +1382,7 @@ function newListenPic() {
       if (w === item) {
         lpState.locked = true; b.classList.add('right'); goodTone(); celebrate(b); addStar();
         lpState.streak++; $('lpStars').textContent = '⭐'.repeat(lpState.streak % 10 || (lpState.streak ? 10 : 0));
-        setTimeout(() => { if (round === lpState.round) speak(`${item[1]}! ${pick(PRAISE)}`); }, 350);
+        setTimeout(() => { if (round === lpState.round) speak([`${item[1]}!`, pick(PRAISE)]); }, 350);
         if (lpState.streak % 10 === 0) setTimeout(() => banner('🎉 별 10개 모았어요! 🎉'), 900);
         setTimeout(() => { if (round === lpState.round) newListenPic(); }, lpState.streak % 10 === 0 ? 2800 : 2000);
       } else {
@@ -1362,6 +1417,21 @@ function applyMode() {
   onlyNoBatchim = babyMode; $('noBatchim').classList.toggle('on', onlyNoBatchim);
   refreshWordList();
 }
+/* ================= 음성 문장 목록 ================= */
+// 이 놀이에서 읽을 수 있는 문장을 모두 돌려줍니다. tools/voice-lines.html이 이 목록으로 mp3 문장표를 만듭니다.
+// speak()에 새 문장을 넣으면 여기에도 꼭 추가합니다.
+// 글자 만들기(마음대로)의 받침 있는 글자는 만 개가 넘어서 넣지 않습니다. 그 글자는 기기 음성으로 읽습니다.
+function voiceLines() {
+  const L = [...PRAISE, '다시 해 볼까요?', '아기 모드', '언니 형 모드'];
+  const consKeys = Object.keys(CONS_NAME);                       // 기본 자음 + 쌍자음
+  const names = [...consKeys.map(c => CONS_NAME[c]), ...JUNG.map(jamoSay)];
+  names.forEach(n => L.push(n, `${n}${josa(n)} 찾아 볼까요?`));   // 자모 이름, 낱말 만들기 도움말
+  consKeys.filter(c => !JONG.includes(c)).forEach(c => L.push(`${c}${josa(CONS_NAME[c]) === '을' ? '은' : '는'} 받침이 될 수 없어요`));
+  CHO.forEach(c => JUNG.forEach(v => L.push(syl(c, v))));        // 받침 없는 글자 (듣고 고르기, 따라 쓰기, 마음대로 만들기)
+  WORDS.forEach(([, w]) => L.push(w, `${w}!`, `${eunNeun(w)} 어디 있을까요?`, ...w));   // 낱말, 칭찬 앞 낱말, 듣고 그림 찾기, 낱말의 글자
+  return L;
+}
+
 $('modeBtn').onclick = () => {
   babyMode = !babyMode;
   try { localStorage.setItem('hangul-mode', babyMode ? 'baby' : 'big'); } catch (e) {}

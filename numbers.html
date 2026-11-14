@@ -108,6 +108,7 @@
     .cntBtn { font-size: 22px; padding: 8px 20px; }
   }
 </style>
+<script src="voice/list.js"></script>
 </head>
 <body>
 <header>
@@ -184,16 +185,70 @@ renderRange();
 let lastN = 0;
 function newN(min = 1) { let n; do { n = min + rand(MAX - min + 1); } while (n === lastN && MAX > min); lastN = n; return n; }
 
+/* ================= 음성 재생 (mp3 우선, 없으면 기기 음성) =================
+   voice/list.js의 VOICE_FILES에 있는 문장은 voice/<이름>.mp3를 재생하고, 없으면 기기 음성(Web Speech API)으로 읽습니다.
+   문장 배열을 주면 조각 mp3를 차례로 이어서 재생합니다. 한 조각이라도 mp3가 없으면 전체를 기기 음성으로 읽습니다.
+   mp3 이름은 문장의 FNV-1a 해시(16진수 8자리)입니다. tools/voice-lines.html도 같은 방식으로 이름을 만듭니다.
+   이 코드는 index.html, cooking.html, hangul.html, numbers.html에 똑같이 들어 있습니다. 고칠 때는 네 파일을 함께 고칩니다. */
+const VOICE = (() => {
+  const norm = t => String(t).trim().replace(/\s+/g, ' ');
+  const hash = t => { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); };
+  const heard = new Set();   // 지금까지 읽은 문장 (문장 목록 점검용)
+  const bufs = {};
+  let ctx = null, src = null, token = 0;
+  function unlock() {        // 아이패드는 터치 안에서 소리 장치를 켜야 그 뒤에 소리가 납니다
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') ctx.resume();
+    } catch (e) { /* 소리 장치 없음 */ }
+  }
+  ['pointerup', 'touchend', 'click', 'keydown'].forEach(t => document.addEventListener(t, unlock, true));
+  function load(h) {
+    return bufs[h] = bufs[h] || fetch(`voice/${h}.mp3`)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+      .then(ab => new Promise((ok, no) => ctx.decodeAudioData(ab, ok, no)))
+      .catch(e => { delete bufs[h]; throw e; });
+  }
+  function stop() {
+    token++;
+    if (src) { try { src.onended = null; src.stop(); } catch (e) {} src = null; }
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+  }
+  // parts: 문장 하나 또는 문장 배열, tts(전체 문장): 기기 음성으로 읽는 함수, onend: mp3를 다 재생한 뒤 부를 함수
+  function play(parts, tts, onend) {
+    stop();
+    const list = [].concat(parts).filter(Boolean).map(norm).filter(Boolean);
+    if (!list.length) return;
+    list.forEach(t => heard.add(t));
+    const files = window.VOICE_FILES || {}, hs = list.map(hash);
+    unlock();
+    if (!ctx || !hs.every((h, i) => files[h] === list[i])) { tts(list.join(' ')); return; }
+    const my = token;
+    Promise.all(hs.map(load)).then(bs => {
+      let i = 0;
+      const next = () => {
+        if (my !== token) return;
+        if (i >= bs.length) { src = null; if (onend) onend(); return; }
+        src = ctx.createBufferSource(); src.buffer = bs[i++]; src.connect(ctx.destination);
+        src.onended = next; src.start();
+      };
+      next();
+    }).catch(() => { if (my === token) tts(list.join(' ')); });
+  }
+  return { play, stop, heard, hash, norm };
+})();
+
 /* ---------- 소리 ---------- */
 let koVoice = null;
 function pickVoice() { const vs = speechSynthesis.getVoices(); koVoice = vs.find(v => v.lang === 'ko-KR') || vs.find(v => v.lang && v.lang.startsWith('ko')) || null; }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function speak(text, rate = 0.85) {
-  if (!('speechSynthesis' in window) || !text) return;
-  speechSynthesis.cancel();
+function ttsSpeak(text, rate) {
+  if (!('speechSynthesis' in window)) return;
   const u = new SpeechSynthesisUtterance(text); u.lang = 'ko-KR'; if (koVoice) u.voice = koVoice; u.rate = rate; u.pitch = 1.2;
   speechSynthesis.speak(u);
 }
+// text: 문장 하나 또는 이어 읽을 문장 배열 (예: [문장, 칭찬])
+function speak(text, rate = 0.85) { VOICE.play(text, t => ttsSpeak(t, rate)); }
 let AC = null;
 function tone(freqs) {
   try {
@@ -280,7 +335,7 @@ let listenN = 0;
 const listenSay = () => speak(`${NATIVE[listenN]}! 숫자 ${eul(SINO[listenN])} 찾아요!`);
 function newListen() {
   listenN = newN();
-  makeOpts($('listenOpts'), listenN, 3, () => { later(() => speak(`${SINO[listenN]}, ${pick(PRAISE)}`), 300); later(newListen, 2000); }, listenSay);
+  makeOpts($('listenOpts'), listenN, 3, () => { later(() => speak([`${SINO[listenN]}!`, pick(PRAISE)]), 300); later(newListen, 2000); }, listenSay);
   later(listenSay, 300);
 }
 $('listenSay').onclick = listenSay;
@@ -295,13 +350,14 @@ function newHowMany() {
     c++; it.classList.add('on'); const b = document.createElement('div'); b.className = 'no'; b.textContent = c; it.appendChild(b);
     tick(c); speak(NATIVE[c], 1);
   });
-  makeOpts($('hmOpts'), hmN, 3, () => { later(() => speak(`${COUNTER[hmN]} 개! ${SINO[hmN]}, ${pick(PRAISE)}`), 300); later(newHowMany, 2300); },
+  makeOpts($('hmOpts'), hmN, 3, () => { later(() => speak([`${COUNTER[hmN]} 개! ${SINO[hmN]}!`, pick(PRAISE)]), 300); later(newHowMany, 2300); },
     () => speak('그림을 하나씩 눌러서 세어 봐요!'));
   later(() => speak('몇 개일까요?'), 300);
 }
 
 /* ================= 많다 적다 ================= */
 let cmpQ = null;
+const cmpResult = (more, big, small) => more ? `${COUNTER[big]} 개가 ${COUNTER[small]} 개보다 많아요!` : `${COUNTER[small]} 개가 ${COUNTER[big]} 개보다 적어요!`;
 const cmpSay = () => speak(cmpQ.more ? '어느 쪽이 더 많을까요?' : '어느 쪽이 더 적을까요?');
 function newCompare() {
   // 두 접시의 개수 차이는 2개 이상 (1개 차이는 3세가 눈으로 비교하기 어려움)
@@ -325,8 +381,7 @@ function newCompare() {
       if (locked || p.classList.contains('wrong')) return;
       if (right) {
         locked = true; cmpCountId++; p.classList.add('right'); goodTone(); celebrate(p); addStar();
-        const big = COUNTER[Math.max(a, b)], small = COUNTER[Math.min(a, b)];
-        later(() => speak((more ? `${big} 개가 ${small} 개보다 많아요! ` : `${small} 개가 ${big} 개보다 적어요! `) + pick(PRAISE)), 300);
+        later(() => speak([cmpResult(more, Math.max(a, b), Math.min(a, b)), pick(PRAISE)]), 300);
         later(newCompare, 2800);
       } else { cmpCountId++; p.classList.add('wrong'); shake(p); badTone(); setTimeout(cmpSay, 400); }
     };
@@ -357,6 +412,20 @@ function countPlate(plate, btn, n) {
   step();
 }
 
+/* ================= 음성 문장 목록 ================= */
+// 이 놀이에서 읽을 수 있는 문장을 모두 돌려줍니다. tools/voice-lines.html이 이 목록으로 mp3 문장표를 만듭니다.
+// speak()에 새 문장을 넣으면 여기에도 꼭 추가합니다.
+function voiceLines() {
+  const L = ['일부터 오까지', '일부터 십까지', '하나씩 눌러서 세어 봐요!', '몇 개일까요?', '그림을 하나씩 눌러서 세어 봐요!',
+    '몇 개일까요? 그림을 하나씩 눌러서 세어 봐요!', '어느 쪽이 더 많을까요?', '어느 쪽이 더 적을까요?', ...PRAISE];
+  for (let n = 1; n <= 10; n++) {
+    L.push(NATIVE[n], `모두 ${NATIVE[n]}! 숫자 ${SINO[n]}`, `${NATIVE[n]}! 숫자 ${eul(SINO[n])} 찾아요!`, `${SINO[n]}!`,
+      `${COUNTER[n]} 개! ${SINO[n]}!`, `${COUNTER[n]} 개!`);
+    for (let s = 1; s <= n - 2; s++) L.push(cmpResult(true, n, s), cmpResult(false, n, s));   // 많다 적다: 차이 2개 이상
+  }
+  return L;
+}
+
 /* ================= 반응이 없을 때 다시 안내 ================= */
 // 놀이 화면에서 8초 동안 아무것도 누르지 않으면 문제를 다시 읽고 누를 곳을 반짝이게 합니다. 그 뒤로는 12초마다 반복합니다.
 const IDLE = {
@@ -380,7 +449,7 @@ const TITLES = { home: '숫자 놀이터', count: '하나씩 세기', listen: '�
 const START = { count: newCount, listen: newListen, howmany: newHowMany, compare: newCompare };
 function show(id) {
   round++;
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  VOICE.stop();
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
   $('title').textContent = TITLES[id];
   curScreen = id;
