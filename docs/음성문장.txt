@@ -1,5 +1,5 @@
 # 음성 문장 목록 (tools/voice-lines.html로 만듦. 직접 고치지 않습니다)
-# 문장 1141개, 글자 6681자
+# 문장 1222개, 글자 7456자
 # 형식: mp3 이름<TAB>문장<TAB>쓰는 놀이
 41857883	요리 놀이	index
 d2366115	한글 놀이터	index
@@ -1116,18 +1116,39 @@ e9b772f9	색을 고르고 쓱쓱 칠해 봐요!	coloring
 f883473d	아직 그림이 없어요. 그림을 칠해 봐요!	coloring
 cf664fa8	내 그림책	coloring
 6773faa2	이 그림을 지울까요?	coloring
+fa1b15f8	동물	coloring
+0876284f	바다 친구	coloring
+c80493e3	공룡	coloring
+7764251c	탈것	coloring
+4d767ec2	음식	coloring
+0d11d8e9	자연과 날씨	coloring
+13a78eae	곤충	coloring
+d1035d88	장난감 놀이	coloring
+baba6ea0	공주와 우주	coloring
 c035f5a6	예뻐요!	coloring
 272cf465	멋져요!	coloring
 75638a20	빨간색	coloring
-48d4818d	주황색	coloring
-53683c24	노란색	coloring
-832717b5	초록색	coloring
-06261428	파란색	coloring
-93f3090c	보라색	coloring
 4e0ccb89	분홍색	coloring
-fd4a855a	갈색	coloring
-d52d666c	하늘색	coloring
+c0cae207	연분홍색	coloring
+625a6c80	자주색	coloring
+48d4818d	주황색	coloring
+bc407dbc	살구색	coloring
+53683c24	노란색	coloring
+0f0e0258	레몬색	coloring
+0175d75a	금색	coloring
 46ad06ec	연두색	coloring
+832717b5	초록색	coloring
+aa9179a7	진초록색	coloring
+03a6e482	청록색	coloring
+d52d666c	하늘색	coloring
+06261428	파란색	coloring
+b1a979fa	남색	coloring
+93f3090c	보라색	coloring
+ad28400a	연보라색	coloring
+fd4a855a	갈색	coloring
+a40014c1	고동색	coloring
+13a7ae86	회색	coloring
+22339922	은색	coloring
 0afb898c	검은색	coloring
 b7f41144	하얀색	coloring
 d0f2e72d	강아지를 칠해 볼까요?	coloring
@@ -1142,3 +1163,63 @@ b084a642	브라키오사우루스를 칠해 볼까요?	coloring
 bf209e84	케이크를 칠해 볼까요?	coloring
 dcd3800a	사과를 칠해 볼까요?	coloring
 c65201cc	무지개를 칠해 볼까요?	coloring
+e0ccf7b6	토끼를 칠해 볼까요?	coloring
+a3fe0fb4	곰을 칠해 볼까요?	coloring
+4fdbd32e	사자를 칠해 볼까요?	coloring
+a9e3ff28	코끼리를 칠해 볼까요?	coloring
+0bf51a6a	기린을 칠해 볼까요?	coloring
+bb1a1215	병아리를 칠해 볼까요?	coloring
+8621bc1a	고래를 칠해 볼까요?	coloring
+199b7f06	문어를 칠해 볼까요?	coloring
+27ccc8eb	거북이를 칠해 볼까요?	coloring
+e6c92ad0	게를 칠해 볼까요?	coloring
+ba6b84aa	불가사리를 칠해 볼까요?	coloring
+c46894d8	해파리를 칠해 볼까요?	coloring
+f0cf90a9	상어를 칠해 볼까요?	coloring
+67596d81	트리케라톱스를 칠해 볼까요?	coloring
+b206b9a8	프테라노돈을 칠해 볼까요?	coloring
+f6d9686c	안킬로사우루스를 칠해 볼까요?	coloring
+64634334	공룡 알을 칠해 볼까요?	coloring
+75517a06	아기 공룡을 칠해 볼까요?	coloring
+1b1ba8ca	버스를 칠해 볼까요?	coloring
+b9829e3b	소방차를 칠해 볼까요?	coloring
+63244c9c	배를 칠해 볼까요?	coloring
+a7eb4c61	헬리콥터를 칠해 볼까요?	coloring
+6722e0c8	자전거를 칠해 볼까요?	coloring
+46fb1160	아이스크림을 칠해 볼까요?	coloring
+01315c71	도넛을 칠해 볼까요?	coloring
+c1edf847	수박을 칠해 볼까요?	coloring
+e022e480	바나나를 칠해 볼까요?	coloring
+b8b8a94a	딸기를 칠해 볼까요?	coloring
+a1c1df4c	햄버거를 칠해 볼까요?	coloring
+c7bbe578	해를 칠해 볼까요?	coloring
+f6cc0ab4	구름과 비를 칠해 볼까요?	coloring
+6fa5e73b	꽃을 칠해 볼까요?	coloring
+c0749026	나무를 칠해 볼까요?	coloring
+01928c3c	눈사람을 칠해 볼까요?	coloring
+659e5946	달과 별을 칠해 볼까요?	coloring
+d894c255	버섯을 칠해 볼까요?	coloring
+091bab16	나비를 칠해 볼까요?	coloring
+9b5c9fbb	무당벌레를 칠해 볼까요?	coloring
+cedde07e	꿀벌을 칠해 볼까요?	coloring
+36964198	잠자리를 칠해 볼까요?	coloring
+5d609168	애벌레를 칠해 볼까요?	coloring
+706a8ad6	개미를 칠해 볼까요?	coloring
+5105ea64	메뚜기를 칠해 볼까요?	coloring
+eecabaa3	달팽이를 칠해 볼까요?	coloring
+3b7a29e9	공을 칠해 볼까요?	coloring
+1b09a18f	곰 인형을 칠해 볼까요?	coloring
+4c84b5a1	풍선을 칠해 볼까요?	coloring
+d4c10fb5	로봇을 칠해 볼까요?	coloring
+b6b692ca	쌓기 블록을 칠해 볼까요?	coloring
+b915eab4	연을 칠해 볼까요?	coloring
+0a679e91	오리 인형을 칠해 볼까요?	coloring
+45b915cd	북을 칠해 볼까요?	coloring
+a6310969	왕관을 칠해 볼까요?	coloring
+f191c83d	성을 칠해 볼까요?	coloring
+05af10c9	요술봉을 칠해 볼까요?	coloring
+9aef05d4	드레스를 칠해 볼까요?	coloring
+ccbea131	로켓을 칠해 볼까요?	coloring
+411a9060	우주인을 칠해 볼까요?	coloring
+266b4090	외계인을 칠해 볼까요?	coloring
+b30c4dd3	토성을 칠해 볼까요?	coloring

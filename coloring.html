@@ -19,10 +19,10 @@
   button { font-family: inherit; color: var(--ink); cursor: pointer; border: none; }
 
   header { height: 72px; display: flex; align-items: center; gap: 12px; padding: 0 18px; padding-top: env(safe-area-inset-top); }
-  #homeBtn { font-size: 30px; width: 56px; height: 56px; border-radius: 16px; background: var(--card); box-shadow: 0 4px 0 rgba(0,0,0,.1); }
-  #title { font-size: 30px; font-weight: 800; flex: 1; }
-  #modeBtn { font-size: 20px; font-weight: 800; padding: 10px 18px; border-radius: 30px; background: var(--card); box-shadow: 0 4px 0 rgba(0,0,0,.1); }
-  #homeBtn:active, #modeBtn:active, .tbtn:active, .picard:active { transform: translateY(3px); box-shadow: none; }
+  #homeBtn, #bookBtn { font-size: 30px; width: 56px; height: 56px; border-radius: 16px; background: var(--card); box-shadow: 0 4px 0 rgba(0,0,0,.1); }
+  #title { font-size: 30px; font-weight: 800; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #modeBtn { font-size: 20px; font-weight: 800; padding: 10px 18px; border-radius: 30px; background: var(--card); box-shadow: 0 4px 0 rgba(0,0,0,.1); white-space: nowrap; }
+  #homeBtn:active, #bookBtn:active, #modeBtn:active, .tbtn:active, .picard:active, .cat:active { transform: translateY(3px); box-shadow: none; }
 
   main { height: calc(100% - 72px - env(safe-area-inset-top)); }
   .screen { display: none; height: 100%; }
@@ -31,15 +31,19 @@
   /* ---------- 그림 고르기 ---------- */
   #home { flex-direction: column; align-items: center; overflow-y: auto; overflow-x: hidden; padding: 8px 18px 24px; gap: 14px; touch-action: pan-y; }
   .ask { font-size: clamp(22px, 3.2vw, 32px); font-weight: 800; }
-  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: min(96vw, 980px); }
-  @media (orientation: portrait) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  /* 카테고리 버튼: 가로 화면 한 줄(9개), 세로 화면 두 줄. 가로로 밀어 넘기지 않음 (화면 고정이 가로 끌기를 막음) */
+  .cats { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; width: min(96vw, 1000px); padding-top: 6px; }
+  @media (orientation: portrait) { .cats { grid-template-columns: repeat(5, 1fr); } }
+  .cat { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px 8px; border-radius: 18px; background: var(--card);
+    box-shadow: 0 4px 0 rgba(0,0,0,.1); font-size: clamp(12px, 1.55vw, 16px); font-weight: 800; white-space: nowrap; transition: transform .15s; }
+  .cat .ic { font-size: clamp(28px, 3.6vw, 40px); line-height: 1.15; }
+  .cat.on { background: linear-gradient(#ffd27a, #ffa628); color: #fff; transform: translateY(-3px) scale(1.06); box-shadow: 0 0 0 4px #fff, 0 0 0 7px #ffa628; }
+  /* 그림 8장이 가로·세로 모두 4×2로 스크롤 없이 보이게 */
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: min(96vw, 980px, max(60vw, calc((100vh - 290px) * 1.9))); }
   .picard { position: relative; background: var(--card); border-radius: 22px; padding: 8px; box-shadow: 0 6px 0 rgba(0,0,0,.1); }
   .picard svg { display: block; width: 100%; height: auto; }
   .picard .nm { font-size: clamp(15px, 2vw, 20px); font-weight: 800; text-align: center; margin-top: 2px; }
   .picard .ok { position: absolute; right: 8px; top: 6px; font-size: 26px; }
-  .picard.book { display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(#ffd27a, #ffb238); color: #fff; }
-  .picard.book .ic { font-size: clamp(48px, 7vw, 76px); line-height: 1.1; }
-  .picard.book .nm { color: #fff; }
 
   /* ---------- 칠하기 ---------- */
   #paint { gap: 12px; padding: 6px 14px 14px; }
@@ -56,11 +60,22 @@
   #palette { display: grid; gap: 8px; justify-items: center; }
   #paint.land #palette { grid-template-columns: repeat(2, 1fr); }
   #paint.port #palette { grid-template-columns: repeat(6, 1fr); }
-  .crayon { width: 74px; height: 58px; background: none; padding: 0; transition: transform .15s; }
+  #paint.land #palette.many { grid-template-columns: repeat(3, 1fr); }
+  #paint.port #palette.many { grid-template-columns: repeat(8, 1fr); }
+  /* 크레용: 아기 모드 12색은 크게, 언니·형 모드 24색은 조금 작게 */
+  .crayon { --cw: 74px; position: relative; width: var(--cw); height: calc(var(--cw) * .78); background: none; padding: 0; border-radius: 14px;
+    transition: transform .15s, opacity .15s; opacity: .8; }
+  #palette.many .crayon { --cw: 56px; }
   .crayon svg { width: 100%; height: 100%; display: block; overflow: visible; }
-  .crayon.on { transform: translateX(-10px) scale(1.12); }
-  #paint.port .crayon.on { transform: translateY(-10px) scale(1.12); }
-  #tools { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  /* 고른 크레용: 흰 받침 + 진한 테두리 + 크게 + 초록 ✔ 표시 */
+  .crayon.on { opacity: 1; background: #fff; box-shadow: 0 0 0 4px var(--ink), 0 6px 10px rgba(0,0,0,.25); transform: scale(1.18); z-index: 2; animation: pickc .35s; }
+  .crayon.on::after { content: '✔'; position: absolute; right: -10px; top: -12px; width: 26px; height: 26px; border-radius: 50%; background: #3fb02b; color: #fff;
+    font-size: 16px; font-weight: 900; line-height: 26px; text-align: center; box-shadow: 0 0 0 3px #fff; }
+  @keyframes pickc { 0% { transform: scale(1); } 55% { transform: scale(1.38); } 100% { transform: scale(1.18); } }
+  /* 지금 고른 색 크게 보기 */
+  #curSw { width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 0 0 4px var(--ink), inset -6px -8px 0 rgba(0,0,0,.15), inset 6px 6px 0 rgba(255,255,255,.35); flex: none; }
+  #curSw.pop { animation: pickc .35s; }
+  #tools { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; }
   .tbtn { font-size: 26px; min-width: 60px; height: 60px; padding: 0 12px; border-radius: 18px; background: var(--card); box-shadow: 0 4px 0 rgba(0,0,0,.1); font-weight: 900; }
   .tbtn.on { background: #ffe9b0; }
   .tbtn.size i { display: inline-block; border-radius: 50%; background: var(--ink); vertical-align: middle; }
@@ -108,13 +123,14 @@ img { -webkit-user-drag: none; }
 <header>
   <button id="homeBtn" aria-label="처음으로">🏠</button>
   <div id="title">색칠 놀이</div>
+  <button id="bookBtn" aria-label="내 그림책">📖</button>
   <button id="modeBtn"></button>
 </header>
 
 <main>
   <!-- 그림 고르기 -->
   <section class="screen active" id="home">
-    <div class="ask">그리고 싶은 그림을 골라요!</div>
+    <div class="cats" id="catBar"></div>
     <div class="grid" id="picGrid"></div>
   </section>
 
@@ -124,6 +140,7 @@ img { -webkit-user-drag: none; }
     <div id="side">
       <div id="palette"></div>
       <div id="tools">
+        <div id="curSw" aria-hidden="true"></div>
         <button class="tbtn size" id="sizeBig" aria-label="굵은 붓"><i style="width:26px;height:26px"></i></button>
         <button class="tbtn size" id="sizeSmall" aria-label="가는 붓"><i style="width:12px;height:12px"></i></button>
         <button class="tbtn" id="resetBtn" aria-label="처음부터">🔄</button>
@@ -252,8 +269,32 @@ const PRAISE = ['잘했어요!', '예뻐요!', '최고예요!', '멋져요!'];
    새 그림을 넣을 때는 .claude/skills/svg-3d-style 의 "색칠 그림" 규칙을 따릅니다. */
 const E = (cx, cy, rx, ry) => `M${cx - rx} ${cy}a${rx} ${ry} 0 1 0 ${rx * 2} 0a${rx} ${ry} 0 1 0 ${-rx * 2} 0Z`;   // 타원
 const EYE = (x, y, r = 7) => [{ d: E(x, y, r, r), fill: '#3a2a20' }, { d: E(x - r * .35, y - r * .4, r * .35, r * .35), fill: '#fff' }];
+// 아래 도우미는 절대 좌표 "x y" 쌍만 쓰는 경로(M L Q C Z)에만 씁니다. E()로 만든 타원에는 MX·TX를 쓰지 않습니다.
+const ER = (cx, cy, rx, ry) => `M${cx - rx} ${cy}a${rx} ${ry} 0 1 1 ${rx * 2} 0a${rx} ${ry} 0 1 1 ${-rx * 2} 0Z`;   // 거꾸로 도는 타원: E()에 이어 붙이면 구멍
+const RR = (x, y, w, h, r) => `M${x + r} ${y}L${x + w - r} ${y}Q${x + w} ${y} ${x + w} ${y + r}L${x + w} ${y + h - r}Q${x + w} ${y + h} ${x + w - r} ${y + h}L${x + r} ${y + h}Q${x} ${y + h} ${x} ${y + h - r}L${x} ${y + r}Q${x} ${y} ${x + r} ${y}Z`; // 둥근 네모
+const PAIR = /(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g;
+const MX = d => d.replace(PAIR, (m, x, y) => `${400 - x} ${y}`);                        // 좌우 뒤집기 (그림판 가운데 기준)
+const TX = (d, dx, dy = 0) => d.replace(PAIR, (m, x, y) => `${+x + dx} ${+y + dy}`);    // 옮기기
+const f1 = v => +v.toFixed(1);
+const STAR = (cx, cy, ro, ri, n = 5) => Array.from({ length: n * 2 }, (_, k) => { const r = k % 2 ? ri : ro, a = -Math.PI / 2 + k * Math.PI / n; return `${k ? 'L' : 'M'}${f1(cx + r * Math.cos(a))} ${f1(cy + r * Math.sin(a))}`; }).join('') + 'Z';
+const PETAL = (cx, cy, deg, r0, r1, w) => {   // 꽃잎·날개 모양 (deg 방향으로 r0에서 r1까지)
+  const c = Math.cos(deg * Math.PI / 180), s = Math.sin(deg * Math.PI / 180), p = (t, o) => `${f1(cx + c * t - s * o)} ${f1(cy + s * t + c * o)}`;
+  return `M${p(r0, 0)}C${p(r0 + (r1 - r0) * .15, w)} ${p(r1, w * .9)} ${p(r1, 0)}C${p(r1, -w * .9)} ${p(r0 + (r1 - r0) * .15, -w)} ${p(r0, 0)}Z`;
+};
+const RAY = (cx, cy, r1, r2, deg, w) => { const p = (r, a) => `${f1(cx + r * Math.cos(a * Math.PI / 180))} ${f1(cy + r * Math.sin(a * Math.PI / 180))}`; return `M${p(r1, deg - w)}L${p(r2, deg)}L${p(r1, deg + w)}Z`; };
+const SCALLOP = (cx, cy, r, b, n) => {        // 꽃 테두리처럼 물결진 동그라미 (사자 갈기)
+  let d = ''; for (let i = 0; i <= n; i++) {
+    const a = i / n * 2 * Math.PI - Math.PI / 2, x = f1(cx + r * Math.cos(a)), y = f1(cy + r * Math.sin(a));
+    if (!i) d += `M${x} ${y}`; else { const m = (i - .5) / n * 2 * Math.PI - Math.PI / 2; d += `Q${f1(cx + (r + b) * Math.cos(m))} ${f1(cy + (r + b) * Math.sin(m))} ${x} ${y}`; }
+  } return d + 'Z';
+};
+const SPARK = (cx, cy, r) => { const q = r * .2; return `M${cx} ${cy - r}Q${cx + q} ${cy - q} ${cx + r} ${cy}Q${cx + q} ${cy + q} ${cx} ${cy + r}Q${cx - q} ${cy + q} ${cx - r} ${cy}Q${cx - q} ${cy - q} ${cx} ${cy - r}Z`; };
+const HEART = (cx, cy, s) => `M${cx} ${cy + s * .9}C${cx - s * 1.4} ${cy} ${cx - s * .8} ${cy - s * 1.1} ${cx} ${cy - s * .35}C${cx + s * .8} ${cy - s * 1.1} ${cx + s * 1.4} ${cy} ${cx} ${cy + s * .9}Z`;
+const DROP = (x, y) => `M${x} ${y}C${x + 6} ${y + 10} ${x + 14} ${y + 18} ${x + 14} ${y + 28}C${x + 14} ${y + 40} ${x - 14} ${y + 40} ${x - 14} ${y + 28}C${x - 14} ${y + 18} ${x - 6} ${y + 10} ${x} ${y}Z`;
+const CLOUD = (x, y) => TX('M0 43Q-2 18 25 20Q32 0 58 6Q82 0 88 24Q110 26 106 48Q100 60 80 58L18 60Q0 58 0 43Z', x, y);   // 너비 110, 높이 60
+const GROUND = (y = 270) => `M0 ${y}Q100 ${y - 14} 200 ${y - 4}Q300 ${y + 6} 400 ${y - 8}L400 300L0 300Z`;
 const PICS = [
-  { id: 'dog', name: '강아지', cat: '동물',
+  { id: 'dog', name: '강아지', cat: 'animal',
     regions: [
       'M272 232C318 224 334 182 318 168C306 188 292 204 268 208Z',               // 꼬리
       E(200, 215, 82, 66),                                                       // 몸
@@ -266,7 +307,7 @@ const PICS = [
       E(200, 133, 11, 8),                                                        // 코
     ],
     details: [...EYE(174, 106), ...EYE(226, 106), { d: 'M186 158Q200 170 214 158' }, { d: 'M200 141L200 156' }] },
-  { id: 'cat', name: '고양이', cat: '동물',
+  { id: 'cat', name: '고양이', cat: 'animal',
     regions: [
       'M268 250C330 250 340 190 318 170C312 200 300 225 262 232Z',               // 꼬리
       E(200, 218, 76, 62),                                                       // 몸
@@ -279,7 +320,7 @@ const PICS = [
     ],
     details: [...EYE(174, 112, 8), ...EYE(226, 112, 8), { d: 'M200 146Q193 155 184 150M200 146Q207 155 216 150' },
       { d: 'M150 132L118 125M150 141L118 143M250 132L282 125M250 141L282 143' }] },
-  { id: 'fish', name: '물고기', cat: '동물',
+  { id: 'fish', name: '물고기', cat: 'sea',
     regions: [
       'M92 150L30 98Q20 150 30 202Z',                                            // 꼬리
       'M168 94C188 50 252 50 272 97Z',                                           // 등지느러미
@@ -290,7 +331,7 @@ const PICS = [
       E(334, 88, 11, 11), E(356, 56, 8, 8),                                      // 물방울
     ],
     details: [...EYE(270, 134, 8), { d: 'M304 160Q312 166 318 158' }, { d: 'M246 118Q236 150 246 182' }] },
-  { id: 'trex', name: '티라노사우루스', cat: '공룡',
+  { id: 'trex', name: '티라노사우루스', cat: 'dino',
     regions: [
       'M128 196C92 200 52 214 22 242C60 240 102 232 138 226Z',                   // 꼬리
       'M166 222L160 270Q160 282 172 282L192 282Q198 276 190 268L184 262L188 226Z', // 뒷다리
@@ -302,7 +343,7 @@ const PICS = [
     ],
     details: [...EYE(282, 88), { d: E(310, 96, 3, 2), fill: '#3a2a20' }, { d: 'M262 118Q292 126 316 112' },
       { d: 'M276 120L280 128L284 121M292 122L296 130L300 121' }] },
-  { id: 'brachio', name: '브라키오사우루스', cat: '공룡',
+  { id: 'brachio', name: '브라키오사우루스', cat: 'dino',
     regions: [
       'M120 200C80 205 45 215 20 235C55 238 95 232 130 222Z',                    // 꼬리
       'M140 210L136 272Q136 282 148 282L166 282Q172 276 164 270L160 264L162 214Z', // 뒷다리
@@ -314,7 +355,7 @@ const PICS = [
       E(168, 180, 11, 7), E(200, 168, 10, 6), E(218, 190, 9, 6),                 // 점무늬
     ],
     details: [...EYE(308, 60, 5), { d: 'M302 75Q314 79 324 71' }, { d: E(322, 62, 2, 1.5), fill: '#3a2a20' }] },
-  { id: 'stego', name: '스테고사우루스', cat: '공룡',
+  { id: 'stego', name: '스테고사우루스', cat: 'dino',
     regions: [
       'M102 164Q106 128 120 114Q134 128 138 164Z', 'M137 152Q141 114 155 100Q169 114 173 152Z',   // 등판
       'M172 148Q176 106 190 92Q204 106 208 148Z', 'M207 152Q211 114 225 100Q239 114 243 152Z',
@@ -326,7 +367,7 @@ const PICS = [
       'M224 222L222 272Q222 282 234 282L252 282Q258 276 250 270L246 264L248 224Z', // 앞다리
     ],
     details: [...EYE(312, 186, 4.5), { d: 'M318 199Q326 200 330 194' }, { d: 'M40 206L30 190M56 210L50 194' }] },
-  { id: 'car', name: '자동차', cat: '탈것',
+  { id: 'car', name: '자동차', cat: 'ride',
     regions: [
       'M112 170L142 110Q148 100 162 100L250 100Q262 100 270 110L308 170Z',        // 지붕
       'M50 202Q50 170 82 166L320 166Q352 168 354 202L354 216Q354 226 342 226L62 226Q50 226 50 216Z', // 차체
@@ -337,7 +378,7 @@ const PICS = [
       E(341, 186, 9, 8),                                                         // 앞불
     ],
     details: [{ d: 'M195 168L195 222' }, { d: 'M210 188L226 188' }, { d: 'M60 196L72 196' }] },
-  { id: 'train', name: '기차', cat: '탈것',
+  { id: 'train', name: '기차', cat: 'ride',
     regions: [
       E(116, 44, 17, 13),                                                        // 연기
       'M96 70L126 70L121 112L101 112Z',                                          // 굴뚝
@@ -350,7 +391,7 @@ const PICS = [
       E(100, 226, 24, 24), E(170, 226, 24, 24), E(262, 222, 30, 30),             // 바퀴
     ],
     details: [{ d: 'M100 202L170 202L262 198' }, { d: E(100, 226, 5, 5), fill: '#4a3426' }, { d: E(170, 226, 5, 5), fill: '#4a3426' }, { d: E(262, 222, 6, 6), fill: '#4a3426' }] },
-  { id: 'plane', name: '비행기', cat: '탈것',
+  { id: 'plane', name: '비행기', cat: 'ride',
     regions: [
       'M72 150L52 80Q50 72 60 72L82 72L122 150Z',                                // 꼬리 날개
       'M172 150L152 110L188 110L212 150Z',                                       // 먼 날개
@@ -362,7 +403,7 @@ const PICS = [
       'M300 252Q300 232 322 234Q330 217 350 224Q372 220 376 240Q392 244 388 258L300 264Q290 260 300 252Z', // 구름
     ],
     details: [{ d: 'M346 150L356 150' }] },
-  { id: 'cake', name: '케이크', cat: '음식·자연',
+  { id: 'cake', name: '케이크', cat: 'food',
     regions: [
       E(200, 262, 152, 24),                                                      // 접시
       'M88 182Q200 202 312 182L312 246Q200 270 88 246Z',                          // 아래 층
@@ -375,7 +416,7 @@ const PICS = [
       E(160, 152, 11, 11), E(200, 157, 11, 11), E(240, 152, 11, 11),             // 딸기
     ],
     details: [{ d: 'M156 146Q160 142 164 146' }, { d: 'M196 151Q200 147 204 151' }, { d: 'M236 146Q240 142 244 146' }] },
-  { id: 'apple', name: '사과', cat: '음식·자연',
+  { id: 'apple', name: '사과', cat: 'food',
     regions: [
       'M0 278Q100 258 200 270Q300 282 400 264L400 300L0 300Z',                   // 풀밭
       'M330 210C318 200 290 202 288 228C286 252 304 272 320 271C326 271 328 268 330 268C332 268 334 271 340 271C356 272 374 252 372 228C370 202 342 200 330 210Z', // 작은 사과
@@ -386,7 +427,7 @@ const PICS = [
       'M130 130C130 110 145 100 155 104C150 118 145 130 140 142C134 142 130 138 130 130Z', // 반짝이
     ],
     details: [{ d: 'M214 68Q245 58 274 52' }] },
-  { id: 'rainbow', name: '무지개', cat: '음식·자연',
+  { id: 'rainbow', name: '무지개', cat: 'nature',
     regions: [
       ...[[172, 148], [148, 124], [124, 100], [100, 76]].map(([a, b]) => `M${200 - a} 250A${a} ${a} 0 0 1 ${200 + a} 250L${200 + b} 250A${b} ${b} 0 0 0 ${200 - b} 250Z`), // 무지개 띠
       E(70, 70, 34, 34),                                                         // 해
@@ -395,16 +436,680 @@ const PICS = [
     ],
     details: [{ d: 'M70 22L70 10M70 118L70 130M22 70L10 70M118 70L130 70M36 36L28 28M104 104L112 112M36 104L28 112M104 36L112 28' },
       { d: E(60, 64, 3.5, 3.5), fill: '#3a2a20' }, { d: E(80, 64, 3.5, 3.5), fill: '#3a2a20' }, { d: 'M58 80Q70 90 82 80' }] },
+
+  /* ---------- 동물 ---------- */
+  { id: 'rabbit', name: '토끼', cat: 'animal',
+    regions: [
+      E(268, 236, 18, 16),                                                       // 꼬리
+      E(200, 222, 70, 58),                                                       // 몸
+      E(200, 240, 36, 30),                                                       // 배
+      E(166, 276, 24, 13), E(234, 276, 24, 13),                                  // 발
+      'M168 96C150 60 150 14 170 10C190 8 196 54 188 96Z', MX('M168 96C150 60 150 14 170 10C190 8 196 54 188 96Z'), // 귀
+      'M172 86C163 60 163 30 172 26C181 26 185 58 182 86Z', MX('M172 86C163 60 163 30 172 26C181 26 185 58 182 86Z'), // 귀 안쪽
+      E(200, 130, 62, 52),                                                       // 머리
+      E(158, 148, 12, 8), E(242, 148, 12, 8),                                    // 볼
+      E(200, 138, 10, 7),                                                        // 코
+    ],
+    details: [...EYE(178, 120), ...EYE(222, 120), { d: 'M200 145L200 152M200 152Q193 160 186 155M200 152Q207 160 214 155' }] },
+  { id: 'bear', name: '곰', cat: 'animal',
+    regions: [
+      E(138, 66, 26, 26), E(262, 66, 26, 26),                                    // 귀
+      E(138, 66, 13, 13), E(262, 66, 13, 13),                                    // 귀 안쪽
+      E(200, 226, 78, 62),                                                       // 몸
+      E(200, 238, 44, 38),                                                       // 배
+      E(128, 214, 20, 30), E(272, 214, 20, 30),                                  // 팔
+      E(160, 278, 26, 15), E(240, 278, 26, 15),                                  // 발
+      E(200, 118, 70, 60),                                                       // 머리
+      E(200, 142, 30, 22),                                                       // 주둥이
+      E(200, 131, 12, 8),                                                        // 코
+    ],
+    details: [...EYE(172, 106), ...EYE(228, 106), { d: 'M200 139L200 149M188 151Q200 159 212 151' }] },
+  { id: 'lion', name: '사자', cat: 'animal',
+    regions: [
+      'M262 240C300 244 314 216 310 194L320 192C328 224 306 254 262 252Z',        // 꼬리
+      E(318, 186, 12, 14),                                                       // 꼬리 털
+      E(200, 226, 72, 56),                                                       // 몸
+      E(164, 276, 24, 13), E(236, 276, 24, 13),                                  // 발
+      SCALLOP(200, 118, 72, 18, 12),                                             // 갈기
+      E(158, 80, 13, 13), E(242, 80, 13, 13),                                    // 귀
+      E(200, 122, 54, 50),                                                       // 얼굴
+      E(200, 144, 26, 18),                                                       // 주둥이
+      'M187 128Q200 123 213 128L200 141Z',                                       // 코
+    ],
+    details: [...EYE(180, 112), ...EYE(220, 112), { d: 'M200 141L200 149M190 153Q200 159 210 153' }] },
+  { id: 'elephant', name: '코끼리', cat: 'animal',
+    regions: [
+      'M84 190C66 196 58 214 62 230L72 228C70 216 76 206 92 202Z',               // 꼬리
+      RR(136, 222, 32, 58, 10), RR(232, 222, 32, 56, 10),                        // 먼 다리
+      E(170, 190, 92, 64),                                                       // 몸
+      RR(100, 226, 38, 62, 12), RR(194, 226, 38, 62, 12),                        // 다리
+      E(274, 148, 58, 54),                                                       // 머리
+      'M312 176C334 200 338 236 324 258C316 270 298 266 304 254C314 236 308 214 288 198Z', // 코
+      'M254 106C218 90 190 124 200 164C208 196 240 202 262 184Z',                 // 귀
+    ],
+    details: [...EYE(298, 136), { d: 'M312 222L324 220M310 240L321 241' }, { d: 'M282 194Q290 204 300 200' }] },
+  { id: 'giraffe', name: '기린', cat: 'animal',
+    regions: [
+      RR(190, 200, 18, 80, 8), RR(258, 200, 18, 80, 8),                          // 먼 다리
+      'M162 184C142 190 136 206 138 220L146 218C146 206 152 198 164 196Z',       // 꼬리
+      E(220, 190, 64, 38),                                                       // 몸
+      RR(164, 204, 20, 84, 8), RR(230, 204, 20, 84, 8),                          // 다리
+      'M246 172C254 130 260 92 262 60L292 60C292 96 286 140 282 180Z',           // 목
+      'M266 40L264 14Q262 6 271 6Q280 6 278 14L278 40Z', 'M288 40L286 14Q284 6 293 6Q302 6 300 14L300 40Z', // 뿔
+      'M262 44L230 30Q222 46 258 58Z',                                           // 귀
+      E(288, 54, 36, 26),                                                        // 머리
+      E(310, 64, 17, 14),                                                        // 주둥이
+      E(196, 182, 13, 11), E(234, 176, 13, 10), E(260, 198, 11, 9),              // 무늬
+      E(272, 120, 8, 10), E(270, 154, 8, 10),
+    ],
+    details: [...EYE(288, 46, 5), { d: E(318, 60, 2.5, 2.5), fill: '#3a2a20' }, { d: 'M302 72Q312 76 320 70' }] },
+  { id: 'chick', name: '병아리', cat: 'animal',
+    regions: [
+      'M164 262L148 288L188 288L180 262Z', 'M222 262L214 288L254 288L238 262Z',   // 발
+      E(196, 198, 86, 70),                                                       // 몸
+      'M138 192C116 206 120 238 150 242C166 228 166 206 152 190Z',               // 날개
+      'M206 72C198 50 212 42 218 58C222 42 238 48 228 70Z',                      // 머리털
+      E(220, 116, 56, 50),                                                       // 머리
+      'M268 110L302 120L268 132Z',                                               // 부리
+      E(246, 134, 11, 7),                                                        // 볼
+    ],
+    details: [...EYE(240, 106)] },
+
+  /* ---------- 바다 친구 ---------- */
+  { id: 'whale', name: '고래', cat: 'sea',
+    regions: [
+      E(240, 40, 15, 11), E(280, 40, 15, 11),                                    // 물보라
+      'M254 78Q252 58 260 52Q268 58 266 78Z',                                    // 물줄기
+      'M80 170C60 140 30 128 18 140C34 150 44 164 50 176C40 188 34 204 20 214C40 222 66 210 84 190Z', // 꼬리
+      'M70 180C80 120 160 84 250 88C320 92 360 130 360 180C360 230 310 256 230 256C140 256 70 236 70 180Z', // 몸
+      'M108 206C160 234 300 236 354 194C350 232 306 256 230 256C160 256 122 238 108 206Z', // 배
+      'M200 214C188 246 212 266 242 256C238 240 228 224 214 214Z',               // 지느러미
+    ],
+    details: [...EYE(300, 158, 8), { d: 'M334 196Q304 208 272 198' }, { d: 'M180 230L184 244M220 236L222 250M262 234L263 248M300 226L302 240' }] },
+  { id: 'octopus', name: '문어', cat: 'sea',
+    regions: [
+      'M130 170C110 200 90 228 70 236C60 240 60 252 74 252C102 252 132 220 154 184Z', MX('M130 170C110 200 90 228 70 236C60 240 60 252 74 252C102 252 132 220 154 184Z'), // 다리
+      'M156 180C148 218 136 248 116 262C108 268 114 280 126 277C154 266 170 230 180 186Z', MX('M156 180C148 218 136 248 116 262C108 268 114 280 126 277C154 266 170 230 180 186Z'),
+      'M184 186C180 226 170 254 158 270C152 278 160 290 170 284C192 268 202 230 204 190Z', MX('M184 186C180 226 170 254 158 270C152 278 160 290 170 284C192 268 202 230 204 190Z'),
+      'M200 40C140 40 112 90 116 140C120 180 150 196 200 196C250 196 280 180 284 140C288 90 260 40 200 40Z', // 머리
+      E(158, 90, 14, 11), E(244, 82, 12, 10),                                    // 무늬
+      E(160, 166, 12, 8), E(240, 166, 12, 8),                                    // 볼
+    ],
+    details: [...EYE(176, 140, 8), ...EYE(224, 140, 8), { d: 'M188 166Q200 176 212 166' }] },
+  { id: 'turtle', name: '거북이', cat: 'sea',
+    regions: [
+      E(122, 234, 24, 16), E(272, 234, 24, 16), E(160, 250, 22, 16), E(236, 250, 22, 16), // 다리
+      'M96 198L50 214L96 230Z',                                                  // 꼬리
+      'M290 172C300 142 340 136 354 160C364 182 342 202 314 198Z',               // 머리
+      'M90 214C90 140 146 96 200 96C254 96 310 140 310 214Z',                    // 등껍질
+      'M200 120L236 140L236 180L200 200L164 180L164 140Z',                       // 가운데 무늬
+      'M108 206C110 172 126 146 150 130L164 144L164 184L146 206Z', MX('M108 206C110 172 126 146 150 130L164 144L164 184L146 206Z'), // 옆 무늬
+      RR(80, 204, 240, 24, 12),                                                  // 껍질 테두리
+    ],
+    details: [...EYE(332, 160, 6), { d: 'M340 182Q348 184 354 178' }] },
+  { id: 'crab', name: '게', cat: 'sea',
+    regions: [
+      'M134 192L84 174Q74 174 76 186L130 208Z', MX('M134 192L84 174Q74 174 76 186L130 208Z'), // 다리
+      'M128 212L76 212Q68 220 76 228L130 228Z', MX('M128 212L76 212Q68 220 76 228L130 228Z'),
+      'M136 230L90 252Q84 262 94 264L144 244Z', MX('M136 230L90 252Q84 262 94 264L144 244Z'),
+      'M152 170C132 150 120 130 116 110L130 106C136 126 146 144 166 160Z', MX('M152 170C132 150 120 130 116 110L130 106C136 126 146 144 166 160Z'), // 팔
+      E(110, 86, 30, 26), E(290, 86, 30, 26),                                    // 집게
+      RR(174, 120, 12, 40, 6), RR(214, 120, 12, 40, 6),                          // 눈자루
+      E(180, 116, 15, 15), E(220, 116, 15, 15),                                  // 눈
+      E(200, 206, 86, 56),                                                       // 몸
+    ],
+    details: [{ d: 'M96 68L114 88M304 68L286 88' }, ...EYE(183, 117, 7), ...EYE(223, 117, 7), { d: 'M184 222Q200 234 216 222' }] },
+  { id: 'starfish', name: '불가사리', cat: 'sea',
+    regions: [
+      GROUND(274),                                                               // 모래
+      'M318 266C318 238 362 238 362 266Z',                                       // 조개
+      STAR(200, 156, 128, 58),                                                   // 불가사리
+      E(200, 76, 11, 11), E(276, 132, 11, 11), E(248, 222, 11, 11), E(152, 222, 11, 11), E(124, 132, 11, 11), // 무늬
+    ],
+    details: [...EYE(184, 150), ...EYE(216, 150), { d: 'M188 172Q200 182 212 172' }, { d: 'M330 262L334 246M340 262L340 244M350 262L346 246' }] },
+  { id: 'jelly', name: '해파리', cat: 'sea',
+    regions: [
+      ...[0, 34, 66, 100].map(dx => TX('M142 150C132 190 158 210 142 250C138 262 150 268 156 258C172 218 146 196 156 150Z', dx)), // 다리
+      'M110 156C110 90 150 50 200 50C250 50 290 90 290 156Q270 170 250 156Q225 170 200 156Q175 170 150 156Q130 170 110 156Z', // 몸
+      E(158, 100, 13, 11), E(238, 90, 11, 9), E(252, 128, 10, 8),                // 무늬
+      E(334, 84, 13, 13), E(358, 50, 9, 9),                                      // 물방울
+    ],
+    details: [...EYE(180, 124), ...EYE(220, 124), { d: 'M192 140Q200 148 208 140' }] },
+  { id: 'shark', name: '상어', cat: 'sea',
+    regions: [
+      'M90 150L36 96Q26 92 30 106L46 150L30 194Q26 208 36 204Z',                 // 꼬리
+      'M180 100L210 40Q216 34 222 42L242 102Z',                                  // 등지느러미
+      'M80 150C110 104 200 92 270 100C320 106 356 128 364 150C356 176 320 196 270 200C200 208 110 196 80 150Z', // 몸
+      'M118 170C180 196 290 196 354 160C342 182 310 198 270 200C200 206 150 196 118 170Z', // 배
+      'M200 180L176 234Q174 242 186 240L238 188Z',                               // 가슴지느러미
+    ],
+    details: [...EYE(300, 136), { d: 'M318 168Q334 172 348 162' }, { d: 'M250 128Q244 144 250 160M264 128Q258 144 264 160' }] },
+
+  /* ---------- 공룡 ---------- */
+  { id: 'tricera', name: '트리케라톱스', cat: 'dino',
+    regions: [
+      'M110 190C80 192 50 200 26 220C60 222 96 214 122 206Z',                    // 꼬리
+      RR(130, 222, 30, 58, 10), RR(232, 222, 30, 58, 10),                        // 먼 다리
+      E(180, 192, 82, 52),                                                       // 몸
+      RR(108, 226, 34, 60, 12), RR(206, 226, 34, 60, 12),                        // 다리
+      'M234 172C216 112 246 68 288 72C320 76 338 110 330 152Z',                  // 프릴
+      'M276 136L290 90Q296 84 300 94L298 142Z',                                  // 먼 뿔
+      'M302 134L330 82Q338 76 340 88L322 140Z',                                  // 뿔
+      'M250 160C254 132 290 120 318 132C344 144 362 168 356 188C346 204 300 210 270 198C256 192 248 176 250 160Z', // 머리
+      'M342 160L366 140Q374 138 372 148L356 174Z',                               // 코뿔
+    ],
+    details: [...EYE(312, 158, 6), { d: 'M330 192Q346 192 356 184' }, { d: E(258, 100, 5, 5), fill: '#4a3426' }, { d: E(282, 88, 5, 5), fill: '#4a3426' }, { d: E(250, 128, 5, 5), fill: '#4a3426' }] },
+  { id: 'ptera', name: '프테라노돈', cat: 'dino',
+    regions: [
+      CLOUD(20, 214), CLOUD(270, 228),                                           // 구름
+      'M206 146C246 106 306 76 384 66C364 96 324 126 262 166Z',                  // 먼 날개
+      'M184 176L174 206L190 206L198 180Z', 'M206 178L202 208L218 206L218 180Z',   // 다리
+      E(200, 160, 42, 26),                                                       // 몸
+      'M196 154C160 114 100 84 18 76C38 108 90 144 150 176Z',                    // 날개
+      'M236 122L208 90Q202 82 212 84L254 112Z',                                  // 머리 볏
+      'M224 128C238 108 270 108 282 120L344 136L282 144C268 154 240 154 224 140Z', // 머리
+    ],
+    details: [...EYE(254, 126, 5), { d: 'M110 108Q140 130 158 160' }, { d: 'M290 138L340 137' }] },
+  { id: 'ankylo', name: '안킬로사우루스', cat: 'dino',
+    regions: [
+      'M110 198C80 202 62 202 46 194L48 210C66 220 90 222 116 216Z',             // 꼬리
+      E(40, 202, 24, 20),                                                        // 꼬리 곤봉
+      RR(126, 220, 30, 56, 10), RR(240, 220, 30, 56, 10),                        // 먼 다리
+      'M290 196C292 170 316 160 340 168C360 176 364 196 352 210C336 220 300 220 290 196Z', // 머리
+      'M100 214C100 150 150 120 200 120C256 120 300 150 300 214Z',               // 등껍질
+      E(148, 162, 17, 13), E(200, 146, 19, 14), E(252, 162, 17, 13), E(174, 192, 15, 11), E(226, 192, 15, 11), // 돌기
+      RR(94, 204, 212, 22, 11),                                                  // 껍질 테두리
+      RR(104, 222, 34, 60, 12), RR(220, 222, 34, 60, 12),                        // 다리
+    ],
+    details: [...EYE(330, 184, 6), { d: 'M340 204Q350 204 356 198' }] },
+  { id: 'dinoegg', name: '공룡 알', cat: 'dino',
+    regions: [
+      E(200, 248, 150, 36),                                                      // 둥지
+      'M200 40C140 40 110 130 110 180C110 236 150 262 200 262C250 262 290 236 290 180C290 130 260 40 200 40Z', // 알
+      E(168, 108, 17, 13), E(238, 140, 15, 13), E(180, 198, 19, 15), E(246, 212, 13, 11), // 반점
+      'M50 238C80 270 320 270 350 238L346 262C320 292 80 292 54 262Z',           // 둥지 앞
+    ],
+    details: [{ d: 'M150 150L168 140L178 156L194 144L210 158L226 146L246 156' }, { d: 'M80 262L110 268M140 274L170 276M230 276L260 274M290 268L320 262' }] },
+  { id: 'babydino', name: '아기 공룡', cat: 'dino',
+    regions: [
+      'M164 206C160 166 176 136 206 128L250 134C244 164 248 190 260 206Z',       // 몸
+      'M184 84L150 70L188 60Z', 'M180 112L146 106L180 92Z',                     // 등 가시
+      E(232, 102, 58, 46),                                                       // 머리
+      'M196 66C204 36 256 30 272 62L260 54L248 66L236 54L224 66L212 56Z',        // 알껍데기 모자
+      'M100 192L130 172L150 192L176 170L200 192L226 170L250 192L276 172L300 192C300 250 260 278 200 278C140 278 100 250 100 192Z', // 알껍데기
+      E(150, 236, 15, 11), E(244, 250, 13, 10),                                  // 반점
+      E(166, 192, 15, 12), E(266, 192, 15, 12),                                  // 팔
+    ],
+    details: [...EYE(214, 100), ...EYE(252, 100), { d: 'M220 122Q233 132 246 122' }] },
+
+  /* ---------- 탈것 ---------- */
+  { id: 'bus', name: '버스', cat: 'ride',
+    regions: [
+      RR(40, 70, 320, 160, 26),                                                  // 차체
+      'M40 164L272 164L272 188L40 188Z',                                         // 띠
+      RR(62, 90, 58, 52, 10), RR(132, 90, 58, 52, 10), RR(202, 90, 58, 52, 10),  // 창문
+      RR(272, 90, 48, 112, 8),                                                   // 문
+      RR(330, 90, 22, 60, 8),                                                    // 앞 창
+      E(348, 202, 10, 9),                                                        // 앞불
+      E(110, 232, 32, 32), E(290, 232, 32, 32),                                  // 바퀴
+      E(110, 232, 13, 13), E(290, 232, 13, 13),                                  // 바퀴 가운데
+    ],
+    details: [{ d: 'M296 92L296 200' }] },
+  { id: 'firetruck', name: '소방차', cat: 'ride',
+    regions: [
+      'M80 70L270 50L272 68L82 88Z',                                             // 사다리
+      RR(40, 96, 222, 120, 14),                                                  // 짐칸
+      'M260 110L320 110Q332 110 338 122L360 170L360 204Q360 216 348 216L260 216Z', // 운전실
+      'M276 122L318 122Q324 122 328 130L344 162L276 162Z',                       // 창문
+      'M282 96Q282 80 296 80Q310 80 310 96L310 110L282 110Z',                    // 경광등
+      E(150, 140, 30, 30),                                                       // 호스 감개
+      'M40 172L360 172L360 190L40 190Z',                                         // 띠
+      E(100, 224, 30, 30), E(300, 224, 30, 30),                                  // 바퀴
+      E(100, 224, 12, 12), E(300, 224, 12, 12),                                  // 바퀴 가운데
+    ],
+    details: [{ d: 'M120 66L122 84M160 62L162 80M200 58L202 76M240 54L242 72' }, { d: 'M150 120Q170 140 150 160Q130 140 150 120' }] },
+  { id: 'ship', name: '배', cat: 'ride',
+    regions: [
+      E(64, 60, 28, 28),                                                         // 해
+      'M0 236Q25 222 50 236Q75 250 100 236Q125 222 150 236Q175 250 200 236Q225 222 250 236Q275 250 300 236Q325 222 350 236Q375 250 400 236L400 300L0 300Z', // 바다
+      RR(194, 36, 12, 156, 4),                                                   // 돛대
+      'M212 50C262 80 284 140 272 182L212 182Z',                                 // 큰 돛
+      'M188 70C150 100 134 150 144 182L188 182Z',                                // 작은 돛
+      'M206 20L238 30L206 40Z',                                                  // 깃발
+      'M60 188L340 188Q330 236 290 248L110 248Q70 236 60 188Z',                  // 배
+      'M64 200L336 200Q334 210 330 218L70 218Q66 210 64 200Z',                   // 띠
+      E(150, 232, 10, 10), E(200, 232, 10, 10), E(250, 232, 10, 10),             // 둥근 창
+      'M0 266Q50 252 100 266Q150 280 200 266Q250 252 300 266Q350 280 400 266L400 300L0 300Z', // 앞 물결
+    ],
+    details: [] },
+  { id: 'heli', name: '헬리콥터', cat: 'ride',
+    regions: [
+      E(26, 112, 12, 30),                                                        // 꼬리 날개
+      'M110 130L24 112Q14 112 16 124L26 140L112 162Z',                           // 꼬리
+      RR(160, 210, 12, 42, 4), RR(268, 210, 12, 42, 4),                          // 다리
+      RR(110, 246, 220, 14, 7),                                                  // 썰매
+      RR(70, 38, 260, 16, 8),                                                    // 날개
+      RR(192, 50, 16, 28, 4),                                                    // 날개 축
+      'M110 150C110 100 160 74 220 74C290 74 320 120 320 160C320 196 290 214 240 214L160 214C130 214 110 190 110 150Z', // 몸
+      'M240 88C280 92 304 122 306 152L240 152Z',                                 // 앞 창
+      E(178, 130, 20, 20),                                                       // 옆 창
+    ],
+    details: [] },
+  { id: 'bike', name: '자전거', cat: 'ride',
+    regions: [
+      E(108, 212, 62, 62), E(292, 212, 62, 62),                                  // 바퀴
+      E(108, 212, 46, 46), E(292, 212, 46, 46),                                  // 바퀴 안
+      'M176 112L190 112L208 208L194 212Z',                                       // 안장 기둥
+      'M108 205L200 205L200 219L108 219Z',                                       // 아래 막대
+      'M178 108L190 118L116 218L104 208Z',                                       // 뒤 막대
+      'M194 202L262 110L274 118L208 212Z',                                       // 앞 막대
+      'M184 112L268 106L268 120L186 126Z',                                       // 윗 막대
+      'M262 108L276 104L298 210L284 214Z',                                       // 앞 포크
+      'M152 104Q152 90 174 90L206 90Q214 90 212 102L198 112L162 114Q152 114 152 104Z', // 안장
+      'M260 106L260 82Q260 72 270 72L300 72Q308 72 308 80L308 88L274 88L274 106Z', // 핸들
+      E(201, 212, 15, 15),                                                       // 페달
+    ],
+    details: [{ d: 'M108 166L108 258M62 212L154 212M292 166L292 258M246 212L338 212' }] },
+
+  /* ---------- 음식 ---------- */
+  { id: 'icecream', name: '아이스크림', cat: 'food',
+    regions: [
+      'M146 150L200 288L254 150Z',                                               // 콘
+      'M132 152C118 118 150 90 200 92C250 90 282 118 268 152Q251 166 234 152Q217 166 200 152Q183 166 166 152Q149 166 132 152Z', // 아래 공
+      E(200, 82, 54, 44),                                                        // 위 공
+      E(206, 32, 15, 15),                                                        // 체리
+    ],
+    details: [{ d: 'M206 18Q210 6 222 2' }, { d: 'M166 172L222 228M182 214L236 168M196 254L230 188M174 186L210 262' },
+      { d: 'M178 70L186 64M214 60L222 66M196 96L204 92M228 92L234 98M170 120L178 116M220 124L228 128' }] },
+  { id: 'donut', name: '도넛', cat: 'food',
+    regions: [
+      E(200, 164, 136, 104) + ER(200, 152, 38, 28),                              // 빵
+      'M80 152C76 96 138 66 200 66C264 66 324 96 320 152C316 180 300 172 290 190C280 206 264 190 252 202C238 214 222 198 206 208C190 216 176 200 160 208C144 214 132 196 118 198C98 200 84 180 80 152Z' + ER(200, 150, 44, 33), // 크림
+    ],
+    details: [{ d: 'M130 110L142 104M262 104L274 112M150 168L160 176M246 172L258 166M196 90L208 90M110 140L114 152M290 136L286 150M220 196L232 192M168 186L178 192' }] },
+  { id: 'watermelon', name: '수박', cat: 'food',
+    regions: [
+      E(200, 270, 170, 22),                                                      // 접시
+      'M40 106L360 106C360 196 290 266 200 266C110 266 40 196 40 106Z',          // 껍질
+      'M54 106L346 106C346 188 280 252 200 252C120 252 54 188 54 106Z',          // 흰 속
+      'M68 106L332 106C332 180 272 238 200 238C128 238 68 180 68 106Z',          // 빨간 속
+    ],
+    details: [[130, 136], [176, 130], [224, 130], [270, 136], [150, 180], [200, 176], [250, 180], [200, 214]].map(([x, y]) => ({ d: `M${x} ${y}Q${x + 7} ${y + 9} ${x} ${y + 15}Q${x - 7} ${y + 9} ${x} ${y}Z`, fill: '#3a2a20' })) },
+  { id: 'banana', name: '바나나', cat: 'food',
+    regions: [
+      'M124 72L124 46Q124 38 133 38L141 38Q148 40 146 48L146 72Z',               // 뒤 꼭지
+      'M120 70C150 170 250 220 352 168C360 164 358 152 348 154C260 186 182 150 148 64C144 56 118 60 120 70Z', // 뒤 바나나
+      'M88 92C98 200 200 262 322 222C332 218 330 206 320 206C220 222 140 180 116 92C114 82 90 82 88 92Z', // 바나나
+      'M92 94L86 66Q86 58 95 58L105 58Q112 60 110 68L112 94Z',                   // 꼭지
+    ],
+    details: [{ d: 'M120 150Q170 210 260 214' }] },
+  { id: 'strawberry', name: '딸기', cat: 'food',
+    regions: [
+      'M200 266C150 250 96 190 100 130C104 96 150 84 200 96C250 84 296 96 300 130C304 190 250 250 200 266Z', // 딸기
+      'M194 76L196 40Q200 32 204 40L206 76Z',                                    // 꼭지
+      'M138 100C150 70 170 70 180 84C186 60 214 60 220 84C230 70 250 70 262 100C240 114 220 102 200 112C180 102 160 114 138 100Z', // 잎
+      'M138 142C138 126 150 118 158 122C152 134 150 146 148 158C142 158 138 152 138 142Z', // 반짝이
+    ],
+    details: [[176, 136], [224, 136], [200, 156], [160, 180], [240, 180], [200, 196], [176, 220], [224, 220], [264, 146], [136, 196]].map(([x, y]) => ({ d: `M${x} ${y}Q${x + 4} ${y + 6} ${x} ${y + 10}Q${x - 4} ${y + 6} ${x} ${y}Z`, fill: '#3a2a20' })) },
+  { id: 'burger', name: '햄버거', cat: 'food',
+    regions: [
+      'M70 228L330 228Q330 272 290 272L110 272Q70 272 70 228Z',                  // 아래 빵
+      RR(62, 200, 276, 38, 18),                                                  // 고기
+      'M66 190L334 190L334 210L300 210L280 232L260 210L124 210L106 230L88 210L66 210Z', // 치즈
+      RR(76, 176, 248, 26, 12),                                                  // 토마토
+      'M58 158L342 158L342 172Q322 188 302 172Q282 158 262 172Q242 188 222 172Q202 158 182 172Q162 188 142 172Q122 158 102 172Q82 188 58 172Z', // 양상추
+      'M64 158C64 88 130 52 200 52C270 52 336 88 336 158Q336 166 326 166L74 166Q64 166 64 158Z', // 위 빵
+    ],
+    details: [{ d: 'M140 96L150 92M196 80L206 80M250 92L260 96M170 120L180 118M226 118L236 120M118 130L126 126M280 128L288 132' }] },
+
+  /* ---------- 자연·날씨 ---------- */
+  { id: 'sun', name: '해', cat: 'nature',
+    regions: [
+      ...Array.from({ length: 8 }, (_, k) => RAY(200, 150, 92, 140, k * 45, 14)), // 햇살
+      E(200, 150, 80, 80),                                                       // 해
+      E(160, 172, 13, 9), E(240, 172, 13, 9),                                    // 볼
+    ],
+    details: [...EYE(176, 138, 8), ...EYE(224, 138, 8), { d: 'M174 178Q200 200 226 178' }] },
+  { id: 'rain', name: '구름과 비', cat: 'nature',
+    regions: [
+      E(200, 284, 120, 13),                                                      // 물웅덩이
+      DROP(130, 196), DROP(180, 220), DROP(230, 196), DROP(280, 220), DROP(156, 244), DROP(256, 244), // 빗방울
+      'M90 150Q78 100 130 100Q140 56 196 64Q240 40 270 84Q330 80 324 130Q350 150 324 176L104 176Q76 172 90 150Z', // 구름
+    ],
+    details: [...EYE(182, 122, 6), ...EYE(234, 122, 6), { d: 'M198 142Q208 150 218 142' }] },
+  { id: 'flower', name: '꽃', cat: 'nature',
+    regions: [
+      'M194 140L206 140L208 238L192 238Z',                                       // 줄기
+      'M196 214C160 214 140 194 132 174C170 170 190 184 196 204Z',               // 왼쪽 잎
+      'M204 196C240 192 262 172 270 152C232 150 210 166 204 186Z',               // 오른쪽 잎
+      ...[0, 60, 120, 180, 240, 300].map(a => PETAL(200, 100, a - 90, 20, 72, 26)), // 꽃잎
+      E(200, 100, 30, 30),                                                       // 꽃 가운데
+      'M150 240L250 240L236 292L164 292Z',                                       // 화분
+      RR(138, 228, 124, 20, 8),                                                  // 화분 테두리
+    ],
+    details: [...EYE(190, 96, 5), ...EYE(210, 96, 5), { d: 'M190 110Q200 118 210 110' }] },
+  { id: 'tree', name: '나무', cat: 'nature',
+    regions: [
+      GROUND(272),                                                               // 땅
+      'M178 280C184 240 184 200 176 160L224 160C216 200 216 240 222 280Z',       // 줄기
+      'M200 26C240 22 268 46 270 72C306 74 324 106 312 136C328 166 300 196 268 188C252 210 216 212 200 196C180 212 146 210 132 188C100 196 72 166 88 136C76 106 94 74 130 72C132 46 160 22 200 26Z', // 나뭇잎
+      E(148, 108, 14, 14), E(240, 86, 14, 14), E(226, 150, 14, 14), E(150, 158, 13, 13), E(284, 134, 13, 13), // 사과
+      E(200, 226, 11, 14),                                                       // 구멍
+    ],
+    details: [{ d: 'M190 260L182 270M212 248L220 256' }] },
+  { id: 'snowman', name: '눈사람', cat: 'nature',
+    regions: [
+      GROUND(268),                                                               // 눈 바닥
+      'M130 200L72 160L80 150L136 188Z', MX('M130 200L72 160L80 150L136 188Z'),  // 팔
+      E(200, 212, 82, 68),                                                       // 몸
+      E(200, 114, 56, 50),                                                       // 머리
+      'M146 150Q200 172 254 150L256 170Q200 192 144 170Z',                       // 목도리
+      'M222 166L234 216L256 208L244 162Z',                                       // 목도리 끝
+      E(200, 204, 10, 10), E(200, 236, 10, 10),                                  // 단추
+      'M200 116L238 126L200 134Z',                                               // 코
+      RR(158, 10, 84, 54, 10),                                                   // 모자
+      'M158 42L242 42L242 56L158 56Z',                                           // 모자 띠
+      RR(140, 56, 120, 14, 7),                                                   // 모자 챙
+    ],
+    details: [...EYE(182, 102, 6), ...EYE(218, 102, 6), { d: 'M182 140Q200 150 218 140' }] },
+  { id: 'moon', name: '달과 별', cat: 'nature',
+    regions: [
+      'M200 40C130 50 100 130 130 190C160 250 240 270 290 230C220 236 170 190 168 130C166 90 180 60 200 40Z', // 달
+      STAR(300, 80, 38, 16), STAR(330, 180, 28, 12), STAR(80, 240, 26, 11), STAR(70, 70, 24, 10), // 별
+      CLOUD(230, 222),                                                           // 구름
+    ],
+    details: [{ d: 'M140 128Q150 136 160 128' }, { d: 'M146 168Q158 178 170 170' }] },
+  { id: 'mushroom', name: '버섯', cat: 'nature',
+    regions: [
+      GROUND(274),                                                               // 풀
+      'M160 160C156 210 150 250 156 276L244 276C250 250 244 210 240 160Z',       // 기둥
+      'M60 170C60 90 130 40 200 40C270 40 340 90 340 170Q340 184 320 184L80 184Q60 184 60 170Z', // 갓
+      E(128, 122, 22, 18), E(200, 80, 21, 16), E(272, 122, 22, 18), E(200, 150, 18, 13), // 점
+      'M318 232C316 250 316 264 318 278L346 278C348 264 348 250 346 232Z',       // 작은 버섯 기둥
+      'M294 238C294 210 316 196 332 196C348 196 370 210 370 238Q370 244 362 244L302 244Q294 244 294 238Z', // 작은 버섯 갓
+    ],
+    details: [...EYE(184, 214, 6), ...EYE(216, 214, 6), { d: 'M190 232Q200 240 210 232' }] },
+
+  /* ---------- 곤충 ---------- */
+  { id: 'butterfly', name: '나비', cat: 'bug',
+    regions: [
+      'M196 140C170 70 100 40 70 70C46 96 70 150 120 160C150 166 180 160 196 150Z', MX('M196 140C170 70 100 40 70 70C46 96 70 150 120 160C150 166 180 160 196 150Z'), // 윗날개
+      'M196 160C170 170 120 180 104 216C92 246 130 264 160 240C180 222 192 196 198 170Z', MX('M196 160C170 170 120 180 104 216C92 246 130 264 160 240C180 222 192 196 198 170Z'), // 아랫날개
+      E(116, 102, 20, 17), E(284, 102, 20, 17), E(146, 216, 14, 13), E(254, 216, 14, 13), // 날개 무늬
+      'M200 110C212 110 214 130 212 160C210 200 206 230 200 238C194 230 190 200 188 160C186 130 188 110 200 110Z', // 몸
+      E(200, 98, 17, 17),                                                        // 머리
+    ],
+    details: [{ d: 'M194 84Q180 58 166 52M206 84Q220 58 234 52' }, { d: E(166, 52, 5, 5), fill: '#4a3426' }, { d: E(234, 52, 5, 5), fill: '#4a3426' },
+      { d: E(194, 97, 2.5, 2.5), fill: '#3a2a20' }, { d: E(206, 97, 2.5, 2.5), fill: '#3a2a20' }] },
+  { id: 'ladybug', name: '무당벌레', cat: 'bug',
+    regions: [
+      'M20 250C80 170 300 150 380 230C300 290 100 300 20 250Z',                  // 잎
+      E(200, 92, 42, 34),                                                        // 머리
+      'M200 102C140 102 100 150 104 200C108 250 150 274 200 274Z', MX('M200 102C140 102 100 150 104 200C108 250 150 274 200 274Z'), // 날개
+      E(152, 152, 16, 16), E(136, 214, 16, 16), E(176, 248, 12, 12),             // 점
+      E(248, 152, 16, 16), E(264, 214, 16, 16), E(224, 248, 12, 12),
+    ],
+    details: [...EYE(184, 84, 6), ...EYE(216, 84, 6), { d: 'M186 62Q176 42 164 38M214 62Q224 42 236 38' }, { d: 'M40 250Q120 232 104 224M360 232Q320 236 296 222' }] },
+  { id: 'bee', name: '꿀벌', cat: 'bug',
+    regions: [
+      E(170, 88, 42, 30), E(238, 84, 38, 28),                                    // 날개
+      'M100 160L70 170L100 180Z',                                                // 침
+      E(200, 170, 100, 64),                                                      // 몸
+      'M168 113Q162 170 168 227L196 232Q190 170 196 108Z',                       // 줄무늬
+      'M226 110Q220 170 226 230L254 222Q248 170 254 118Z',
+      E(312, 160, 44, 42),                                                       // 머리
+    ],
+    details: [...EYE(322, 150, 7), { d: 'M314 176Q326 186 340 174' }, { d: 'M306 120Q298 94 286 88M326 120Q334 94 348 90' }] },
+  { id: 'dragonfly', name: '잠자리', cat: 'bug',
+    regions: [
+      'M196 116C150 76 70 66 50 86C40 104 80 124 196 130Z', MX('M196 116C150 76 70 66 50 86C40 104 80 124 196 130Z'), // 윗날개
+      'M196 140C150 140 80 160 66 182C60 198 100 198 196 152Z', MX('M196 140C150 140 80 160 66 182C60 198 100 198 196 152Z'), // 아랫날개
+      'M191 140L209 140L207 272Q200 284 193 272Z',                               // 꼬리
+      E(200, 132, 18, 24),                                                       // 가슴
+      E(200, 94, 26, 22),                                                        // 머리
+      E(182, 86, 13, 13), E(218, 86, 13, 13),                                    // 눈
+    ],
+    details: [...EYE(183, 87, 6), ...EYE(219, 87, 6), { d: 'M193 172L207 172M193 202L207 202M194 232L206 232' }, { d: 'M190 104Q200 110 210 104' }] },
+  { id: 'caterpillar', name: '애벌레', cat: 'bug',
+    regions: [
+      'M10 240C60 190 330 180 392 240C330 290 70 296 10 240Z',                   // 잎
+      E(84, 206, 34, 34), E(136, 196, 36, 36), E(192, 188, 38, 38), E(250, 180, 40, 40), // 몸 마디
+      E(312, 150, 46, 46),                                                       // 머리
+    ],
+    details: [...EYE(296, 140, 7), ...EYE(328, 140, 7), { d: 'M300 166Q312 176 326 166' }, { d: 'M298 108Q290 84 278 78M328 108Q338 84 350 80' },
+      { d: 'M80 240L76 250M132 232L128 242M192 226L190 236M250 220L248 230' }] },
+  { id: 'ant', name: '개미', cat: 'bug',
+    regions: [
+      E(290, 100, 48, 26),                                                        // 과자
+      E(110, 184, 58, 46),                                                       // 배
+      E(196, 182, 34, 28),                                                       // 가슴
+      E(284, 160, 48, 42),                                                       // 머리
+    ],
+    details: [{ d: 'M180 204L160 252L144 256M198 210L198 260M214 204L240 252L256 256' }, ...EYE(298, 150, 8), { d: 'M292 180Q304 188 316 178' },
+      { d: E(272, 92, 4, 4), fill: '#4a3426' }, { d: E(300, 86, 4, 4), fill: '#4a3426' }, { d: E(318, 98, 3.5, 3.5), fill: '#4a3426' }] },
+  { id: 'grasshopper', name: '메뚜기', cat: 'bug',
+    regions: [
+      GROUND(272),                                                               // 풀밭
+      'M270 200L260 252L272 254L284 204Z', 'M298 196L302 250L314 248L312 196Z',  // 앞다리
+      'M226 140L176 264L190 268L242 144Z',                                       // 뒷다리 아래
+      'M80 190C80 160 140 150 230 156C270 158 290 170 290 186C290 204 250 212 200 212C130 212 80 210 80 190Z', // 몸
+      'M108 172C150 140 220 140 262 160C222 178 160 186 108 182Z',               // 날개
+      'M150 198C170 150 210 120 236 126C248 132 242 148 228 150C210 156 186 182 176 208Z', // 뒷다리 위
+      E(302, 170, 34, 30),                                                       // 머리
+    ],
+    details: [...EYE(312, 162, 7), { d: 'M314 186Q324 190 332 184' }, { d: 'M306 142Q330 90 370 70M294 142Q298 96 318 70' }] },
+  { id: 'snail', name: '달팽이', cat: 'bug',
+    regions: [
+      GROUND(276),                                                               // 풀밭
+      'M60 260C60 230 90 224 130 226L250 226C280 200 290 160 320 150C350 142 364 170 356 200C350 226 330 250 300 262C280 270 80 274 60 260Z', // 몸
+      E(170, 168, 82, 74),                                                       // 껍질
+      E(176, 172, 52, 48),                                                       // 껍질 무늬
+      E(180, 174, 24, 22),
+    ],
+    details: [{ d: 'M330 152L322 110M344 152L356 112' }, { d: E(322, 106, 6, 6), fill: '#3a2a20' }, { d: E(356, 108, 6, 6), fill: '#3a2a20' }, { d: 'M334 188Q344 196 352 186' }] },
+
+  /* ---------- 장난감·놀이 ---------- */
+  { id: 'ball', name: '공', cat: 'toy',
+    regions: [
+      GROUND(276),                                                               // 바닥
+      E(200, 150, 112, 112),                                                     // 공
+      'M200 38C150 78 140 222 200 262C130 262 88 210 88 150C88 90 130 38 200 38Z', // 왼쪽 무늬
+      MX('M200 38C150 78 140 222 200 262C130 262 88 210 88 150C88 90 130 38 200 38Z'), // 오른쪽 무늬
+      E(200, 46, 22, 10),                                                        // 꼭지
+      E(340, 252, 26, 26),                                                       // 작은 공
+    ],
+    details: [{ d: 'M136 92Q146 78 160 72' }] },
+  { id: 'teddy', name: '곰 인형', cat: 'toy',
+    regions: [
+      E(140, 62, 24, 24), E(260, 62, 24, 24),                                    // 귀
+      E(140, 62, 12, 12), E(260, 62, 12, 12),                                    // 귀 안쪽
+      E(200, 214, 70, 62),                                                       // 몸
+      E(128, 200, 20, 32), E(272, 200, 20, 32),                                  // 팔
+      HEART(200, 228, 22),                                                       // 하트 천
+      E(146, 262, 34, 26), E(254, 262, 34, 26),                                  // 다리
+      E(146, 264, 16, 13), E(254, 264, 16, 13),                                  // 발바닥
+      E(200, 112, 64, 56),                                                       // 머리
+      E(200, 136, 26, 18),                                                       // 주둥이
+      E(200, 128, 10, 7),                                                        // 코
+      'M200 168L168 152L168 184Z', MX('M200 168L168 152L168 184Z'),              // 나비넥타이
+      E(200, 168, 9, 9),
+    ],
+    details: [...EYE(176, 102), ...EYE(224, 102), { d: 'M200 135L200 144M190 146Q200 152 210 146' }] },
+  { id: 'balloon', name: '풍선', cat: 'toy',
+    regions: [
+      TX('M200 30C240 30 262 64 258 100C254 140 226 166 206 170L212 180L188 180L194 170C174 166 146 140 142 100C138 64 160 30 200 30Z', -90, 30), // 왼쪽 풍선
+      TX('M200 30C240 30 262 64 258 100C254 140 226 166 206 170L212 180L188 180L194 170C174 166 146 140 142 100C138 64 160 30 200 30Z', 90, 20),  // 오른쪽 풍선
+      'M200 20C240 20 262 54 258 90C254 130 226 156 206 160L212 170L188 170L194 160C174 156 146 130 142 90C138 54 160 20 200 20Z', // 가운데 풍선
+      'M200 276L172 264L172 290Z', MX('M200 276L172 264L172 290Z'),               // 리본
+    ],
+    details: [{ d: 'M110 210Q130 250 200 276M200 170Q188 226 200 276M290 200Q270 250 200 276' }, { d: 'M162 70Q170 50 186 44M72 100Q80 80 96 74M252 90Q260 70 276 64' }] },
+  { id: 'robot', name: '로봇', cat: 'toy',
+    regions: [
+      RR(192, 16, 16, 26, 5),                                                    // 안테나
+      E(200, 12, 11, 11),                                                        // 안테나 공
+      RR(114, 64, 18, 40, 6), RR(268, 64, 18, 40, 6),                            // 귀
+      RR(130, 38, 140, 92, 20),                                                  // 머리
+      E(170, 80, 19, 19), E(230, 80, 19, 19),                                    // 눈
+      RR(166, 106, 68, 14, 7),                                                   // 입
+      RR(146, 242, 38, 44, 10), RR(216, 242, 38, 44, 10),                        // 다리
+      RR(182, 126, 36, 18, 4),                                                   // 목
+      RR(120, 140, 160, 106, 18),                                                // 몸
+      RR(148, 158, 104, 46, 10),                                                 // 화면
+      E(168, 224, 10, 10), E(200, 224, 10, 10), E(232, 224, 10, 10),             // 버튼
+      RR(82, 148, 34, 82, 14), RR(284, 148, 34, 82, 14),                         // 팔
+    ],
+    details: [...EYE(172, 80, 7), ...EYE(232, 80, 7), { d: 'M160 184L176 172L192 192L208 172L224 192L240 180' }] },
+  { id: 'blocks', name: '쌓기 블록', cat: 'toy',
+    regions: [
+      'M160 190L184 170L184 260L160 280Z', 'M60 190L84 170L184 170L160 190Z', RR(60, 190, 100, 90, 8),       // 왼쪽 블록 (옆, 위, 앞)
+      'M300 190L324 170L324 260L300 280Z', 'M200 190L224 170L324 170L300 190Z', RR(200, 190, 100, 90, 8),   // 오른쪽 블록
+      'M230 100L254 80L254 170L230 190Z', 'M130 100L154 80L254 80L230 100Z', RR(130, 100, 100, 90, 8),      // 위 블록
+      'M140 80L192 26L244 80Z',                                                  // 세모 블록
+    ],
+    details: [{ d: 'M88 212L132 212L132 258' }, { d: 'M230 210L230 256L272 256' }, { d: 'M202 122L158 122L158 168L202 168' }] },
+  { id: 'kite', name: '연', cat: 'toy',
+    regions: [
+      CLOUD(20, 40), CLOUD(280, 200),                                            // 구름
+      'M200 30L110 120L200 120Z', 'M200 30L290 120L200 120Z',                    // 연 위
+      'M110 120L200 230L200 120Z', 'M290 120L200 230L200 120Z',                  // 연 아래
+      'M190 252L166 240L166 266Z', 'M190 252L214 240L214 266Z',                  // 꼬리 리본
+      'M206 282L182 270L182 296Z', 'M206 282L230 270L230 296Z',
+    ],
+    details: [{ d: 'M200 230Q176 240 190 252Q204 266 206 282' }] },
+  { id: 'duck', name: '오리 인형', cat: 'toy',
+    regions: [
+      'M0 232Q50 220 100 232Q150 244 200 232Q250 220 300 232Q350 244 400 232L400 300L0 300Z', // 물
+      'M98 182L62 150Q54 172 90 208Z',                                           // 꼬리
+      'M90 190C90 150 130 140 170 150C200 156 230 150 260 140C300 130 320 170 310 200C300 250 240 262 190 262C130 262 90 236 90 190Z', // 몸
+      'M146 188C156 160 210 160 232 180C222 212 174 218 146 188Z',               // 날개
+      E(270, 108, 52, 48),                                                       // 머리
+      'M310 110C330 102 358 108 362 120C352 134 326 136 306 128Z',               // 부리
+      'M0 264Q50 252 100 264Q150 276 200 264Q250 252 300 264Q350 276 400 264L400 300L0 300Z', // 앞 물결
+    ],
+    details: [...EYE(282, 96), { d: 'M316 121L356 121' }] },
+  { id: 'drum', name: '북', cat: 'toy',
+    regions: [
+      'M90 140Q200 166 310 140L310 236Q200 270 90 236Z',                         // 몸통
+      'M90 224Q200 256 310 224L310 244Q200 278 90 244Z',                         // 아래 테두리
+      E(200, 140, 110, 26),                                                      // 윗면
+      'M84 62L172 118L164 130L76 74Z', MX('M84 62L172 118L164 130L76 74Z'),      // 북채
+      E(78, 64, 13, 13), E(322, 64, 13, 13),                                     // 북채 끝
+    ],
+    details: [{ d: 'M92 166L126 212L162 172L200 218L238 172L274 212L308 166' }] },
+
+  /* ---------- 공주·우주 ---------- */
+  { id: 'crown', name: '왕관', cat: 'space',
+    regions: [
+      'M60 252C60 222 120 212 200 212C280 212 340 222 340 252C340 276 280 286 200 286C120 286 60 276 60 252Z', // 방석
+      'M92 222L76 90L140 150L200 64L260 150L324 90L308 222Z',                    // 왕관
+      RR(86, 190, 228, 38, 12),                                                  // 띠
+      'M200 112L220 144L200 176L180 144Z',                                       // 가운데 보석
+      E(140, 209, 12, 11), E(200, 209, 15, 13), E(260, 209, 12, 11),             // 띠 보석
+      E(76, 86, 13, 13), E(200, 60, 14, 14), E(324, 86, 13, 13),                 // 꼭대기 구슬
+    ],
+    details: [{ d: 'M84 262Q90 250 100 246M300 246Q310 250 316 262' }] },
+  { id: 'castle', name: '성', cat: 'space',
+    regions: [
+      GROUND(278),                                                               // 잔디
+      'M160 80L240 80L240 272L160 272Z',                                         // 가운데 탑
+      'M148 84L200 20L252 84Z',                                                  // 가운데 지붕
+      'M202 4L232 13L202 22Z',                                                   // 깃발
+      'M70 120L130 120L130 272L70 272Z', 'M62 124L100 62L138 124Z',               // 왼쪽 탑, 지붕
+      MX('M70 120L130 120L130 272L70 272Z'), MX('M62 124L100 62L138 124Z'),       // 오른쪽 탑, 지붕
+      'M120 172L132 172L132 160L152 160L152 172L170 172L170 160L190 160L190 172L210 172L210 160L230 160L230 172L248 172L248 160L268 160L268 172L280 172L280 282L120 282Z', // 성벽
+      'M176 282L176 236C176 208 224 208 224 236L224 282Z',                       // 문
+      'M188 132Q188 110 200 110Q212 110 212 132L212 150L188 150Z',               // 가운데 창
+      'M88 160Q88 146 100 146Q112 146 112 160L112 188L88 188Z', MX('M88 160Q88 146 100 146Q112 146 112 160L112 188L88 188Z'), // 옆 창
+    ],
+    details: [{ d: 'M200 22L200 2' }] },
+  { id: 'wand', name: '요술봉', cat: 'space',
+    regions: [
+      SPARK(88, 80, 24), SPARK(340, 230, 22), SPARK(84, 196, 18), SPARK(352, 40, 18), // 반짝이
+      'M118 276L106 264L212 152L224 164Z',                                       // 막대
+      'M204 172C172 180 152 200 150 222L166 224C170 206 184 194 210 186Z',       // 리본
+      'M214 178C210 208 214 232 230 248L242 238C230 224 226 206 228 184Z',
+      STAR(250, 108, 84, 38),                                                    // 별
+      HEART(250, 114, 22),                                                       // 하트
+    ],
+    details: [] },
+  { id: 'dress', name: '드레스', cat: 'space',
+    regions: [
+      'M160 62L150 20L166 20L178 66Z', MX('M160 62L150 20L166 20L178 66Z'),      // 어깨끈
+      'M158 58C170 74 230 74 242 58L248 150L152 150Z',                           // 윗옷
+      'M160 146L240 146C280 200 320 250 330 272Q200 296 70 272C80 250 120 200 160 146Z', // 치마
+      'M70 272Q200 296 330 272L334 284Q312 300 292 288Q270 302 248 290Q224 304 200 292Q176 304 152 290Q130 302 108 288Q88 300 66 284Z', // 치마 프릴
+      HEART(150, 236, 15), HEART(250, 236, 15), HEART(200, 200, 15),             // 하트 무늬
+      RR(146, 140, 108, 20, 10),                                                 // 허리띠
+      'M200 150L166 132L166 168Z', MX('M200 150L166 132L166 168Z'),              // 리본
+      E(200, 150, 10, 10),
+    ],
+    details: [] },
+  { id: 'rocket', name: '로켓', cat: 'space',
+    regions: [
+      STAR(70, 70, 26, 11), STAR(330, 86, 22, 9), STAR(326, 232, 20, 8),         // 별
+      E(78, 222, 24, 24),                                                        // 작은 별(행성)
+      'M168 236C168 272 186 292 200 298C214 292 232 272 232 236Z',               // 불꽃
+      'M182 236C182 260 192 276 200 282C208 276 218 260 218 236Z',               // 불꽃 안
+      'M152 166L108 230Q104 242 118 242L158 234Z', MX('M152 166L108 230Q104 242 118 242L158 234Z'), // 날개
+      'M200 20C240 50 256 110 252 180L250 242L150 242L148 180C144 110 160 50 200 20Z', // 몸
+      'M200 20C224 38 238 62 244 84Q200 96 156 84C162 62 176 38 200 20Z',        // 머리
+      E(200, 132, 27, 27),                                                       // 창
+      E(200, 132, 17, 17),                                                       // 창 안
+      'M193 196L207 196L207 250L193 250Z',                                       // 가운데 날개
+    ],
+    details: [] },
+  { id: 'astronaut', name: '우주인', cat: 'space',
+    regions: [
+      STAR(342, 60, 24, 10), STAR(56, 86, 20, 8), STAR(330, 250, 18, 7),         // 별
+      RR(132, 138, 136, 102, 16),                                                // 배낭
+      RR(156, 234, 38, 48, 12), RR(206, 234, 38, 48, 12),                        // 다리
+      RR(148, 270, 50, 22, 10), RR(202, 270, 50, 22, 10),                        // 신발
+      RR(146, 150, 108, 98, 30),                                                 // 몸
+      RR(106, 158, 42, 70, 18), RR(252, 158, 42, 70, 18),                        // 팔
+      E(127, 236, 19, 15), E(273, 236, 19, 15),                                  // 장갑
+      RR(174, 176, 52, 32, 8),                                                   // 가슴 장치
+      E(200, 96, 70, 66),                                                        // 헬멧
+      'M148 98C148 60 252 60 252 98C252 132 148 132 148 98Z',                    // 얼굴 창
+    ],
+    details: [{ d: 'M166 84Q176 72 192 70' }, { d: E(188, 192, 5, 5), fill: '#4a3426' }, { d: E(212, 192, 5, 5), fill: '#4a3426' }] },
+  { id: 'alien', name: '외계인', cat: 'space',
+    regions: [
+      'M168 70L144 26L153 21L178 64Z', MX('M168 70L144 26L153 21L178 64Z'),      // 더듬이
+      E(146, 22, 14, 14), E(254, 22, 14, 14),                                    // 더듬이 공
+      'M150 160C140 210 140 250 150 270L250 270C260 250 260 210 250 160Z',       // 몸
+      E(200, 226, 30, 30),                                                       // 배
+      'M152 186C120 186 106 210 112 230L126 226C124 212 136 202 154 204Z', MX('M152 186C120 186 106 210 112 230L126 226C124 212 136 202 154 204Z'), // 팔
+      E(118, 234, 14, 12), E(282, 234, 14, 12),                                  // 손
+      E(170, 278, 25, 12), E(230, 278, 25, 12),                                  // 발
+      E(200, 110, 82, 62),                                                       // 머리
+      E(164, 104, 23, 25), E(236, 104, 23, 25),                                  // 눈
+    ],
+    details: [...EYE(168, 108, 10), ...EYE(240, 108, 10), { d: 'M180 142Q200 156 220 142' }] },
+  { id: 'saturn', name: '토성', cat: 'space',
+    regions: [
+      STAR(60, 50, 22, 9), STAR(350, 56, 26, 11), STAR(344, 254, 20, 8), STAR(52, 252, 24, 10), // 별
+      E(200, 160, 170, 44) + ER(200, 160, 122, 26),                              // 고리 뒤
+      E(200, 150, 92, 92),                                                       // 토성
+      'M126 100Q200 84 274 100L282 118Q200 104 118 118Z',                        // 무늬
+      'M112 138Q200 124 288 138L290 152Q200 140 110 152Z',
+      'M30 160A170 44 0 0 0 370 160L322 160A122 26 0 0 1 78 160Z',               // 고리 앞
+    ],
+    details: [] },
 ];
 
 /* ================= 모드, 색 ================= */
 let babyMode = true;
 try { babyMode = localStorage.getItem('color-mode') !== 'big'; } catch (e) {}
+// [이름, 색, 아기 모드에도 나오는지]. 비슷한 색끼리 모아 둠. 아기 모드 12색, 언니·형 모드 24색
 const COLORS = [
-  ['빨간색', '#ff5a5a'], ['주황색', '#ff9f40'], ['노란색', '#ffd93b'], ['초록색', '#4cc764'], ['파란색', '#4aa3ff'], ['보라색', '#a76bff'],
-  ['분홍색', '#ff7eb6'], ['갈색', '#a8714a'], ['하늘색', '#8fd3ff'], ['연두색', '#b6e86a'], ['검은색', '#4a4a4a'], ['하얀색', '#ffffff'],
+  ['빨간색', '#ff4d4d', 1], ['분홍색', '#ff7eb6', 1], ['연분홍색', '#ffc4dd', 0], ['자주색', '#c43c8f', 0],
+  ['주황색', '#ff9a3c', 1], ['살구색', '#ffcfa0', 0], ['노란색', '#ffd93b', 1], ['레몬색', '#fff38a', 0],
+  ['금색', '#dcae32', 0], ['연두색', '#b6e86a', 1], ['초록색', '#4cc764', 1], ['진초록색', '#23863f', 0],
+  ['청록색', '#2cc4b8', 0], ['하늘색', '#8fd3ff', 1], ['파란색', '#3f8fff', 1], ['남색', '#3446b8', 0],
+  ['보라색', '#a76bff', 1], ['연보라색', '#d4baff', 0], ['갈색', '#b07a4f', 1], ['고동색', '#6b4128', 0],
+  ['회색', '#9a9a9a', 0], ['은색', '#cdd5dc', 0], ['검은색', '#3c3c3c', 1], ['하얀색', '#ffffff', 1],
 ];
-const colorsNow = () => babyMode ? COLORS.slice(0, 8) : COLORS;
+const colorsNow = () => babyMode ? COLORS.filter(c => c[2]) : COLORS;
 let curColor = COLORS[0][1], brush = 16;
 
 // 색을 밝게/어둡게 (크레용 입체감용)
@@ -521,15 +1226,22 @@ function layout() {
 addEventListener('resize', () => { if ($('paint').classList.contains('active')) layout(); });
 
 function renderPalette() {
-  const box = $('palette'); box.innerHTML = '';
+  const box = $('palette'); box.innerHTML = ''; box.classList.toggle('many', !babyMode);
   colorsNow().forEach(([name, hex], i) => {
     const b = document.createElement('button'); b.className = 'crayon' + (hex === curColor ? ' on' : ''); b.innerHTML = crayonSVG(hex, i); b.setAttribute('aria-label', name);
-    b.onclick = () => { curColor = hex; box.querySelectorAll('.crayon').forEach(x => x.classList.toggle('on', x === b)); tone([700]); speak(name); };
+    b.onclick = () => { curColor = hex; box.querySelectorAll('.crayon').forEach(x => x.classList.toggle('on', x === b)); showCur(true); tone([700]); speak(name); };
     box.appendChild(b);
   });
   const big = !babyMode;
   $('sizeBig').style.display = $('sizeSmall').style.display = big ? '' : 'none';
   $('sizeBig').classList.toggle('on', brush === 16); $('sizeSmall').classList.toggle('on', brush === 7);
+  showCur(false);
+}
+// 지금 고른 색을 큰 동그라미와 붓 굵기 점에 보여 줌
+function showCur(pop) {
+  const sw = $('curSw'); sw.style.background = curColor;
+  document.querySelectorAll('.tbtn.size i').forEach(i => { i.style.background = curColor; i.style.boxShadow = '0 0 0 2px var(--ink)'; });
+  if (pop) { sw.classList.remove('pop'); void sw.offsetWidth; sw.classList.add('pop'); }
 }
 $('sizeBig').onclick = () => { brush = 16; renderPalette(); tone([500]); };
 $('sizeSmall').onclick = () => { brush = 7; renderPalette(); tone([800]); };
@@ -582,11 +1294,24 @@ function thumbSVG(p) {   // 선만 있는 작은 그림 (앞 칸이 뒤 칸 선�
   return `<svg viewBox="0 0 ${VW} ${VH}"><g fill="#fff" stroke="#4a3426" stroke-width="5" stroke-linejoin="round">${p.regions.map(d => `<path d="${d}"/>`).join('')}</g>
     ${p.details.map(dt => dt.fill ? `<path d="${dt.d}" fill="${dt.fill}"/>` : `<path d="${dt.d}" fill="none" stroke="#4a3426" stroke-width="4" stroke-linecap="round"/>`).join('')}</svg>`;
 }
+// 카테고리: [id, 화면 이름, 이모지, 읽는 말]. 그림의 cat 값이 id
+const CATS = [
+  ['animal', '동물', '🐶', '동물'], ['sea', '바다 친구', '🐠', '바다 친구'], ['dino', '공룡', '🦖', '공룡'],
+  ['ride', '탈것', '🚗', '탈것'], ['food', '음식', '🍰', '음식'], ['nature', '자연·날씨', '🌈', '자연과 날씨'],
+  ['bug', '곤충', '🐞', '곤충'], ['toy', '장난감·놀이', '🧸', '장난감 놀이'], ['space', '공주·우주', '👑', '공주와 우주'],
+];
+let curCat = 'animal';
+try { const c = localStorage.getItem('color-cat'); if (CATS.some(k => k[0] === c)) curCat = c; } catch (e) {}
 function renderHome() {
+  const bar = $('catBar'); bar.innerHTML = '';
+  CATS.forEach(([id, name, ic, say]) => {
+    const b = document.createElement('button'); b.className = 'cat' + (id === curCat ? ' on' : '');
+    b.innerHTML = `<div class="ic">${ic}</div>${name}`;
+    b.onclick = () => { if (id === curCat) { speak(say); return; } curCat = id; try { localStorage.setItem('color-cat', id); } catch (e) {} renderHome(); tone([600, 800]); speak(say); };
+    bar.appendChild(b);
+  });
   const g = $('picGrid'), ds = doneSet(); g.innerHTML = '';
-  const bk = document.createElement('button'); bk.className = 'picard book'; bk.innerHTML = '<div class="ic">📖</div><div class="nm">내 그림책</div>';
-  bk.onclick = () => show('book'); g.appendChild(bk);
-  PICS.forEach(p => {
+  PICS.filter(p => p.cat === curCat).forEach(p => {
     const b = document.createElement('button'); b.className = 'picard';
     b.innerHTML = thumbSVG(p) + `<div class="nm">${p.name}</div>` + (ds.has(p.id) ? '<div class="ok">⭐</div>' : '');
     b.onclick = () => { tone([600, 900]); startPic(p); };
@@ -635,6 +1360,7 @@ $('modeBtn').onclick = () => {
 };
 // 🏠: 칠하기·그림책에서는 그림 고르기로, 그림 고르기에서는 놀이 선택 화면으로
 $('homeBtn').onclick = () => { if ($('home').classList.contains('active')) location.href = 'index.html'; else { $('finish').classList.remove('on'); show('home'); } };
+$('bookBtn').onclick = () => { $('finish').classList.remove('on'); tone([600, 900]); show('book'); };
 
 const picEl = $('pic');
 picEl.addEventListener('pointerdown', onDown);
@@ -647,7 +1373,7 @@ picEl.addEventListener('pointermove', onMove);
 function voiceLines() {
   return ['그리고 싶은 그림을 골라요!', '색을 고르고, 칸을 톡 눌러서 칠해요!', '색을 고르고, 손가락으로 쓱쓱 칠해요!', '처음부터 다시 칠해요!',
     '다 칠했어요! 그림책에 넣었어요!', '아직 안 칠한 칸이 있어요!', '다 칠했으면 초록 버튼을 눌러요!', '색을 고르고 쓱쓱 칠해 봐요!',
-    '아직 그림이 없어요. 그림을 칠해 봐요!', '내 그림책', '이 그림을 지울까요?', '아기 모드', '언니 형 모드',
+    '아직 그림이 없어요. 그림을 칠해 봐요!', '내 그림책', '이 그림을 지울까요?', '아기 모드', '언니 형 모드', ...CATS.map(c => c[3]),
     ...PRAISE, ...COLORS.map(c => c[0]), ...PICS.map(p => `${eul(p.name)} 칠해 볼까요?`)];
 }
 
