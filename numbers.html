@@ -84,6 +84,11 @@
   .plate .pin { display: grid; grid-template-columns: repeat(var(--cols), auto); gap: 2px 6px; justify-content: center; }
   .plate span { font-size: min(5.6vw, 7vh, 56px); line-height: 1.1; }
   .plate.right { background: radial-gradient(circle, #c9f2df 0 60%, #a6e3c9 62% 68%, #c9f2df 70%); }
+  /* 접시 + 세어 보기 버튼 묶음 */
+  .plateCol { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .cntBtn { font-size: 24px; padding: 10px 22px; min-width: 190px; }
+  .plate span { border-radius: 12px; transition: background .2s; }
+  .plate span.on { background: #fff3c4; animation: hop .35s; }
 
   /* ---------- 반응이 없을 때 누를 곳 반짝이기 ---------- */
   .glow { animation: glow .7s infinite alternate !important; }
@@ -97,8 +102,10 @@
     .menu button { min-height: min(26vh, 260px); }
     .opt { --s: min(27vw, 20vh, 200px); }
     .plates { flex-direction: column; }
-    .plate { width: min(34vh, 80vw, 380px); height: min(34vh, 80vw, 380px); }
-    .plate span { font-size: min(4.6vh, 9vw, 50px); }
+    .plate { width: min(30vh, 80vw, 340px); height: min(30vh, 80vw, 340px); }
+    .plate span { font-size: min(4vh, 8vw, 44px); }
+    .plateCol { gap: 8px; }
+    .cntBtn { font-size: 22px; padding: 8px 20px; }
   }
 </style>
 </head>
@@ -161,7 +168,8 @@ const SINO = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구',
 const COUNTER = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];   // "한 개, 두 개"
 const hasBatchim = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return c >= 0 && c % 28 !== 0; };
 const eul = w => w + (hasBatchim(w) ? '을' : '를');
-const THINGS = ['🍎', '🍓', '🍌', '🐶', '🐥', '🐟', '🚗', '⭐', '🎈', '🍪', '🦋', '🌸'];
+// ⭐는 칭찬 별과 헷갈리므로 세는 그림에 쓰지 않음
+const THINGS = ['🍎', '🍓', '🍌', '🐶', '🐥', '🐟', '🚗', '🍊', '🎈', '🍪', '🦋', '🌸'];
 
 /* ---------- 범위: 1~5 / 1~10 (기기에 기억) ---------- */
 let MAX = 5;   // 처음에는 1~5로 시작 (1~10으로 바꾸면 기억)
@@ -304,22 +312,49 @@ function newCompare() {
   cmpQ = { a, b, more };
   $('cmpAsk').textContent = more ? '어느 쪽이 더 많을까요?' : '어느 쪽이 더 적을까요?';
   const box = $('plates'); box.innerHTML = ''; let locked = false;
+  cmpCountId++;
   [a, b].forEach(n => {
+    const col = document.createElement('div'); col.className = 'plateCol';
     const p = document.createElement('button'); p.className = 'plate';
     p.innerHTML = `<div class="pin" style="--cols:${cols}">` + Array.from({ length: n }, () => `<span>${thing}</span>`).join('') + '</div>';
+    // 세어 보기 버튼: 정답 확인과 상관없이 그 접시의 그림을 하나씩 세어 줌 (별 없음)
+    const cb = document.createElement('button'); cb.className = 'btn cntBtn'; cb.textContent = '🔢 세어 볼까?';
+    cb.onclick = () => countPlate(p, cb, n);
     const right = more ? n === Math.max(a, b) : n === Math.min(a, b);
     p.onclick = () => {
       if (locked || p.classList.contains('wrong')) return;
       if (right) {
-        locked = true; p.classList.add('right'); goodTone(); celebrate(p); addStar();
+        locked = true; cmpCountId++; p.classList.add('right'); goodTone(); celebrate(p); addStar();
         const big = COUNTER[Math.max(a, b)], small = COUNTER[Math.min(a, b)];
         later(() => speak((more ? `${big} 개가 ${small} 개보다 많아요! ` : `${small} 개가 ${big} 개보다 적어요! `) + pick(PRAISE)), 300);
         later(newCompare, 2800);
-      } else { p.classList.add('wrong'); shake(p); badTone(); setTimeout(cmpSay, 400); }
+      } else { cmpCountId++; p.classList.add('wrong'); shake(p); badTone(); setTimeout(cmpSay, 400); }
     };
-    box.appendChild(p);
+    col.appendChild(p); col.appendChild(cb); box.appendChild(col);
   });
   later(cmpSay, 300);
+}
+// 접시 그림을 0.7초마다 하나씩 표시하며 "하나, 둘, …"을 읽고, 끝나면 "○ 개!"
+// 새로 세기 시작하거나, 접시를 누르거나, 다음 문제로 넘어가면 cmpCountId가 바뀌어 세던 것을 멈춤
+let cmpCountId = 0;
+function countPlate(plate, btn, n) {
+  const id = ++cmpCountId, r = round;
+  document.querySelectorAll('#plates .plate span.on').forEach(s => s.classList.remove('on'));
+  const spans = plate.querySelectorAll('span');
+  const alive = () => id === cmpCountId && r === round;
+  let i = 0;
+  const step = () => {
+    if (!alive()) return;
+    if (i < n) {
+      spans[i].classList.add('on'); i++;
+      tick(i); speak(NATIVE[i], 1);
+      setTimeout(step, 700);
+    } else {
+      btn.textContent = `🔢 ${n}개`;
+      speak(`${COUNTER[n]} 개!`);
+    }
+  };
+  step();
 }
 
 /* ================= 반응이 없을 때 다시 안내 ================= */
@@ -328,14 +363,14 @@ const IDLE = {
   count: () => { speak('하나씩 눌러서 세어 봐요!'); return document.querySelector('#countItems .item:not(.on)'); },
   listen: () => { listenSay(); return $('listenSay'); },
   howmany: () => { speak('몇 개일까요? 그림을 하나씩 눌러서 세어 봐요!'); return document.querySelector('#hmItems .item:not(.on)'); },
-  compare: () => { cmpSay(); return null; },
+  compare: () => { cmpSay(); return [...document.querySelectorAll('#plates .cntBtn')]; },
 };
 let idleT = null, curScreen = 'home';
 function clearGlow() { document.querySelectorAll('.glow').forEach(e => e.classList.remove('glow')); }
 function resetIdle() {
   clearTimeout(idleT); clearGlow();
   if (!IDLE[curScreen]) return;
-  const fire = () => { const t = IDLE[curScreen](); if (t) t.classList.add('glow'); idleT = setTimeout(fire, 12000); };
+  const fire = () => { [].concat(IDLE[curScreen]() || []).forEach(t => t.classList.add('glow')); idleT = setTimeout(fire, 12000); };
   idleT = setTimeout(fire, 8000);
 }
 document.addEventListener('pointerdown', resetIdle, true);
