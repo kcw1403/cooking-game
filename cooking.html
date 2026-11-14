@@ -268,13 +268,27 @@ img.fe{width:1em;height:1em;display:inline-block;vertical-align:-.12em;pointer-e
 .ovenwin.hot{background:radial-gradient(#ffc56b,#e2541c);}
 
 /* 김밥 */
-.mat{background:repeating-linear-gradient(#ecdfb2 0 calc(var(--u)*2.2),#c7b57c calc(var(--u)*2.2) calc(var(--u)*2.6));border-radius:calc(var(--u)*1.5);
-  box-shadow:0 calc(var(--u)*1) calc(var(--u)*2) rgba(0,0,0,.18);}
-.nori{position:absolute;left:8%;right:8%;top:8%;bottom:8%;background:linear-gradient(135deg,#25432f,#132a1d);border-radius:calc(var(--u)*.8);overflow:hidden;
-  transition:clip-path .4s,-webkit-clip-path .4s;}
-.nori .rice{position:absolute;left:0;right:0;top:16%;bottom:0;background:var(--grain);}
-.fill{position:absolute;left:5%;right:5%;height:7%;border-radius:calc(var(--u)*2);animation:popin .3s;}
-.dbar{background:#ffd400;border-radius:calc(var(--u)*1.5);}
+/* 김발: 둥근 대나무 살(위는 밝고 아래는 어둡게)을 가로로 늘어놓고, 세로로 묶은 끈 두 줄 (그림체 규칙: .claude/skills/svg-3d-style) */
+.mat{background:repeating-linear-gradient(#f6e3b4 0,#e2c27e calc(var(--u)*1.2),#b88a46 calc(var(--u)*2.2),#8a6532 calc(var(--u)*2.3),#f6e3b4 calc(var(--u)*2.4));
+  border-radius:calc(var(--u)*1.5);box-shadow:0 calc(var(--u)*1.2) calc(var(--u)*2) rgba(0,0,0,.2);}
+.mat::before,.mat::after{content:'';position:absolute;top:-1%;bottom:-1%;width:calc(var(--u)*.5);background:linear-gradient(90deg,#f3efe6,#cfc6b4);border-radius:calc(var(--u)*.3);}
+.mat::before{left:4%;}.mat::after{right:4%;}
+/* 김: 짙은 초록 3단 그라데이션 + 결 무늬 + 왼쪽 위 윤기 */
+.nori{position:absolute;left:8%;right:8%;top:8%;bottom:8%;border-radius:calc(var(--u)*.8);overflow:hidden;z-index:1;
+  background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,0) 35%),
+    repeating-linear-gradient(115deg,rgba(255,255,255,.04) 0 2px,rgba(0,0,0,0) 2px 7px),
+    linear-gradient(135deg,#3f6b4c,#1f3a2a 55%,#0e1f15);
+  box-shadow:0 calc(var(--u)*.6) calc(var(--u)*1) rgba(0,0,0,.3);transition:clip-path .4s,-webkit-clip-path .4s;}
+/* 밥: 김 위쪽 띠(16%)는 비워 둠. 위는 밝고 아래 가장자리는 살짝 그림자 */
+.nori .rice,.nori .ricearea{position:absolute;left:0;right:0;top:16%;bottom:0;}
+.nori .rice{background:linear-gradient(170deg,rgba(255,255,255,.55),rgba(255,255,255,.2) 60%,rgba(255,255,255,.05)),var(--grain);border-radius:calc(var(--u)*.6) calc(var(--u)*.6) 0 0;
+  box-shadow:inset 0 calc(var(--u)*.6) calc(var(--u)*.8) rgba(255,255,255,.7),inset 0 calc(var(--u)*-.8) calc(var(--u)*1.2) rgba(150,115,60,.25);}
+.nori .rice.fadein{animation:fadein .5s ease-out;}
+@keyframes fadein{from{opacity:0}}
+/* 김밥 속 재료 띠: 재료 색 위에 위는 밝고 아래는 어두운 막대 입체감 */
+.fill{position:absolute;left:5%;right:5%;height:7%;border-radius:calc(var(--u)*2);animation:popin .3s;
+  background-image:linear-gradient(rgba(255,255,255,.45),rgba(255,255,255,0) 45%,rgba(0,0,0,.22));box-shadow:0 calc(var(--u)*.4) calc(var(--u)*.6) rgba(0,0,0,.18);}
+.dbar{background:linear-gradient(#fff3a0,#ffd400 45%,#e0a800);border-radius:calc(var(--u)*1.5);box-shadow:0 calc(var(--u)*.6) calc(var(--u)*.8) rgba(0,0,0,.18);}
 .kroll{position:absolute;left:5%;right:5%;background:linear-gradient(#3a5d45,#132a1d 60%,#0d1f14);border-radius:calc(var(--u)*3);transition:bottom .4s,height .4s;z-index:2;}
 .klong{position:absolute;left:0;right:0;top:15%;bottom:15%;background:linear-gradient(#3e6449,#1a3324 45%,#0d1f14);border-radius:calc(var(--u)*4);}
 .kslice{border-radius:50%;border:calc(var(--u)*.9) solid #132a1d;
@@ -569,8 +583,13 @@ function useTool(ch,rest,cls){
   document.documentElement.style.setProperty('--grain',`url("data:image/svg+xml,${encodeURIComponent(svg)}") 0 0/calc(var(--u)*24) calc(var(--u)*24),#f8f2e4`);
 })();
 // 바르기에서 밥알 한 톨 그리기 (김밥 밥 펴기)
-function drawGrain(ctx,x,y,w){ctx.save();ctx.translate(x,y);ctx.rotate(rand(0,Math.PI));ctx.beginPath();ctx.ellipse(0,0,w*.026,w*.012,0,0,Math.PI*2);
-  ctx.fillStyle='#fffefa';ctx.fill();ctx.lineWidth=Math.max(1,w*.0025);ctx.strokeStyle='#cdbb93';ctx.stroke();ctx.restore();}
+// 밥알 한 톨: 오른쪽 아래 옅은 그림자 → 하얀 알 → 왼쪽 위 작은 반사광 (그림체 규칙의 빛 방향)
+function drawGrain(ctx,x,y,w){const a=w*.026,b=w*.012;
+  ctx.save();ctx.translate(x,y);ctx.rotate(rand(0,Math.PI));
+  ctx.beginPath();ctx.ellipse(a*.15,b*.45,a,b,0,0,Math.PI*2);ctx.fillStyle='rgba(150,115,60,.18)';ctx.fill();
+  ctx.beginPath();ctx.ellipse(0,0,a,b,0,0,Math.PI*2);ctx.fillStyle='#fffefa';ctx.fill();ctx.lineWidth=Math.max(1,w*.0015);ctx.strokeStyle='#e6dabd';ctx.stroke();
+  ctx.beginPath();ctx.ellipse(-a*.3,-b*.3,a*.35,b*.3,0,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.95)';ctx.fill();
+  ctx.restore();}
 // 그려서 쓰는 도구 (이모지에 없는 것)
 const KNIFE_SVG=`<svg viewBox="0 0 100 100" style="width:${uu(17)};height:${uu(17)}"><g transform="rotate(-45 50 50)">
   <rect x="6" y="42" width="52" height="16" rx="8" fill="#dfe4e8" stroke="#8d969e" stroke-width="2.5"/>
@@ -704,9 +723,10 @@ function paintTask(done,o){
   let fin=false;
   const dab=p=>{
     const r=relIn(p,cv);if(r.x<-.15||r.x>1.15||r.y<-.15||r.y>1.15)return;
+    if(o.dab)o.dab(ctx,r.x*cv.width,r.y*cv.height,Rr*cv.width,Rr*cv.height,cv.width);else{   // o.dab: 한 번 찍는 그림을 직접 그림 (예: 밥 덩이)
     ctx.fillStyle=o.color;ctx.beginPath();ctx.ellipse(r.x*cv.width,r.y*cv.height,Rr*cv.width,Rr*cv.height,0,0,Math.PI*2);ctx.fill();
     if(o.grain){for(let k=0;k<3;k++)drawGrain(ctx,(r.x+rand(-Rr,Rr)*.9)*cv.width,(r.y+rand(-Rr,Rr)*.9)*cv.height,cv.width);}
-    else if(o.speck&&Math.random()<.5){ctx.fillStyle=o.speck;ctx.beginPath();ctx.arc((r.x+rand(-.05,.05))*cv.width,(r.y+rand(-.05,.05))*cv.height,cv.width*.012,0,Math.PI*2);ctx.fill();}
+    else if(o.speck&&Math.random()<.5){ctx.fillStyle=o.speck;ctx.beginPath();ctx.arc((r.x+rand(-.05,.05))*cv.width,(r.y+rand(-.05,.05))*cv.height,cv.width*.012,0,Math.PI*2);ctx.fill();}}
     for(let gx=0;gx<G;gx++)for(let gy=0;gy<G;gy++){if(Math.hypot((gx+.5)/G-r.x,(gy+.5)/G-r.y)<Rr*1.1)cells.add(gx+','+gy);}
   };
   const line=(a,b)=>{const steps=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/(U()*1.5)));for(let i=1;i<=steps;i++)dab({x:a.x+(b.x-a.x)*i/steps,y:a.y+(b.y-a.y)*i/steps});};
@@ -1228,15 +1248,31 @@ function kbMat(withNori=true){
   (S.fills||[]).forEach((f,i)=>addFill(nori,f,i));
   return{mat,nori};
 }
-function addFill(nori,f,i){const d=el('div','fill',nori);d.style.background=f.c;d.style.top=(70-i*9)+'%';return d;}
+function addFill(nori,f,i){const d=el('div','fill',nori);d.style.backgroundColor=f.c;d.style.top=(70-i*9)+'%';return d;}
 function kbNori(done){
   const{mat}=kbMat(false);const nm=box(stage,'drag norimini',50,86,24,16);
   draggable(nm,mat,elm=>{elm.remove();const n=el('div','nori',mat);n.style.animation='popin .3s';SFX.pop();later(done,400);});
   hintFn=()=>nm.isConnected?{type:'drag',from:nm,to:mat}:null;
 }
+// 밥 주걱 (왼쪽 아래가 주걱 머리 = 손가락 위치, 오른쪽 위로 손잡이)
+const PADDLE_SVG=`<svg viewBox="0 0 100 100" style="width:${uu(14)};height:${uu(14)};display:block;overflow:visible">
+  <defs><linearGradient id="pdlh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6e3b4"/><stop offset=".5" stop-color="#e2c27e"/><stop offset="1" stop-color="#b88a46"/></linearGradient>
+    <radialGradient id="pdlb" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#f1e6cf"/><stop offset="1" stop-color="#d2bf95"/></radialGradient></defs>
+  <path d="M46 52 L86 12 Q92 8 95 13 Q98 17 92 22 L54 60 Z" fill="url(#pdlh)"/>
+  <ellipse cx="33" cy="68" rx="24" ry="19" transform="rotate(-45 33 68)" fill="url(#pdlb)"/>
+  <ellipse cx="26" cy="60" rx="8" ry="5" transform="rotate(-45 26 60)" fill="#fff" opacity=".6"/>
+  <path d="M68 30 L88 10" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".5"/></svg>`;
+// 밥 한 덩이 찍기: 가장자리가 부드러운 하얀 덩어리 + 그림자·반사광이 있는 밥알 (canvas)
+function riceClump(ctx,x,y,rx,ry,W){
+  const g=ctx.createRadialGradient(x,y,0,x,y,rx);
+  g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.6,'rgba(251,246,234,.95)');g.addColorStop(1,'rgba(232,220,192,0)');
+  ctx.save();ctx.translate(x,y);ctx.scale(1,ry/rx);ctx.translate(-x,-y);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,rx,0,Math.PI*2);ctx.fill();ctx.restore();
+  for(let k=0;k<7;k++){const a=Math.random()*Math.PI*2,d=Math.random()*.8;drawGrain(ctx,x+Math.cos(a)*rx*d,y+Math.sin(a)*ry*d,W);}
+}
 function kbRice(done){
-  const{nori}=kbMat();
-  paintTask(()=>{S.rice=1;done();},{target:nori,color:'#f1e8d4',grain:true,R:.1,cover:.75,tool:'🥄'});
+  const{nori}=kbMat();const area=el('div','ricearea',nori);
+  paintTask(()=>{el('div','rice fadein',nori);area.style.transition='opacity .5s';area.style.opacity=0;S.rice=1;done();},
+    {target:area,R:.11,cover:.75,tool:PADDLE_SVG,dab:riceClump});
 }
 function kbFill(done){
   S.fills=[];const{mat,nori}=kbMat();box(stage,'tray',50,86,84,18);let n=0;

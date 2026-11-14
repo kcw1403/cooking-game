@@ -44,6 +44,7 @@
 ## 코드 규칙
 - 각 놀이는 HTML 파일 하나에 CSS·JS를 모두 넣는다. 외부 라이브러리, 이미지, 소리 파일을 쓰지 않는다. 그림은 이모지, CSS, SVG로 그린다. 예외: 음성 mp3와 그 목록(`voice/`), 요리 놀이 3D 그림(`img/fluent/`)만 따로 둔다.
 - 요리 놀이(`cooking.html`)는 화면에 들어온 이모지 글자를 `img/fluent/<코드>.png`(Microsoft Fluent Emoji 3D, MIT)로 자동으로 바꾼다. 새 이모지를 쓰면 같은 저장소의 3D PNG를 `img/fluent/`에 넣고 `FLUENT` 목록에 코드를 추가한다. 그림이 없는 이모지는 글자 그대로 보인다.
+- 그림을 SVG·CSS·canvas로 직접 그릴 때는 프로젝트 스킬 `svg-3d-style`(`.claude/skills/svg-3d-style/SKILL.md`)의 3D 그림체 규칙을 따른다.
 - 크기는 `--u: min(1vw, 1vh)` 단위로 정해 가로·세로 화면 모두에 맞춘다.
 - 터치는 Pointer Events를 쓰고, iOS 확대·스크롤·길게 누르기 메뉴를 막는다.
 - 요리 놀이의 각 단계는 `hintFn`으로 다음에 할 동작(tap / rub / drag)을 알려 줘야 한다. 힌트 손가락과 자동 테스트가 이 값을 쓴다.
