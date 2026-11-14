@@ -29,7 +29,13 @@ html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;touch-ac
 #home:active{transform:translateY(calc(var(--u)*.4));box-shadow:none;}
 
 /* 무대 */
-#stage{flex:1;position:relative;overflow:hidden;touch-action:none;}
+/* 무대 배경: 밝은 대리석 조리대 (나무 도구·김발·도마가 묻히지 않게 돌 재질). 가운데가 밝고, 옅은 결 두 줄 */
+#stage{flex:1;position:relative;overflow:hidden;touch-action:none;
+  background:radial-gradient(ellipse at 50% 38%,rgba(255,255,255,.6),rgba(255,255,255,0) 70%),
+    linear-gradient(115deg,rgba(0,0,0,0) 28%,rgba(176,156,128,.16) 29.5%,rgba(0,0,0,0) 31.5%,rgba(0,0,0,0) 61%,rgba(176,156,128,.12) 62.8%,rgba(0,0,0,0) 65%),
+    linear-gradient(160deg,rgba(0,0,0,0) 70%,rgba(176,156,128,.1) 71.5%,rgba(0,0,0,0) 73%),
+    linear-gradient(#f4ede2,#e6dac8);
+  box-shadow:inset 0 calc(var(--u)*1) calc(var(--u)*2) rgba(90,60,30,.12);}
 #caption{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*1.5);
   min-height:calc(var(--u)*11);padding:calc(var(--u)*1.2) calc(var(--u)*3);
   font-size:calc(var(--u)*4);font-weight:800;color:var(--brown);text-align:center;background:rgba(255,255,255,.55);}
@@ -96,9 +102,15 @@ img.fe{width:1em;height:1em;display:inline-block;vertical-align:-.12em;pointer-e
 .dirt{position:absolute;width:calc(var(--u)*6.5);height:calc(var(--u)*5.5);margin:calc(var(--u)*-2.75) 0 0 calc(var(--u)*-3.25);
   background:radial-gradient(circle,#6e4524 0 40%,#8a5d39 42% 62%,transparent 66%);border-radius:50%;transition:opacity .2s,transform .3s;}
 .dirt.clean{transform:scale(0);opacity:0!important;}
-.board{background:linear-gradient(#e7bb84,#c98f52);border-radius:calc(var(--u)*3);box-shadow:0 calc(var(--u)*1) calc(var(--u)*2) rgba(0,0,0,.18);}
-.plate{border-radius:50%;background:radial-gradient(ellipse at center,#fff 0 52%,#e6e6e6 54% 60%,#fff 62%);
-  box-shadow:0 calc(var(--u)*1) calc(var(--u)*2) rgba(0,0,0,.15);}
+/* 도마: 나무 3단 그라데이션 + 세로 나뭇결 + 윗면 반사 (그림체 규칙: .claude/skills/svg-3d-style) */
+.board{border-radius:calc(var(--u)*3);
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 calc(var(--u)*1.3),rgba(120,70,20,.05) calc(var(--u)*1.3) calc(var(--u)*2.8)),
+    linear-gradient(#f0c98f,#dba86a 55%,#b9844a);
+  box-shadow:0 calc(var(--u)*1.2) calc(var(--u)*2) rgba(0,0,0,.2),inset 0 calc(var(--u)*.5) 0 rgba(255,255,255,.35),inset 0 calc(var(--u)*-.6) 0 rgba(120,70,20,.25);}
+/* 접시: 가운데 오목, 테두리 고리, 바깥 가장자리 어둡게 */
+.plate{border-radius:50%;
+  background:radial-gradient(ellipse at 50% 44%,#fff 0 48%,#eef0f2 52%,#dde2e7 57%,#fff 61%,#f2f4f6 78%,#d6dbe1 100%);
+  box-shadow:0 calc(var(--u)*1.2) calc(var(--u)*1.6) rgba(0,0,0,.18);}
 .tray{background:rgba(255,255,255,.6);border-radius:calc(var(--u)*4);}
 .seg{position:absolute;top:0;height:100%;overflow:hidden;transition:transform .3s ease-out;}
 .seginner{position:absolute;top:0;height:100%;}
@@ -164,10 +176,15 @@ img.fe{width:1em;height:1em;display:inline-block;vertical-align:-.12em;pointer-e
   background:#e6bb86;border-radius:20% 40% 30% 50%;pointer-events:none;z-index:45;}
 
 /* 그릇 */
-.bowl .body{position:absolute;left:0;right:0;top:22%;bottom:0;background:linear-gradient(#63b8ec,#2c80bd);
-  border-radius:0 0 50% 50% / 0 0 100% 100%;}
-.bowl .rim{position:absolute;left:0;right:0;top:0;height:46%;border-radius:50%;background:#d6eefc;border:calc(var(--u)*.9) solid #4ea4dc;}
-.bowl .inside{position:absolute;left:7%;right:7%;top:5%;height:36%;border-radius:50%;overflow:hidden;background:#bfe2f8;}
+/* 그릇: 바닥 그림자, 몸통은 가로 3단(왼쪽 빛) + 왼쪽 위 반사광, 안쪽은 오목하게 그늘 */
+.bowl::before{content:'';position:absolute;left:14%;right:14%;bottom:-7%;height:14%;border-radius:50%;background:radial-gradient(rgba(0,0,0,.22),rgba(0,0,0,0) 70%);}
+.bowl .body{position:absolute;left:0;right:0;top:22%;bottom:0;border-radius:0 0 50% 50% / 0 0 100% 100%;
+  background:radial-gradient(ellipse 22% 30% at 24% 38%,rgba(255,255,255,.55),rgba(255,255,255,0)),
+    linear-gradient(90deg,#3a8fcb,#6cc0f0 24%,#4aa3e0 55%,#2a78b5 82%,#1c5f94);}
+.bowl .rim{position:absolute;left:0;right:0;top:0;height:46%;border-radius:50%;background:linear-gradient(#eef8ff,#cfe9fa);border:calc(var(--u)*.9) solid #3f97d3;
+  box-shadow:inset 0 calc(var(--u)*.5) calc(var(--u)*.5) rgba(255,255,255,.7);}
+.bowl .inside{position:absolute;left:7%;right:7%;top:5%;height:36%;border-radius:50%;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 30%,#d8eefc,#a9d3f0 70%,#8cc3e8);box-shadow:inset 0 calc(var(--u)*1.2) calc(var(--u)*1.5) rgba(0,40,80,.25);}
 .chunk{position:absolute;border-radius:45% 55% 50% 40%;background:radial-gradient(circle at 50% 55%,#ffcc33 0 30%,#fff 33%);
   box-shadow:inset calc(var(--u)*-.4) calc(var(--u)*-.4) calc(var(--u)*.8) rgba(0,0,0,.1);transition:transform .2s,opacity .2s;}
 .mash{position:absolute;left:4%;right:4%;top:8%;bottom:4%;border-radius:50%;background:radial-gradient(#ffe27a,#ffcf3a);transform:scale(0);transition:transform .2s;}
@@ -220,21 +237,44 @@ img.fe{width:1em;height:1em;display:inline-block;vertical-align:-.12em;pointer-e
 .skewfruits>*{flex:0 0 auto;font-size:calc(var(--u)*13);line-height:1;animation:popin .3s;}
 
 /* 주먹밥 */
-.ricepot{background:linear-gradient(90deg,#d9d9d9,#fff 45%,#cfcfcf);border-radius:calc(var(--u)*2) calc(var(--u)*2) calc(var(--u)*6) calc(var(--u)*6);
-  box-shadow:0 calc(var(--u)*1) calc(var(--u)*2) rgba(0,0,0,.15);}
-.ricepot::before{content:'';position:absolute;left:4%;right:4%;top:-10%;height:28%;background:var(--grain);border:calc(var(--u)*.7) solid #c9c9c9;border-radius:50%;}
-.ricemound{position:absolute;left:8%;right:8%;top:6%;bottom:6%;border-radius:50%;background:var(--grain);transition:transform .3s,filter .3s;}
-.oil{position:absolute;width:18%;height:26%;border-radius:50%;background:radial-gradient(#f7cf55,#d99a1b);opacity:.85;animation:popin .3s;}
-.seed{position:absolute;width:calc(var(--u)*1.1);height:calc(var(--u)*.7);border-radius:50%;background:#f3e3b5;border:1px solid #b89a5e;}
+/* 밥솥: 따뜻한 회색 금속(가로 3단 + 반사 띠), 양옆 손잡이, 위에 소복한 밥 */
+.ricepot{border-radius:calc(var(--u)*2.5) calc(var(--u)*2.5) calc(var(--u)*7) calc(var(--u)*7);
+  background:linear-gradient(90deg,#7c858d,#c4cbd1 14%,#f5f7f9 30%,#d9dee3 46%,#9aa3ab 78%,#5f6870);
+  box-shadow:0 calc(var(--u)*1.4) calc(var(--u)*1.8) rgba(0,0,0,.22),inset 0 calc(var(--u)*-1) calc(var(--u)*1.5) rgba(0,0,0,.18);}
+.ricepot::before{content:'';position:absolute;left:3%;right:3%;top:-12%;height:30%;border-radius:50%;
+  background:radial-gradient(ellipse at 40% 35%,rgba(255,255,255,.6),rgba(255,255,255,0) 55%),var(--ricetex) center/cover;
+  border:calc(var(--u)*.8) solid #b8c0c7;box-shadow:inset 0 calc(var(--u)*-.6) calc(var(--u)*.8) rgba(120,90,40,.25);}
+.ricepot .ph{position:absolute;top:14%;width:14%;height:16%;border-radius:calc(var(--u)*1.2);background:linear-gradient(#5f6870,#3f474e);box-shadow:inset 0 calc(var(--u)*.3) 0 rgba(255,255,255,.3);}
+.ricepot .ph.l{left:-9%;}.ricepot .ph.r{right:-9%;}
+/* 그릇 속 밥: 왼쪽 위 밝게, 오른쪽 아래 그늘 */
+.ricemound{position:absolute;left:8%;right:8%;top:6%;bottom:6%;border-radius:50%;transition:transform .3s,filter .3s;
+  background:radial-gradient(ellipse at 38% 30%,rgba(255,255,255,.55),rgba(255,255,255,0) 50%),radial-gradient(ellipse at 62% 82%,rgba(150,115,60,.2),rgba(0,0,0,0) 60%),var(--ricetex) center/cover;}
+/* 참기름 방울: 반짝이는 액체 (반사광 진하게) */
+.oil{position:absolute;width:18%;height:26%;border-radius:50%;opacity:.9;animation:popin .3s;
+  background:radial-gradient(ellipse 30% 25% at 35% 30%,rgba(255,255,255,.8),rgba(255,255,255,0)),radial-gradient(circle at 40% 35%,#fff0a8,#f2c447 45%,#d99a1b 85%);}
+/* 깨: 작은 볼록한 씨앗 */
+.seed{position:absolute;width:calc(var(--u)*1.2);height:calc(var(--u)*.75);border-radius:50%;
+  background:radial-gradient(ellipse at 35% 30%,#fffbe8,#f0dca8 55%,#c9a865);box-shadow:0 1px 1px rgba(110,80,30,.35);}
 .shaker .lid{position:absolute;left:8%;right:8%;top:0;height:22%;border-radius:calc(var(--u)*1.2) calc(var(--u)*1.2) 0 0;
   background:radial-gradient(circle,#7a1f1f calc(var(--u)*.4),transparent calc(var(--u)*.5)) 0 0/calc(var(--u)*2) calc(var(--u)*2),#d33;}
 .shaker .jar{position:absolute;left:0;right:0;top:20%;bottom:0;border-radius:calc(var(--u)*2);border:calc(var(--u)*.5) solid #ccc;
   background:radial-gradient(ellipse,#e9d6a0 calc(var(--u)*.45),transparent calc(var(--u)*.6)) 0 0/calc(var(--u)*1.6) calc(var(--u)*1.3),rgba(255,255,255,.85);
   display:flex;align-items:center;justify-content:center;font-weight:900;font-size:calc(var(--u)*4);color:#6b3e1e;}
-.riceball{background:var(--grain);box-shadow:inset calc(var(--u)*-1) calc(var(--u)*-1.5) calc(var(--u)*2.5) rgba(0,0,0,.1),0 calc(var(--u)*1) calc(var(--u)*2) rgba(0,0,0,.15);
-  transition:transform .25s,border-radius .25s;}
-.norib{position:absolute;left:28%;width:44%;bottom:-1%;height:42%;background:linear-gradient(135deg,#25432f,#132a1d);border-radius:calc(var(--u)*.6);animation:popin .3s;}
-.norimini{background:linear-gradient(135deg,#25432f,#132a1d);border-radius:calc(var(--u)*1);}
+/* 주먹밥: 반복 무늬 대신 한 장짜리 밥 그림 + 왼쪽 위 반사, 오른쪽 아래 그늘, 바닥 그림자 */
+.riceball{transition:transform .25s,border-radius .25s;
+  background:radial-gradient(ellipse 34% 28% at 34% 26%,rgba(255,255,255,.75),rgba(255,255,255,0)),
+    radial-gradient(ellipse at 68% 82%,rgba(140,105,50,.28),rgba(0,0,0,0) 58%),var(--ricetex) center/cover;
+  box-shadow:inset calc(var(--u)*-1.2) calc(var(--u)*-1.6) calc(var(--u)*2.4) rgba(140,105,50,.22),0 calc(var(--u)*1.4) calc(var(--u)*1.6) rgba(0,0,0,.2);}
+/* 주먹밥 김과 작은 김 조각: 김밥의 김과 같은 결 무늬·윤기 */
+.norib,.norimini{background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,0) 40%),
+    repeating-linear-gradient(115deg,rgba(255,255,255,.04) 0 2px,rgba(0,0,0,0) 2px 6px),linear-gradient(135deg,#3f6b4c,#1f3a2a 55%,#0e1f15);}
+.norib{position:absolute;left:26%;width:48%;bottom:-2%;height:44%;border-radius:calc(var(--u)*.8) calc(var(--u)*.8) calc(var(--u)*1.6) calc(var(--u)*1.6);
+  box-shadow:inset 0 calc(var(--u)*.4) calc(var(--u)*.4) rgba(255,255,255,.12),0 calc(var(--u)*.3) calc(var(--u)*.5) rgba(0,0,0,.25);animation:popin .3s;}
+.norimini{border-radius:calc(var(--u)*1);box-shadow:0 calc(var(--u)*.8) calc(var(--u)*1.2) rgba(0,0,0,.25);}
+/* 밥 펼 때 주걱 아래로 튀는 밥알 */
+.ricebit{position:absolute;width:calc(var(--u)*1.7);height:calc(var(--u)*1);margin:calc(var(--u)*-.5) 0 0 calc(var(--u)*-.85);border-radius:50%;pointer-events:none;z-index:45;
+  background:radial-gradient(ellipse at 35% 30%,#fff,#f6eedc 60%,#e2d3b0);box-shadow:0 1px 1px rgba(120,90,40,.3);animation:bitpop .6s ease-out forwards;}
+@keyframes bitpop{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
 
 /* 팬케이크 */
 .yolk{position:absolute;left:30%;top:18%;width:40%;height:64%;border-radius:50%;background:radial-gradient(circle,#ffb300 0 32%,#fff7e0 35% 66%,transparent 69%);animation:popin .3s;}
@@ -280,11 +320,10 @@ img.fe{width:1em;height:1em;display:inline-block;vertical-align:-.12em;pointer-e
     linear-gradient(135deg,#3f6b4c,#1f3a2a 55%,#0e1f15);
   box-shadow:0 calc(var(--u)*.6) calc(var(--u)*1) rgba(0,0,0,.3);transition:clip-path .4s,-webkit-clip-path .4s;}
 /* 밥: 김 위쪽 띠(16%)는 비워 둠. 위는 밝고 아래 가장자리는 살짝 그림자 */
-.nori .rice,.nori .ricearea{position:absolute;left:0;right:0;top:16%;bottom:0;}
-.nori .rice{background:linear-gradient(170deg,rgba(255,255,255,.55),rgba(255,255,255,.2) 60%,rgba(255,255,255,.05)),var(--grain);border-radius:calc(var(--u)*.6) calc(var(--u)*.6) 0 0;
-  box-shadow:inset 0 calc(var(--u)*.6) calc(var(--u)*.8) rgba(255,255,255,.7),inset 0 calc(var(--u)*-.8) calc(var(--u)*1.2) rgba(150,115,60,.25);}
-.nori .rice.fadein{animation:fadein .5s ease-out;}
-@keyframes fadein{from{opacity:0}}
+/* 밥 층: 밥을 편 그림(S.riceImg)을 그대로 쓰고, 아래로 그림자를 떨어뜨려 김 위에 소복이 올라간 두께를 냄 */
+.nori .rice,.nori .ricearea{position:absolute;left:0;right:0;top:16%;bottom:0;filter:drop-shadow(0 calc(var(--u)*.4) calc(var(--u)*.35) rgba(40,25,5,.5));}
+.nori .rice{background:var(--ricetex) center/cover;border-radius:calc(var(--u)*1.2);}
+.nori .rice.img{border-radius:0;}
 /* 김밥 속 재료 띠: 재료 색 위에 위는 밝고 아래는 어두운 막대 입체감 */
 .fill{position:absolute;left:5%;right:5%;height:7%;border-radius:calc(var(--u)*2);animation:popin .3s;
   background-image:linear-gradient(rgba(255,255,255,.45),rgba(255,255,255,0) 45%,rgba(0,0,0,.22));box-shadow:0 calc(var(--u)*.4) calc(var(--u)*.6) rgba(0,0,0,.18);}
@@ -583,11 +622,19 @@ function useTool(ch,rest,cls){
   document.documentElement.style.setProperty('--grain',`url("data:image/svg+xml,${encodeURIComponent(svg)}") 0 0/calc(var(--u)*24) calc(var(--u)*24),#f8f2e4`);
 })();
 // 바르기에서 밥알 한 톨 그리기 (김밥 밥 펴기)
-// 밥알 한 톨: 오른쪽 아래 옅은 그림자 → 하얀 알 → 왼쪽 위 작은 반사광 (그림체 규칙의 빛 방향)
-function drawGrain(ctx,x,y,w){const a=w*.026,b=w*.012;
+// 밥 그림 한 장 (반복 무늬가 아닌 큰 그림): 밥솥·그릇 속 밥·주먹밥·김밥 밥에 --ricetex로 씀
+(function makeRiceTexture(){
+  const S=640,cv=document.createElement('canvas');cv.width=cv.height=S;const ctx=cv.getContext('2d');
+  ctx.fillStyle='#fbf6ea';ctx.fillRect(0,0,S,S);
+  for(let i=0;i<1200;i++)drawGrain(ctx,rand(-10,S+10),rand(-10,S+10),S*.9,true);
+  document.documentElement.style.setProperty('--ricetex',`url(${cv.toDataURL('image/jpeg',.9)})`);
+})();
+// 밥알 한 톨: 오른쪽 아래 옅은 그림자 → 하얀 알 → 왼쪽 위 작은 반사광 (그림체 규칙의 빛 방향). 통통하게(가로:세로 = 2:1.1)
+// soft: 밥알이 빽빽한 큰 밥 그림용. 그림자·테두리를 옅게 해 전체가 칙칙해지지 않게
+function drawGrain(ctx,x,y,w,soft){const a=w*.03,b=w*.0165;
   ctx.save();ctx.translate(x,y);ctx.rotate(rand(0,Math.PI));
-  ctx.beginPath();ctx.ellipse(a*.15,b*.45,a,b,0,0,Math.PI*2);ctx.fillStyle='rgba(150,115,60,.18)';ctx.fill();
-  ctx.beginPath();ctx.ellipse(0,0,a,b,0,0,Math.PI*2);ctx.fillStyle='#fffefa';ctx.fill();ctx.lineWidth=Math.max(1,w*.0015);ctx.strokeStyle='#e6dabd';ctx.stroke();
+  ctx.beginPath();ctx.ellipse(a*.15,b*.45,a,b,0,0,Math.PI*2);ctx.fillStyle=soft?'rgba(150,115,60,.1)':'rgba(150,115,60,.18)';ctx.fill();
+  ctx.beginPath();ctx.ellipse(0,0,a,b,0,0,Math.PI*2);ctx.fillStyle='#fffefa';ctx.fill();ctx.lineWidth=Math.max(1,w*.0015);ctx.strokeStyle=soft?'#efe6d2':'#e6dabd';ctx.stroke();
   ctx.beginPath();ctx.ellipse(-a*.3,-b*.3,a*.35,b*.3,0,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.95)';ctx.fill();
   ctx.restore();}
 // 그려서 쓰는 도구 (이모지에 없는 것)
@@ -1022,7 +1069,7 @@ function riceBowl(x,y,w=58,h=36){
 function addSeed(ins){const s=el('div','seed',ins);s.style.left=rand(15,82)+'%';s.style.top=rand(15,80)+'%';s.style.transform=`rotate(${rand(0,180)}deg)`;return s;}
 function rcScoop(done){
   S.rice=.3;
-  box(stage,'ricepot',24,58,32,26);
+  box(stage,'ricepot',24,58,32,26,'<i class="ph l"></i><i class="ph r"></i>');
   const b=riceBowl(70,60);let n=0,cur=null;
   // 한 번만 옮기면 그릇에 밥이 소복이 담기고 다음 단계로
   const spawn=()=>{cur=emo(stage,'🍚',24,40,15,'drag');
@@ -1244,7 +1291,8 @@ function pzEat(done){
 const FILLS=[{k:'dan',c:'#ffd400'},{k:'🥬',c:'#2e8b3a'},{k:'🥚',c:'#ffcf3a'},{k:'🥕',c:'#ff7f27'}];
 function kbMat(withNori=true){
   const mat=box(stage,'mat',50,44,60,46);if(!withNori)return{mat};
-  const nori=el('div','nori',mat);if(S.rice)el('div','rice',nori);
+  const nori=el('div','nori',mat);
+  if(S.rice){const r=el('div','rice',nori);if(S.riceImg){r.classList.add('img');r.style.background=`url(${S.riceImg}) 0 0/100% 100%`;}}   // 밥 펴기에서 그린 밥을 그대로
   (S.fills||[]).forEach((f,i)=>addFill(nori,f,i));
   return{mat,nori};
 }
@@ -1265,14 +1313,31 @@ const PADDLE_SVG=`<svg viewBox="0 0 100 100" style="width:${uu(14)};height:${uu(
 // 밥 한 덩이 찍기: 가장자리가 부드러운 하얀 덩어리 + 그림자·반사광이 있는 밥알 (canvas)
 function riceClump(ctx,x,y,rx,ry,W){
   const g=ctx.createRadialGradient(x,y,0,x,y,rx);
-  g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.6,'rgba(251,246,234,.95)');g.addColorStop(1,'rgba(232,220,192,0)');
+  // 가운데부터 85%까지는 꽉 찬 밥, 바깥 15%만 짧게 사라짐 → 가장자리가 흐리게 번지지 않고 몽글몽글하게
+  g.addColorStop(0,'#fffefb');g.addColorStop(.7,'#fbf6ea');g.addColorStop(.85,'rgba(238,228,204,.95)');g.addColorStop(1,'rgba(232,220,192,0)');
   ctx.save();ctx.translate(x,y);ctx.scale(1,ry/rx);ctx.translate(-x,-y);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,rx,0,Math.PI*2);ctx.fill();ctx.restore();
-  for(let k=0;k<7;k++){const a=Math.random()*Math.PI*2,d=Math.random()*.8;drawGrain(ctx,x+Math.cos(a)*rx*d,y+Math.sin(a)*ry*d,W);}
+  for(let k=0;k<5;k++){const a=Math.random()*Math.PI*2,d=Math.random()*.8;drawGrain(ctx,x+Math.cos(a)*rx*d,y+Math.sin(a)*ry*d,W);}
+}
+// 밥 덩이 중심을 가장자리에서 조금 안쪽으로만 찍어, 밥 층 가장자리가 반듯하게 잘리지 않고 울퉁불퉁하게
+function riceClumpIn(ctx,x,y,rx,ry,W){const H=ctx.canvas.height;
+  riceClump(ctx,Math.min(W-rx*.55,Math.max(rx*.55,x)),Math.min(H-ry*.55,Math.max(ry*.55,y)),rx,ry,W);}
+// 주걱 아래로 밥알이 톡톡 튀는 효과
+function riceBits(p){
+  for(let i=0;i<2;i++){const b=el('div','ricebit',stage);b.style.left=p.x+'px';b.style.top=p.y+'px';
+    b.style.setProperty('--dx',uu(rand(-5,5)));b.style.setProperty('--dy',uu(rand(-7,-2)));b.style.setProperty('--r',rand(-180,180)+'deg');
+    setTimeout(()=>b.remove(),650);}
 }
 function kbRice(done){
-  const{nori}=kbMat();const area=el('div','ricearea',nori);
-  paintTask(()=>{el('div','rice fadein',nori);area.style.transition='opacity .5s';area.style.opacity=0;S.rice=1;done();},
-    {target:area,R:.11,cover:.75,tool:PADDLE_SVG,dab:riceClump});
+  const{nori}=kbMat();const area=el('div','ricearea',nori);let last=0;
+  stageOn('pointermove',e=>{const now=Date.now();if(now-last<120)return;const p=pt(e),r=center(area);
+    if(Math.abs(p.x-r.x)<r.w/2&&Math.abs(p.y-r.y)<r.h/2){last=now;riceBits(p);}});
+  const cv=paintTask(()=>{
+    // 다 펴면 덜 칠한 빈틈을 0.5초 동안 밥 덩이로 채우고, 그 그림을 저장해 다음 단계(재료 올리기·말기)에서 그대로 씀
+    const ctx=cv.getContext('2d'),W=cv.width,H=cv.height,rx=.11*W,ry=.11*H,cols=6,rows=5;let row=0;
+    const step=()=>{for(let c=0;c<cols;c++)riceClumpIn(ctx,(c+.5)/cols*W+rand(-rx,rx)*.6,(row+.5)/rows*H+rand(-ry,ry)*.6,rx*rand(.85,1.15),ry*rand(.85,1.15),W);
+      if(++row<rows)later(step,90);else{try{S.riceImg=cv.toDataURL('image/png');}catch(e){}S.rice=1;done();}};
+    step();
+  },{target:area,R:.11,cover:.75,tool:PADDLE_SVG,dab:riceClumpIn});
 }
 function kbFill(done){
   S.fills=[];const{mat,nori}=kbMat();box(stage,'tray',50,86,84,18);let n=0;
