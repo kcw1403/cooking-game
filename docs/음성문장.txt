@@ -1,5 +1,5 @@
 # 음성 문장 목록 (tools/voice-lines.html로 만듦. 직접 고치지 않습니다)
-# 문장 1222개, 글자 7456자
+# 문장 1302개, 글자 8304자
 # 형식: mp3 이름<TAB>문장<TAB>쓰는 놀이
 41857883	요리 놀이	index
 d2366115	한글 놀이터	index
@@ -355,7 +355,7 @@ dca75e27	쁘	hangul
 f0a77da3	쁴	hangul
 94a6eccf	삐	hangul
 a8a70c4b	사	hangul
-4ca67b77	새	hangul
+4ca67b77	새	hangul,coloring
 60a69af3	샤	hangul
 04a60a1f	섀	hangul
 18a6299b	서	hangul
@@ -1125,6 +1125,14 @@ c80493e3	공룡	coloring
 13a78eae	곤충	coloring
 d1035d88	장난감 놀이	coloring
 baba6ea0	공주와 우주	coloring
+0ed00447	농장	coloring
+2ff8c13e	우리 집	coloring
+c8de174d	채소	coloring
+31a4bdf6	옷	coloring
+58df8210	악기	coloring
+8c9a64d3	놀이터	coloring
+a928c60a	간식	coloring
+f078015d	숲속 동물	coloring
 c035f5a6	예뻐요!	coloring
 272cf465	멋져요!	coloring
 75638a20	빨간색	coloring
@@ -1223,3 +1231,75 @@ ccbea131	로켓을 칠해 볼까요?	coloring
 411a9060	우주인을 칠해 볼까요?	coloring
 266b4090	외계인을 칠해 볼까요?	coloring
 b30c4dd3	토성을 칠해 볼까요?	coloring
+6386360e	돼지를 칠해 볼까요?	coloring
+10d851d0	소를 칠해 볼까요?	coloring
+91f2911d	양을 칠해 볼까요?	coloring
+eb233294	말을 칠해 볼까요?	coloring
+ba02eb91	닭을 칠해 볼까요?	coloring
+d495a392	오리를 칠해 볼까요?	coloring
+16734703	헛간을 칠해 볼까요?	coloring
+87a1dd77	트랙터를 칠해 볼까요?	coloring
+4a3c265d	집을 칠해 볼까요?	coloring
+a8f1e592	시계를 칠해 볼까요?	coloring
+6dc62cea	우산을 칠해 볼까요?	coloring
+85dbaa01	머그컵을 칠해 볼까요?	coloring
+1fcdce0a	의자를 칠해 볼까요?	coloring
+d8d14037	전등을 칠해 볼까요?	coloring
+82b9c826	텔레비전을 칠해 볼까요?	coloring
+f2994b64	주전자를 칠해 볼까요?	coloring
+79585a03	부엉이를 칠해 볼까요?	coloring
+e5655a55	펭귄을 칠해 볼까요?	coloring
+70c7fab5	앵무새를 칠해 볼까요?	coloring
+e17c001d	백조를 칠해 볼까요?	coloring
+34644122	참새를 칠해 볼까요?	coloring
+c3c1fe50	홍학을 칠해 볼까요?	coloring
+cc6db990	공작을 칠해 볼까요?	coloring
+30065d21	새 둥지를 칠해 볼까요?	coloring
+81d6d871	당근을 칠해 볼까요?	coloring
+d17c635c	토마토를 칠해 볼까요?	coloring
+412e96e1	옥수수를 칠해 볼까요?	coloring
+34064f52	가지를 칠해 볼까요?	coloring
+dfc0107a	브로콜리를 칠해 볼까요?	coloring
+cadb59a7	호박을 칠해 볼까요?	coloring
+437ac638	무를 칠해 볼까요?	coloring
+0ad4b749	완두콩을 칠해 볼까요?	coloring
+9a3e61e8	티셔츠를 칠해 볼까요?	coloring
+7fd5aa76	바지를 칠해 볼까요?	coloring
+390e5b3a	모자를 칠해 볼까요?	coloring
+5d6c8c85	양말을 칠해 볼까요?	coloring
+76d8f665	장화를 칠해 볼까요?	coloring
+d5fa5b42	치마를 칠해 볼까요?	coloring
+464e089d	목도리를 칠해 볼까요?	coloring
+f88519c0	장갑을 칠해 볼까요?	coloring
+eb5dfa3c	피아노를 칠해 볼까요?	coloring
+90f967c2	기타를 칠해 볼까요?	coloring
+1746911e	나팔을 칠해 볼까요?	coloring
+74e246bc	실로폰을 칠해 볼까요?	coloring
+0dfa556e	마라카스를 칠해 볼까요?	coloring
+333c3edc	탬버린을 칠해 볼까요?	coloring
+a0ac36b9	종을 칠해 볼까요?	coloring
+69936c3c	마이크를 칠해 볼까요?	coloring
+2bf25eea	미끄럼틀을 칠해 볼까요?	coloring
+0bd1d116	그네를 칠해 볼까요?	coloring
+fe9c5aea	시소를 칠해 볼까요?	coloring
+6adda1b8	모래 놀이를 칠해 볼까요?	coloring
+15a837a5	회전목마를 칠해 볼까요?	coloring
+878dc802	비눗방울을 칠해 볼까요?	coloring
+126e5d8a	텐트를 칠해 볼까요?	coloring
+a91448cc	열기구를 칠해 볼까요?	coloring
+c1dad47c	막대 사탕을 칠해 볼까요?	coloring
+2e70cce3	사탕을 칠해 볼까요?	coloring
+c9c4ddf1	컵케이크를 칠해 볼까요?	coloring
+e2dd456e	쿠키를 칠해 볼까요?	coloring
+90c693a2	우유를 칠해 볼까요?	coloring
+af78db12	주스를 칠해 볼까요?	coloring
+13878809	팝콘을 칠해 볼까요?	coloring
+11061d5e	피자를 칠해 볼까요?	coloring
+1e39604e	여우를 칠해 볼까요?	coloring
+d2a7cde4	다람쥐를 칠해 볼까요?	coloring
+c7664b4a	사슴을 칠해 볼까요?	coloring
+d359d65f	원숭이를 칠해 볼까요?	coloring
+fc7dc81e	판다를 칠해 볼까요?	coloring
+9409a842	하마를 칠해 볼까요?	coloring
+2b39246a	고슴도치를 칠해 볼까요?	coloring
+8d9d16bb	얼룩말을 칠해 볼까요?	coloring
